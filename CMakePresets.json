@@ -1,0 +1,108 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "Base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/Build/${presetName}",
+      "cacheVariables": {
+
+      }
+    },
+    {
+      "name": "Windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "MSVC",
+      "hidden": true,
+      "inherits": [
+        "Base",
+        "Windows"
+      ],
+      "architecture": "x64"
+    },
+    {
+      "name": "VS_2022",
+      "inherits": "MSVC",
+      "displayName": "Visual Studio 2022",
+      "description": "MSVC Compiler",
+      "generator": "Visual Studio 17 2022"
+    },
+    {
+      "name": "VS_2026",
+      "inherits": "MSVC",
+      "displayName": "Visual Studio 2026",
+      "description": "MSVC Compiler",
+      "generator": "Visual Studio 18 2026"
+    },
+    {
+      "name": "GCC",
+      "inherits": "Base",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "g++$env{gcc_compiler_v}"
+      },
+      "description": "GCC compiler"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Base",
+      "hidden": true,
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "Debug",
+      "hidden": true,
+      "inherits": "Base",
+      "configuration": "Debug"
+    },
+    {
+      "name": "Release",
+      "hidden": true,
+      "inherits": "Base",
+      "configuration": "Release"
+    },
+    {
+      "name": "GCC Debug",
+      "inherits": "Debug",
+      "configurePreset": "GCC"
+    },
+    {
+      "name": "GCC Release",
+      "inherits": "Release",
+      "configurePreset": "GCC"
+    },
+    {
+      "name": "VS_2022 Debug",
+      "inherits": "Debug",
+      "description": "Visual Studio multi-config Debug preset",
+      "configurePreset": "VS_2022"
+    },
+    {
+      "name": "VS_2022 Release",
+      "inherits": "Release",
+      "description": "Visual Studio multi-config Release preset",
+      "configurePreset": "VS_2022"
+    },
+    {
+      "name": "VS_2026 Debug",
+      "inherits": "Debug",
+      "description": "Visual Studio multi-config Debug preset",
+      "configurePreset": "VS_2026"
+    },
+    {
+      "name": "VS_2026 Release",
+      "inherits": "Release",
+      "description": "Visual Studio multi-config Release preset",
+      "configurePreset": "VS_2026"
+    }
+  ]
+}
