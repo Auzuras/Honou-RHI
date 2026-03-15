@@ -10,7 +10,7 @@ class IInstance;
 class IDevice
 {
 public:
-	virtual ~IDevice() { };
+	virtual ~IDevice() = default;
 
 	virtual void CreateDevice(IInstance* _instance) = 0;
 	virtual void DestroyDevice() = 0;

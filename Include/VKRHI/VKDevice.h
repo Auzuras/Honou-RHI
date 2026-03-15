@@ -10,7 +10,7 @@
 class VKDevice : public IDevice
 {
 public:
-	~VKDevice() override final { };
+	~VKDevice() override final = default;
 
 	void CreateDevice(IInstance* _instance) override final;
 	void DestroyDevice() override final;
@@ -19,13 +19,15 @@ public:
 	DX12Device* CastToDX12() override final { return nullptr; }
 	OGLDevice* CastToOGL() override final { return nullptr; }
 
-private:
+	[[nodiscard]] VkDevice GetLogicalDevice() const { return m_LogicalDevice; }
+	[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
 
+private:
 	uint32_t SelectBestDevice(const std::vector<VkPhysicalDevice>& devices);
 
 private:
-
-	VkDevice m_Device = VK_NULL_HANDLE;
+	VkDevice m_LogicalDevice = VK_NULL_HANDLE;
+	VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 	VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
 };
 

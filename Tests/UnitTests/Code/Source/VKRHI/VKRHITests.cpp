@@ -2,6 +2,7 @@
 
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKSwapChain.h>
 
 class VKRHITest : public testing::Test {};
 
@@ -18,8 +19,24 @@ TEST(VKRHITest, DeviceTest)
 	instance.CreateInstance();
 
 	VKDevice device;
-	device.CreateDevice(reinterpret_cast<IInstance*>(&instance));
+	device.CreateDevice(&instance);
 	device.DestroyDevice();
 
+	instance.DestroyInstance();
+}
+
+TEST(VKRHITest, SwapChainTest)
+{
+	VKInstance instance;
+	instance.CreateInstance();
+
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKSwapChain swapChain;
+	swapChain.CreateSwapChain(&device);
+	swapChain.DestroySwapChain(&device);
+
+	device.DestroyDevice();
 	instance.DestroyInstance();
 }

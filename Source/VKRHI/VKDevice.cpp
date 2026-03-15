@@ -12,11 +12,12 @@ void VKDevice::CreateDevice(IInstance* _instance)
 	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
 	const uint32_t selectedDevice = SelectBestDevice(devices);
+	m_PhysicalDevice = devices[selectedDevice];
 
 	uint32_t queueFamilyCount{ 0 };
-	vkGetPhysicalDeviceQueueFamilyProperties(devices[selectedDevice], &queueFamilyCount, nullptr);
+	vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamilyCount, nullptr);
 	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(devices[selectedDevice], &queueFamilyCount, queueFamilies.data());
+	vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamilyCount, queueFamilies.data());
 
 	uint32_t queueFamily{ 0 };
 	for (size_t i = 0; i < queueFamilyCount; ++i)
@@ -68,13 +69,13 @@ void VKDevice::CreateDevice(IInstance* _instance)
 		.pEnabledFeatures = &enabledVk10Features
 	};
 
-	vkCreateDevice(devices[selectedDevice], &deviceCI, nullptr, &m_Device);
-	vkGetDeviceQueue(m_Device, queueFamily, 0, &m_GraphicsQueue);
+	vkCreateDevice(m_PhysicalDevice, &deviceCI, nullptr, &m_LogicalDevice);
+	vkGetDeviceQueue(m_LogicalDevice, queueFamily, 0, &m_GraphicsQueue);
 }
 
 void VKDevice::DestroyDevice()
 {
-	vkDestroyDevice(m_Device, nullptr);
+	vkDestroyDevice(m_LogicalDevice, nullptr);
 }
 
 uint32_t VKDevice::SelectBestDevice(const std::vector<VkPhysicalDevice>& devices)

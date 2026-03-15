@@ -8,7 +8,7 @@
 class VKInstance : public IInstance
 {
 public:
-	~VKInstance() override final { };
+	~VKInstance() override final = default;
 
 	void CreateInstance() override final;
 	void DestroyInstance() override final;

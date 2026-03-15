@@ -8,7 +8,7 @@ class OGLInstance;
 class IInstance
 {
 public:
-	virtual ~IInstance() { };
+	virtual ~IInstance() = default;
 
 	virtual void CreateInstance() = 0;
 	virtual void DestroyInstance() = 0;
