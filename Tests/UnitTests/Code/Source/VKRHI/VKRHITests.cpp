@@ -3,6 +3,7 @@
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSwapChain.h>
+#include <VKRHI/VKImage.h>
 
 class VKRHITest : public testing::Test {};
 
