@@ -4,6 +4,8 @@
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKImage.h>
+#include <VKRHI/VKBuffer.h>
+#include <VKRHI/VKCommandAllocator.h>
 
 class VKRHITest : public testing::Test {};
 

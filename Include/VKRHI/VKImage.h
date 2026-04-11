@@ -21,7 +21,7 @@ protected:
 
 	static VkImage CreateImage(VkDevice _device, VkImage* _image, const ImageDescription& _description);
 	static VkDeviceMemory AllocateImage(VkDevice _device, VkImage* _image, VkDeviceMemory* _memory);
-	static VkDeviceMemory CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description);
+	static VkImageView CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description);
 private:
 
 	VkImage m_Image = VK_NULL_HANDLE;

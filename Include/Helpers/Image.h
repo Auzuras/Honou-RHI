@@ -1,9 +1,12 @@
 #ifndef HONOU_RENDER_IMAGE_H
 #define HONOU_RENDER_IMAGE_H
 
+#include <cstdint>
+
 enum class TextureFormat : uint32_t
 {
 	HONOU_FORMAT_UNDEFINED				=	0,
+
 	HONOU_FORMAT_R8G8B8A8_UNORM			=	1,
 	HONOU_FORMAT_B8G8R8A8_UNORM			=	2,
 	HONOU_FORMAT_R8G8B8_UNORM			=	3,

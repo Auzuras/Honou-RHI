@@ -42,6 +42,8 @@ VkImage VKImage::CreateImage(VkDevice _device, VkImage* _image, const ImageDescr
 	};
 
 	vkCreateImage(_device, &imageCI, nullptr, _image);
+
+	return *_image;
 }
 
 VkDeviceMemory VKImage::AllocateImage(VkDevice _device, VkImage* _image, VkDeviceMemory* _memory)
@@ -56,9 +58,11 @@ VkDeviceMemory VKImage::AllocateImage(VkDevice _device, VkImage* _image, VkDevic
 
 	vkAllocateMemory(_device, &memoryAI, nullptr, _memory);
 	vkBindImageMemory(_device, *_image, *_memory, 0);
+
+	return *_memory;
 }
 
-VkDeviceMemory CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description)
+VkImageView CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description)
 {
 	VkImageViewCreateInfo imageViewCI{
 		.sType				= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -73,4 +77,6 @@ VkDeviceMemory CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _
 	};
 
 	vkCreateImageView(_device, &imageViewCI, nullptr, _imageView);
+
+	return *_imageView;
 }

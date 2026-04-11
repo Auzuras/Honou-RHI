@@ -15,12 +15,12 @@ public:
 	void CreateDevice(IInstance* _instance) override final;
 	void DestroyDevice() override final;
 
-	VKDevice* CastToVK() override final { return this; }
+	VKDevice* const CastToVK() override final { return this; }
 	DX12Device* CastToDX12() override final { return nullptr; }
 	OGLDevice* CastToOGL() override final { return nullptr; }
 
-	[[nodiscard]] VkDevice GetLogicalDevice() const { return m_LogicalDevice; }
-	[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
+	[[nodiscard]] VkDevice const GetLogicalDevice() const { return m_LogicalDevice; }
+	[[nodiscard]] VkPhysicalDevice const GetPhysicalDevice() const { return m_PhysicalDevice; }
 
 private:
 	uint32_t SelectBestDevice(const std::vector<VkPhysicalDevice>& devices);
