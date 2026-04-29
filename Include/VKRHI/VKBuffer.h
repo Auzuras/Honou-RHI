@@ -14,7 +14,7 @@ class VKBuffer : public IBuffer
 public:
 	~VKBuffer() override final = default;
 
-	void CreateBuffer(IDevice* _device) override final;
+	void CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage) override final;
 	void DestroyBuffer(IDevice* _device) override final;
 
 	VKBuffer* const CastToVK() override final { return this; }
@@ -22,7 +22,14 @@ public:
 	OGLBuffer* CastToOGL() override final { return nullptr; }
 
 private:
+
+	static VkBufferUsageFlags MapToVulkan(BufferUsage _usage);
+	static uint32_t FindMemoryType(VkPhysicalDevice _physicalDevice, uint32_t _typeFilter, VkMemoryPropertyFlags _properties);
+
+private:
+
 	VkBuffer m_Buffer = VK_NULL_HANDLE;
+	VkDeviceMemory m_BufferMemory = VK_NULL_HANDLE;
 };
 
 #endif //HONOU_RENDER_VKBUFFER_H
