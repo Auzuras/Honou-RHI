@@ -19,6 +19,13 @@ public:
 	void Open() const override final;
 	void Close() const override final;
 
+	void SetViewport(float _width, float _height) const override final;
+	void SetScissor(uint32_t _width, uint32_t _height) const override final;
+
+	void Draw(uint32_t _vertexCount) const override final;
+	void DrawIndexed(uint32_t _indexCount) const override final;
+	void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const override final;
+
 	VKCommandBuffer* const CastToVK() { return this; }
 	DX12CommandBuffer* CastToDX12() { return nullptr; }
 	OGLCommandBuffer* CastToOGL() { return nullptr; }
