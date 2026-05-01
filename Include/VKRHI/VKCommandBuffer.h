@@ -22,6 +22,9 @@ public:
 	void SetViewport(float _width, float _height) const override final;
 	void SetScissor(uint32_t _width, uint32_t _height) const override final;
 
+	void BindVertexBuffer(IBuffer* const _vertexBuffer) const override final;
+	void BindIndexBuffer(IBuffer* const _indexBuffer) const override final;
+
 	void Draw(uint32_t _vertexCount) const override final;
 	void DrawIndexed(uint32_t _indexCount) const override final;
 	void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const override final;

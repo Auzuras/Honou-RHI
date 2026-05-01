@@ -6,6 +6,7 @@
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKCommandAllocator.h>
+#include <VKRHI/VKShaderModule.h>
 
 class VKRHITest : public testing::Test {};
 

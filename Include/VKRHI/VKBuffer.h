@@ -21,6 +21,8 @@ public:
 	DX12Buffer* CastToDX12() override final { return nullptr; }
 	OGLBuffer* CastToOGL() override final { return nullptr; }
 
+	VkBuffer GetRaw() { return m_Buffer };
+
 private:
 
 	static VkBufferUsageFlags MapToVulkan(BufferUsage _usage);

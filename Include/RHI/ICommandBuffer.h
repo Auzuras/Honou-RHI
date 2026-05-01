@@ -8,6 +8,7 @@ class DX12CommandBuffer;
 class OGLCommandBuffer;
 
 class IDevice;
+class IBuffer;
 
 class ICommandBuffer
 {
@@ -19,6 +20,9 @@ public:
 
 	virtual void SetViewport(float _width, float _height) const;
 	virtual void SetScissor(uint32_t _width, uint32_t _height) const;
+
+	virtual void BindVertexBuffer(IBuffer* const _vertexBuffer) const;
+	virtual void BindIndexBuffer(IBuffer* const _indexBuffer) const;
 
 	virtual void Draw(uint32_t _vertexCount) const;
 	virtual void DrawIndexed(uint32_t _indexCount) const;

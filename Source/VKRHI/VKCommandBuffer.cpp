@@ -1,6 +1,7 @@
 #include <VKRHI/VKCommandBuffer.h>
 
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKBuffer.h>
 
 void VKCommandBuffer::Open() const
 {
@@ -39,6 +40,23 @@ void VKCommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	};
 
 	vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
+}
+
+void VKCommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const
+{
+	VKBuffer* const vkBuffer = _vertexBuffer->CastToVK();
+
+	const VkBuffer vertexBuffers[] = { vkBuffer->GetRaw() };
+	const VkDeviceSize offsets[] = { 0 };
+
+	vkCmdBindVertexBuffers(m_CommandBuffer, 0, 1, vertexBuffers, offsets);
+}
+
+void VKCommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
+{
+	VKBuffer* const vkBuffer = _indexBuffer->CastToVK();
+
+	vkCmdBindIndexBuffer(m_CommandBuffer, vkBuffer->GetRaw(), 0, VK_INDEX_TYPE_UINT32);
 }
 
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const
