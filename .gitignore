@@ -24,3 +24,6 @@ MakeFile
 [Tt]emporary/
 
 *.tmp
+
+# Shader bin
+*.spv
