@@ -2,6 +2,7 @@
 
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKSurface.h>
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
@@ -29,18 +30,44 @@ TEST(VKRHITest, DeviceTest)
 	instance.DestroyInstance();
 }
 
+TEST(VKRHITest, SurfaceTest)
+{
+	VKInstance instance;
+	instance.CreateInstance();
+
+	VKSurface surface;
+	ISurface::SurfaceInformation info{
+		.instance	=	NULL,
+		.hwnd		=	NULL
+	};
+
+	surface.CreateSurface(&instance, info);
+	surface.DestroySurface(&instance);
+
+	instance.DestroyInstance();
+}
+
 TEST(VKRHITest, SwapChainTest)
 {
 	VKInstance instance;
 	instance.CreateInstance();
 
+	VKSurface surface;
+	ISurface::SurfaceInformation info{
+		.instance = NULL,
+		.hwnd = NULL
+	};
+
+	surface.CreateSurface(&instance, info);
+
 	VKDevice device;
 	device.CreateDevice(&instance);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&instance , &device);
+	swapChain.CreateSwapChain(&device, &surface);
 	swapChain.DestroySwapChain(&device);
 
 	device.DestroyDevice();
+	surface.DestroySurface(&instance);
 	instance.DestroyInstance();
 }

@@ -5,15 +5,15 @@ class VKSwapChain;
 class DX12SwapChain;
 class OGLSwapChain;
 
-class IInstance;
 class IDevice;
+class ISurface;
 
 class ISwapChain
 {
 public:
     virtual ~ISwapChain() = default;
 
-    virtual void CreateSwapChain(IInstance* _instance, IDevice* _device) = 0;
+    virtual void CreateSwapChain(IDevice* _device, ISurface* _surface) = 0;
     virtual void DestroySwapChain(IDevice* _device) = 0;
 
     virtual VKSwapChain* CastToVK() { return nullptr; }

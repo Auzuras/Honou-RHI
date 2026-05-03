@@ -1,27 +1,13 @@
 #include <VKRHI/VKSwapChain.h>
 
-#include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKSurface.h>
 
-#define VK_USE_PLATFORM_WIN32_KHR
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <vulkan/vulkan_win32.h>
-
-void VKSwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device)
+void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
 {
-    const VkInstance instance = _instance->CastToVK()->GetRaw();
+    const VkSurfaceKHR surface = _surface->CastToVK()->GetRaw();
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-
-    const VkWin32SurfaceCreateInfoKHR surfaceCI{
-        .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-        .hinstance = GetModuleHandle(nullptr),
-        .hwnd = nullptr
-    };
-
-    VkSurfaceKHR surface{};
-    vkCreateWin32SurfaceKHR(instance, &surfaceCI, nullptr, &surface);
 
     VkSurfaceCapabilitiesKHR surfaceCaps{};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(pDevice, surface, &surfaceCaps);

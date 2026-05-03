@@ -10,7 +10,7 @@ class VKSwapChain : public ISwapChain
 public:
     ~VKSwapChain() override final = default;
 
-    void CreateSwapChain(IInstance* _instance, IDevice* _device) override final;
+    void CreateSwapChain(IDevice* _device, ISurface* _surface) override final;
     void DestroySwapChain(IDevice* _device) override final;
 
     VKSwapChain* CastToVK() override final { return this; }
