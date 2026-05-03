@@ -17,6 +17,8 @@ public:
 	virtual DX12Image* CastToDX12() override final { return nullptr; }
 	virtual OGLImage* CastToOGL() override final { return nullptr; }
 
+	VkImage GetRaw() const { return m_Image; }
+
 protected:
 
 	static VkImage CreateImage(VkDevice _device, VkImage* _image, const ImageDescription& _description);

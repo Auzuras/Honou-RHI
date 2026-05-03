@@ -22,6 +22,10 @@ public:
 	void SetViewport(float _width, float _height) const override final;
 	void SetScissor(uint32_t _width, uint32_t _height) const override final;
 
+	void MemoryBarrier(IImage* _image) const override final;
+	void Copy(IImage* _destination, IImage* _source) const override final;
+	void Copy(IImage* _destination, IBuffer* _source) const override final;
+
 	void BindVertexBuffer(IBuffer* const _vertexBuffer) const override final;
 	void BindIndexBuffer(IBuffer* const _indexBuffer) const override final;
 

@@ -2,6 +2,7 @@
 
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKBuffer.h>
+#include <VKRHI/VKImage.h>
 
 void VKCommandBuffer::Open() const
 {
@@ -40,6 +41,68 @@ void VKCommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	};
 
 	vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
+}
+
+void VKCommandBuffer::MemoryBarrier(IImage* _image) const
+{
+	VkImage image = _image->CastToVK()->GetRaw();
+
+	const VkImageMemoryBarrier barrier{
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+
+		.srcAccessMask = 0,
+		.dstAccessMask = 0,
+
+		.oldLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+
+		.image = image,
+
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		}
+	};
+
+	vkCmdPipelineBarrier(m_CommandBuffer, 0, 0, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+}
+
+void VKCommandBuffer::Copy(IImage* _destination, IImage* _source) const
+{
+	VkImage destImage = _destination->CastToVK()->GetRaw();
+	VkImage srcImage = _source->CastToVK()->GetRaw();
+
+	// TODO
+}
+
+void VKCommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
+{
+	VkImage destImage = _destination->CastToVK()->GetRaw();
+	VkBuffer srcBuffer = _source->CastToVK()->GetRaw();
+
+	const VkBufferImageCopy region{
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+
+		.imageSubresource = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		},
+
+		.imageOffset = { 0, 0, 0 },
+		.imageExtent = { 0, 0, 1 }
+	};
+
+	vkCmdCopyBufferToImage(m_CommandBuffer, srcBuffer, destImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
 void VKCommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const

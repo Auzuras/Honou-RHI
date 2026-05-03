@@ -1,0 +1,10 @@
+#define sc_VertexIndex	SV_VertexID
+#define sc_Position		SV_Position
+
+#define S_OUTPUT struct ShaderOutputStruct {
+#define E_OUTPUT };
+
+#define S_INPUT struct ShaderInputStruct {
+#define E_INPUT struct };
+
+#define MAIN_ENTRY() ShaderOutputStruct main(ShaderInputStruct inputs)

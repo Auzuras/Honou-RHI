@@ -38,7 +38,7 @@ TEST(VKRHITest, SwapChainTest)
 	device.CreateDevice(&instance);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device);
+	swapChain.CreateSwapChain(&instance , &device);
 	swapChain.DestroySwapChain(&device);
 
 	device.DestroyDevice();

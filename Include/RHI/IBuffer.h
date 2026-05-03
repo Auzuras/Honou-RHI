@@ -1,6 +1,8 @@
 #ifndef HONOU_RENDER_IBUFFER_H
 #define HONOU_RENDER_IBUFFER_H
 
+#include <cstdint>
+
 class VKBuffer;
 class DX12Buffer;
 class OGLBuffer;

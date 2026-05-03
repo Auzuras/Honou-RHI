@@ -9,24 +9,29 @@ class OGLCommandBuffer;
 
 class IDevice;
 class IBuffer;
+class IImage;
 
 class ICommandBuffer
 {
 public:
 	virtual ~ICommandBuffer() = default;
 
-	virtual void Open() const;
-	virtual void Close() const;
+	virtual void Open() const = 0;
+	virtual void Close() const = 0;
 
-	virtual void SetViewport(float _width, float _height) const;
-	virtual void SetScissor(uint32_t _width, uint32_t _height) const;
+	virtual void SetViewport(float _width, float _height) const = 0;
+	virtual void SetScissor(uint32_t _width, uint32_t _height) const = 0;
 
-	virtual void BindVertexBuffer(IBuffer* const _vertexBuffer) const;
-	virtual void BindIndexBuffer(IBuffer* const _indexBuffer) const;
+	virtual void MemoryBarrier(IImage* _image) const = 0;
+	virtual void Copy(IImage* _destination, IImage* _source) const = 0;
+	virtual void Copy(IImage* _destination, IBuffer* _source) const = 0;
 
-	virtual void Draw(uint32_t _vertexCount) const;
-	virtual void DrawIndexed(uint32_t _indexCount) const;
-	virtual void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const;
+	virtual void BindVertexBuffer(IBuffer* const _vertexBuffer) const = 0;
+	virtual void BindIndexBuffer(IBuffer* const _indexBuffer) const = 0;
+
+	virtual void Draw(uint32_t _vertexCount) const = 0;
+	virtual void DrawIndexed(uint32_t _indexCount) const = 0;
+	virtual void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const = 0;
 
 	virtual VKCommandBuffer* const CastToVK() { return nullptr; }
 	virtual DX12CommandBuffer* CastToDX12() { return nullptr; }
