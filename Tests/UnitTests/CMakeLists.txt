@@ -25,4 +25,6 @@ add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
 
 target_link_libraries(HonouRenderTests PRIVATE gtest)
 
+target_link_libraries(HonouRenderTests PRIVATE KooriWindow)
+
 target_link_libraries(HonouRenderTests PRIVATE HonouRender)
