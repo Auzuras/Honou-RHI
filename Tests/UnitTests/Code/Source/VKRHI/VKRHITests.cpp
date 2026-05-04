@@ -37,7 +37,7 @@ TEST(VKRHITest, SurfaceTest)
 
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
-		.instance	=	NULL,
+		.instance	=	GetModuleHandle(nullptr),
 		.hwnd		=	NULL
 	};
 
