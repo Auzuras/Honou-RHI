@@ -64,9 +64,9 @@ void VKPipeline::CreatePipeline(IDevice* _device)
 
     const std::vector<VkDynamicState> dynamicStates{ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
     const VkPipelineDynamicStateCreateInfo dynamicState{
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-        .dynamicStateCount = 2,
-        .pDynamicStates = dynamicStates.data()
+        .sType              =   VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        .dynamicStateCount  =   2,
+        .pDynamicStates     =   dynamicStates.data()
     };
 
     const VkPipelineRenderingCreateInfo renderingCI{
@@ -76,10 +76,48 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         //.depthAttachmentFormat
     };
 
+    const VkPipelineColorBlendAttachmentState blendAttachment{
+        .colorWriteMask = 0xF
+    };
 
+    const VkPipelineColorBlendStateCreateInfo colorBlendStateCI{
+        .sType              =   VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        .attachmentCount    =   1,
+        .pAttachments       =   &blendAttachment
+    };
+
+    const VkPipelineRasterizationStateCreateInfo rasterizationStateCI{
+        .sType      =   VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+        .lineWidth  =   1.f
+    };
+
+    const VkPipelineMultisampleStateCreateInfo multisampleStateCI{
+        .sType                  =   VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        .rasterizationSamples   =   VK_SAMPLE_COUNT_1_BIT
+    };
+
+    const VkGraphicsPipelineCreateInfo gPipelineCI{
+        .sType                  =    VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+        .pNext                  =    &renderingCI,
+        .stageCount             =    2,
+        .pStages                =    shaderStagesCI.data(),
+        .pVertexInputState      =    &vertexInputStateCI,
+        .pInputAssemblyState    =    &imputAssemblyCI,
+        .pViewportState         =    &viewportState,
+        .pRasterizationState    =    &rasterizationStateCI,
+        .pMultisampleState      =    &multisampleStateCI,
+        .pDepthStencilState     =    VK_NULL_HANDLE,
+        .pColorBlendState       =    &colorBlendStateCI,
+        .pDynamicState          =    &dynamicState,
+        .layout                 =    m_PipelineLayout
+    };
+
+    vkCreateGraphicsPipelines(ldevice, VK_NULL_HANDLE, 1, &gPipelineCI, nullptr, &m_Pipeline);
 }
 
-void VKPipeline::DestroyPipeline()
+void VKPipeline::DestroyPipeline(IDevice* _device)
 {
-
+    const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
+    vkDestroyPipelineLayout(ldevice, m_PipelineLayout, nullptr);
+    vkDestroyPipeline(ldevice, m_Pipeline, nullptr);
 }
