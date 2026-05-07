@@ -9,6 +9,8 @@
 #include <VKRHI/VKCommandAllocator.h>
 #include <VKRHI/VKShaderModule.h>
 
+#include <Window/Window.h>
+
 class VKRHITest : public testing::Test {};
 
 TEST(VKRHITest, InstanceTest)
@@ -34,17 +36,21 @@ TEST(VKRHITest, SurfaceTest)
 {
 	VKInstance instance;
 	instance.CreateInstance();
+	
+	Window window(1920, 1080);
 
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
-		.instance	=	GetModuleHandle(nullptr),
-		.hwnd		=	NULL
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
 	};
 
 	surface.CreateSurface(&instance, info);
 	surface.DestroySurface(&instance);
 
 	instance.DestroyInstance();
+
+	window.KooriDestroyWindow();
 }
 
 TEST(VKRHITest, SwapChainTest)
@@ -52,10 +58,12 @@ TEST(VKRHITest, SwapChainTest)
 	VKInstance instance;
 	instance.CreateInstance();
 
+	Window window(1920, 1080);
+
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
-		.instance = NULL,
-		.hwnd = NULL
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
 	};
 
 	surface.CreateSurface(&instance, info);
@@ -70,4 +78,6 @@ TEST(VKRHITest, SwapChainTest)
 	device.DestroyDevice();
 	surface.DestroySurface(&instance);
 	instance.DestroyInstance();
+
+	window.KooriDestroyWindow();
 }

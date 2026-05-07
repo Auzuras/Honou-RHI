@@ -5,6 +5,9 @@
 # Google test folder
 googletest/
 
+# Koori Window test folder
+Koori-Window/
+
 # CMake folders
 out/
 CmakeFiles/

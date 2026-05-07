@@ -20,6 +20,17 @@ public:
 	VkInstance GetRaw() const { return m_Instance; }
 
 private:
+
+	static bool CheckValidationLayerSupport();
+
+	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT _messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT _messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* _pCallbackData,
+		void* _pUserData
+	);
+
+	VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
 	VkInstance m_Instance = VK_NULL_HANDLE;
 };
 
