@@ -1,31 +1,21 @@
 #version 450
 
-#define HONOU_SHADER_VULKAN
-
-#include "Common.sf"
-
-float2 positions[3] = float2[](
-	float2(0.0, -0.5),
-	float2(0.5, 0.5),
-	float2(-0.5, 0.5)
+vec2 positions[3] = vec2[](
+	vec2(0.0, -0.5),
+	vec2(0.5, 0.5),
+	vec2(-0.5, 0.5)
 );
 
-float3 colors[3] = float3[](
-	float3(1.0, 0.0, 0.0),
-	float3(0.0, 1.0, 0.0),
-	float3(0.0, 0.0, 1.0)
+vec3 colors[3] = vec3[](
+	vec3(1.0, 0.0, 0.0),
+	vec3(0.0, 1.0, 0.0),
+	vec3(0.0, 0.0, 1.0)
 );
 
-S_OUTPUT
+layout(location = 0) out vec3 fragColor;
 
-
-
-E_OUTPUT
-
-layout(location = 0) out float3 fragColor;
-
-MAIN_ENTRY()
+void main()
 {
-	sc_Position = float4(positions[sc_VertexIndex], 0.0, 1.0);
-	fragColor = colors[sc_VertexIndex];
+	gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+	fragColor = colors[gl_VertexIndex];
 }
