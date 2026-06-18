@@ -1,6 +1,8 @@
 #ifndef HONOU_RENDER_ISAMPLER_H
 #define HONOU_RENDER_ISAMPLER_H
 
+#include <cstdint>
+
 class VKSampler;
 class DX12Sampler;
 class OGLSampler;
