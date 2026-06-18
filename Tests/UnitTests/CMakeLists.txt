@@ -12,9 +12,14 @@ FetchContent_Declare(
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/googletest
 )
 
-FetchContent_MakeAvailable(googletest)
+FetchContent_Declare(
+        Koori-Window
+        GIT_TAG dev
+        GIT_REPOSITORY https://github.com/Auzuras/Koori-Window.git 
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Koori-Window
+)
 
-add_subdirectory(ThirdParty/Koori-Window)
+FetchContent_MakeAvailable(googletest Koori-Window)
 
 set(HONOU_RENDER_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
