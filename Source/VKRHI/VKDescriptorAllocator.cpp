@@ -8,12 +8,12 @@ void VKDescriptorAllocator::CreateDescriptorAllocator(IDevice* _device)
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const uint32_t maxSet = 2;
 
-	VkDescriptorPoolSize poolSize{
+	const VkDescriptorPoolSize poolSize{
 		.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		.descriptorCount = maxSet
 	};
 
-	VkDescriptorPoolCreateInfo poolCI{
+	const VkDescriptorPoolCreateInfo poolCI{
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 		.maxSets = maxSet,
 		.poolSizeCount = 1,
@@ -31,12 +31,12 @@ void VKDescriptorAllocator::DestroyDescriptorAllocator(IDevice* _device)
 
 IDescriptor* VKDescriptorAllocator::AllocateDescriptors(IDevice* _device, uint32_t _count)
 {
-
+	return nullptr;
 }
 
 IDescriptor* VKDescriptorAllocator::AllocateDescriptor(IDevice* _device)
 {
-
+	return nullptr;
 }
 
 void VKDescriptorAllocator::FreeDescriptors(IDevice* _device, IDescriptor* _descriptor, uint32_t _count)
