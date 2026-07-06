@@ -22,10 +22,10 @@ public:
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
     virtual OGLSwapChain* CastToOGL() { return nullptr; }
-    
+
 protected:
-    
-    std::vector<IImage*> p_SwapChainImages;
+
+    std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
 };
 
 #endif //HONOU_RENDER_ISWAPCHAIN_H

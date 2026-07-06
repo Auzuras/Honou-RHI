@@ -1,9 +1,0 @@
-#ifdef HONOU_SHADER_VULKAN
-
-#include "VKCommon.sf"
-
-#elif  HONOU_SHADER_DX12
-
-#include "DX12Common.sf"
-
-#endif

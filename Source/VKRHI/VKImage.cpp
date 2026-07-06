@@ -24,7 +24,7 @@ void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description
 
 VkImage VKImage::CreateImage(VkDevice _device, VkImage* _image, const ImageDescription& _description)
 {
-	VkImageCreateInfo imageCI{
+	const VkImageCreateInfo imageCI{
 		.sType			= VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType		= VK_IMAGE_TYPE_2D,
 		.format			= MapToVkFormat(_description.format),
@@ -51,7 +51,7 @@ VkDeviceMemory VKImage::AllocateImage(VkDevice _device, VkImage* _image, VkDevic
 	VkMemoryRequirements memRequirements{};
 	vkGetImageMemoryRequirements(_device, *_image, &memRequirements);
 
-	VkMemoryAllocateInfo memoryAI{
+	const VkMemoryAllocateInfo memoryAI{
 		.sType			= VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
 		.allocationSize = memRequirements.size
 	};
@@ -64,7 +64,7 @@ VkDeviceMemory VKImage::AllocateImage(VkDevice _device, VkImage* _image, VkDevic
 
 VkImageView CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description)
 {
-	VkImageViewCreateInfo imageViewCI{
+	const VkImageViewCreateInfo imageViewCI{
 		.sType				= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.image				= *_image,
 		.viewType			= VK_IMAGE_VIEW_TYPE_2D,

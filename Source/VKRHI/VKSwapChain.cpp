@@ -38,6 +38,12 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     };
 
     vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &m_SwapChain);
+
+    uint32_t imageCount = 0;
+    std::vector<VkImage> scImages = std::vector<VkImage>();
+    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, nullptr);
+    scImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());    
 }
 
 void VKSwapChain::DestroySwapChain(IDevice* _device)
