@@ -1,8 +1,0 @@
-#define float2 vec2
-#define float3 vec3
-#define float4 vec4
-
-#define sc_VertexIndex	gl_VertexIndex
-#define sc_Position		gl_Position
-
-#define MAIN_ENTRY() void main()
