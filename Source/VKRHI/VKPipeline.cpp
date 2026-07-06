@@ -2,6 +2,8 @@
 
 #include <VKRHI/VKDevice.h>
 
+#include <VKRHI/VKShaderModule.h>
+
 #include <vector>
 
 void VKPipeline::CreatePipeline(IDevice* _device)
@@ -25,9 +27,9 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     };
 
     const std::vector<VkVertexInputAttributeDescription> vertexAttributes{
-        { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT },
-        { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 3 * sizeof(float) },
-        { .location = 2, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 6 * sizeof(float) }
+        //{ .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT },
+        //{ .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 3 * sizeof(float) },
+        //{ .location = 2, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 6 * sizeof(float) }
     };
 
     const VkPipelineVertexInputStateCreateInfo vertexInputStateCI{
@@ -43,15 +45,21 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
     };
 
+    VKShaderModule vertModule = VKShaderModule();
+    VKShaderModule fragModule = VKShaderModule();
+
+    vertModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Shaders/HelloTriangle.vert.spv"));
+    fragModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Shaders/HelloTriangle.frag.spv"));
+
     const std::vector<VkPipelineShaderStageCreateInfo> shaderStagesCI{
         {   .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_VERTEX_BIT,
-            .module = VK_NULL_HANDLE,
+            .module = vertModule.CastToVK()->GetRaw(),
             .pName = "main"
         },
         {   .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .module = VK_NULL_HANDLE,
+            .module = fragModule.CastToVK()->GetRaw(),
             .pName = "main"
         },
     };
@@ -114,6 +122,9 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     };
 
     vkCreateGraphicsPipelines(ldevice, VK_NULL_HANDLE, 1, &gPipelineCI, nullptr, &m_Pipeline);
+
+    fragModule.DestroyShaderModule(_device);
+    vertModule.DestroyShaderModule(_device);
 }
 
 void VKPipeline::DestroyPipeline(IDevice* _device)

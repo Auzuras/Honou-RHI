@@ -5,6 +5,8 @@
 #include <VKRHI/VKSurface.h>
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKPipeline.h>
+#include <VKRHI/VKCommandAllocator.h>
+#include <VKRHI/VKCommandBuffer.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKCommandAllocator.h>
@@ -88,6 +90,42 @@ TEST(VKRHITest, PipelineTest)
 	VKInstance instance;
 	instance.CreateInstance();
 
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKPipeline pipeline;
+	pipeline.CreatePipeline(&device);
+	pipeline.DestroyPipeline(&device);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
+}
+
+TEST(VKRHITest, CommandAllocatorTest)
+{
+	VKInstance instance;
+	instance.CreateInstance();
+
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKCommandAllocator cmdAlloc;
+	cmdAlloc.CreateCommandAllocator(&device);
+
+	ICommandBuffer* cmdBuffer = cmdAlloc.AllocateCommandBuffer(&device);
+	cmdAlloc.FreeCommandBuffer(&device, cmdBuffer);
+
+	cmdAlloc.DestroyCommandAllocator(&device);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
+}
+
+TEST(VKRHITest, RenderLoop)
+{
+	VKInstance instance;
+	instance.CreateInstance();
+
 	Window window(1920, 1080);
 
 	VKSurface surface;
@@ -106,6 +144,12 @@ TEST(VKRHITest, PipelineTest)
 
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
+
+	while (!window.WindowShouldClose())
+	{
+		window.UpdateWindow();
+	}
+
 	pipeline.DestroyPipeline(&device);
 
 	swapChain.DestroySwapChain(&device);

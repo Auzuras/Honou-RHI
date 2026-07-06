@@ -70,7 +70,12 @@ void VKCommandAllocator::FreeCommandBuffer(IDevice* _device, ICommandBuffer* _bu
 void VKCommandAllocator::FreeCommandBuffers(IDevice* _device, ICommandBuffer* _buffers, uint32_t _count)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-	vkFreeCommandBuffers(lDevice, m_CommandAllocator, _count, nullptr);
+
+	for (size_t i = 0; i < _count; ++i)
+	{
+		vkFreeCommandBuffers(lDevice, m_CommandAllocator, 1, &_buffers[i].CastToVK()->m_CommandBuffer);
+	}
+
 	delete[] _buffers;
 }
 
