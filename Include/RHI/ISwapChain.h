@@ -7,6 +7,9 @@ class OGLSwapChain;
 
 class IDevice;
 class ISurface;
+class IImage;
+
+#include <vector>
 
 class ISwapChain
 {
@@ -19,6 +22,10 @@ public:
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
     virtual OGLSwapChain* CastToOGL() { return nullptr; }
+
+protected:
+
+    std::vector<IImage*> m_SwapChainImages = std::vector<IImage*>();
 };
 
 #endif //HONOU_RENDER_ISWAPCHAIN_H

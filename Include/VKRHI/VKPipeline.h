@@ -13,7 +13,7 @@ public:
 	void CreatePipeline(IDevice* _device) override final = 0;
 	void DestroyPipeline(IDevice* _device) override final = 0;
 
-	VKPipeline* CastToVK() override final { return nullptr; }
+	VKPipeline* CastToVK() override final { return this; }
 	DX12Pipeline* CastToDX12() override final { return nullptr; }
 	OGLPipeline* CastToOGL() override final { return nullptr; }
 

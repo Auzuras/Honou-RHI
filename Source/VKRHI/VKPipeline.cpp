@@ -73,7 +73,6 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
         .colorAttachmentCount = 1
         //.pColorAttachmentFormats
-        //.depthAttachmentFormat
     };
 
     const VkPipelineColorBlendAttachmentState blendAttachment{
