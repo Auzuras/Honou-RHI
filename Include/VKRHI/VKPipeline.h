@@ -10,8 +10,8 @@ class VKPipeline : public IPipeline
 public:
 	~VKPipeline() override final = default;
 
-	void CreatePipeline(IDevice* _device) override final = 0;
-	void DestroyPipeline(IDevice* _device) override final = 0;
+	virtual void CreatePipeline(IDevice* _device) override final;
+	virtual void DestroyPipeline(IDevice* _device) override final;
 
 	VKPipeline* CastToVK() override final { return this; }
 	DX12Pipeline* CastToDX12() override final { return nullptr; }

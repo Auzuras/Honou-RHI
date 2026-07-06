@@ -4,6 +4,7 @@
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSurface.h>
 #include <VKRHI/VKSwapChain.h>
+#include <VKRHI/VKPipeline.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKCommandAllocator.h>
@@ -73,6 +74,40 @@ TEST(VKRHITest, SwapChainTest)
 
 	VKSwapChain swapChain;
 	swapChain.CreateSwapChain(&device, &surface);
+	swapChain.DestroySwapChain(&device);
+
+	device.DestroyDevice();
+	surface.DestroySurface(&instance);
+	instance.DestroyInstance();
+
+	window.KooriDestroyWindow();
+}
+
+TEST(VKRHITest, PipelineTest)
+{
+	VKInstance instance;
+	instance.CreateInstance();
+
+	Window window(1920, 1080);
+
+	VKSurface surface;
+	ISurface::SurfaceInformation info{
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
+	};
+
+	surface.CreateSurface(&instance, info);
+
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKSwapChain swapChain;
+	swapChain.CreateSwapChain(&device, &surface);
+
+	VKPipeline pipeline;
+	pipeline.CreatePipeline(&device);
+	pipeline.DestroyPipeline(&device);
+
 	swapChain.DestroySwapChain(&device);
 
 	device.DestroyDevice();

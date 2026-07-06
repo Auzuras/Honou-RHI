@@ -11,7 +11,10 @@ public:
 	~VKImage() override final = default;
 
 	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) override final;
-	virtual void DestroyImage() override final;
+	virtual void DestroyImage(IDevice* _device) override final;
+
+	void CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description);
+
 
 	virtual VKImage* CastToVK() override final { return this; }
 	virtual DX12Image* CastToDX12() override final { return nullptr; }
@@ -21,9 +24,10 @@ public:
 
 protected:
 
-	static VkImage CreateImage(VkDevice _device, VkImage* _image, const ImageDescription& _description);
-	static VkDeviceMemory AllocateImage(VkDevice _device, VkImage* _image, VkDeviceMemory* _memory);
-	static VkImageView CreateImageView(VkDevice _device, VkImage* _image, VkImageView* _imageView, const ImageDescription& _description);
+	static VkImage CreateImage(VkDevice _device, const ImageDescription& _description);
+	static VkDeviceMemory AllocateImage(VkDevice _device, VkImage _image);
+	static VkImageView CreateImageView(VkDevice _device, VkImage _image, const ImageDescription& _description);
+
 private:
 
 	VkImage m_Image = VK_NULL_HANDLE;

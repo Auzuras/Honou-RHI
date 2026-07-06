@@ -15,7 +15,7 @@ public:
 	virtual ~IImage() = default;
 
 	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) = 0;
-	virtual void DestroyImage() = 0;
+	virtual void DestroyImage(IDevice* _device) = 0;
 
 	virtual VKImage* CastToVK() { return nullptr; }
 	virtual DX12Image* CastToDX12() { return nullptr; }

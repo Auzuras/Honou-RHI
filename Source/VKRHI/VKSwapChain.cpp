@@ -2,6 +2,8 @@
 
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSurface.h>
+#include <Helpers/Image.h>
+#include <VKRHI/VKImage.h>
 
 void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
 {
@@ -16,7 +18,9 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     if (surfaceCaps.currentExtent.width == 0xFFFFFFFF)
         return;
 
-    const VkFormat imageFormat{ VK_FORMAT_B8G8R8A8_UNORM };
+    const TextureFormat scFormat = TextureFormat::HONOU_FORMAT_B8G8R8A8_UNORM;
+
+    const VkFormat imageFormat = MapToVkFormat(scFormat);
     VkSwapchainCreateInfoKHR swapChainCI{
         .sType              =   VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 
@@ -43,11 +47,38 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     std::vector<VkImage> scImages = std::vector<VkImage>();
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, nullptr);
     scImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());    
+    p_SwapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
+
+    const ImageDescription desc{
+        .width = scExtent.width,
+        .height = scExtent.height,
+        .format = scFormat
+    };
+
+    // TODO: Rework
+
+    for (size_t i = 0; i < imageCount; ++i)
+    {
+        VKImage* image = new VKImage();
+        image->CreateImageInternal(_device, scImages[i], desc);
+        p_SwapChainImages[i] = image;
+        
+    }
 }
 
 void VKSwapChain::DestroySwapChain(IDevice* _device)
 {
+    // TODO: Rework
+
+    for (size_t i = 0; i < p_SwapChainImages.size(); ++i)
+    {
+        p_SwapChainImages[i]->DestroyImage(_device);
+        delete p_SwapChainImages[i];
+    }
+
+    p_SwapChainImages.clear();
+
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
     vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
 }
