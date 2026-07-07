@@ -3,6 +3,7 @@
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKImage.h>
+#include <VKRHI/VKPipeline.h>
 
 void VKCommandBuffer::Open() const
 {
@@ -12,6 +13,52 @@ void VKCommandBuffer::Open() const
 	};
 
 	vkBeginCommandBuffer(m_CommandBuffer, &cbBI);
+}
+
+void VKCommandBuffer::Close() const
+{
+	vkEndCommandBuffer(m_CommandBuffer);
+}
+
+void VKCommandBuffer::BeginRendering() const
+{
+	const VkRenderingAttachmentInfo colorAttachementInfo{
+		.sType			=	VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+		.imageView		=	VK_NULL_HANDLE,
+		.imageLayout	=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+		.loadOp			=	VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp		=	VK_ATTACHMENT_STORE_OP_STORE,
+		.clearValue{
+			.color{ 
+			0.0f, 0.0f, 0.2f, 1.0f 
+			}
+		}
+	};
+
+	const VkRenderingInfo renderingInfo{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_AREA_INFO,
+		.renderArea{
+			.extent{
+
+			}
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &colorAttachementInfo
+	};
+
+	vkCmdBeginRendering(m_CommandBuffer, &renderingInfo);
+}
+
+void VKCommandBuffer::EndRendering() const
+{
+	vkCmdEndRendering(m_CommandBuffer);
+}
+
+void VKCommandBuffer::BindPipeline(IPipeline* _pipeline) const
+{
+	VkPipeline pipeline = _pipeline->CastToVK()->GetRaw();
+	vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }
 
 void VKCommandBuffer::SetViewport(float _width, float _height) const
@@ -43,34 +90,38 @@ void VKCommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
 }
 
-void VKCommandBuffer::MemoryBarrier(IImage* _image) const
+void VKCommandBuffer::AddMemoryBarrier(IImage* _image) const
 {
 	VkImage image = _image->CastToVK()->GetRaw();
 
-	const VkImageMemoryBarrier barrier{
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+	const VkImageMemoryBarrier2 barrier{
+		.sType			=	VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
 
-		.srcAccessMask = 0,
-		.dstAccessMask = 0,
+		.srcStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask	=	0,
 
-		.oldLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.dstStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstAccessMask	=	VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.oldLayout		=	VK_IMAGE_LAYOUT_UNDEFINED,
+		.newLayout		=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
 
-		.image = image,
+		.image			=	image,
 
-		.subresourceRange = {
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.baseMipLevel = 0,
-			.levelCount = 1,
-			.baseArrayLayer = 0,
-			.layerCount = 1
+		.subresourceRange{
+			.aspectMask		=	VK_IMAGE_ASPECT_COLOR_BIT,
+			.levelCount		=	1,
+			.layerCount		=	1
 		}
 	};
 
-	vkCmdPipelineBarrier(m_CommandBuffer, 0, 0, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+	VkDependencyInfo barrierDependencyInfo{
+		.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+		.imageMemoryBarrierCount = 1,
+		.pImageMemoryBarriers = &barrier
+	};
+
+	vkCmdPipelineBarrier2(m_CommandBuffer, &barrierDependencyInfo);
 }
 
 void VKCommandBuffer::Copy(IImage* _destination, IImage* _source) const
@@ -135,9 +186,4 @@ void VKCommandBuffer::DrawIndexed(uint32_t _indexCount) const
 void VKCommandBuffer::Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const
 {
 	vkCmdDispatch(m_CommandBuffer, _groupCountX, _groupCountY, _groupCountZ);
-}
-
-void VKCommandBuffer::Close() const
-{
-	vkEndCommandBuffer(m_CommandBuffer);
 }

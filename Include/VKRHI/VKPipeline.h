@@ -13,6 +13,8 @@ public:
 	virtual void CreatePipeline(IDevice* _device) override final;
 	virtual void DestroyPipeline(IDevice* _device) override final;
 
+	VkPipeline GetRaw() const { return m_Pipeline; }
+
 	VKPipeline* CastToVK() override final { return this; }
 	DX12Pipeline* CastToDX12() override final { return nullptr; }
 	OGLPipeline* CastToOGL() override final { return nullptr; }

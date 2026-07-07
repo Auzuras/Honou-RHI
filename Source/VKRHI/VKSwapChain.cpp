@@ -48,6 +48,7 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, nullptr);
     scImages.resize(imageCount);
     p_SwapChainImages.resize(imageCount);
+    m_ImageSemaphores.resize(imageCount);
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
 
     const ImageDescription desc{
@@ -58,27 +59,45 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
 
     // TODO: Rework
 
+    const VkSemaphoreCreateInfo semaphoreCI{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
+    };
+
     for (size_t i = 0; i < imageCount; ++i)
     {
         VKImage* image = new VKImage();
         image->CreateImageInternal(_device, scImages[i], desc);
         p_SwapChainImages[i] = image;
         
+        vkCreateSemaphore(lDevice, &semaphoreCI, nullptr, &m_ImageSemaphores[i]);
     }
 }
 
 void VKSwapChain::DestroySwapChain(IDevice* _device)
 {
+    const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
     // TODO: Rework
 
     for (size_t i = 0; i < p_SwapChainImages.size(); ++i)
     {
         p_SwapChainImages[i]->DestroyImage(_device);
         delete p_SwapChainImages[i];
+
+        vkDestroySemaphore(lDevice, m_ImageSemaphores[i], nullptr);
     }
 
+    m_ImageSemaphores.clear();
     p_SwapChainImages.clear();
 
-    const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
     vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
+}
+
+uint32_t VKSwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
+{
+    const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+    uint32_t imageIndex = 0;
+    vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, m_ImageSemaphores[_frameIndex], VK_NULL_HANDLE, &imageIndex);
+    return imageIndex;
 }

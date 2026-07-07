@@ -19,10 +19,15 @@ public:
 	void Open() const override final;
 	void Close() const override final;
 
+	void BeginRendering() const override final;
+	void EndRendering() const override final;
+
+	void BindPipeline(IPipeline* _pipeline) const override final;
+
 	void SetViewport(float _width, float _height) const override final;
 	void SetScissor(uint32_t _width, uint32_t _height) const override final;
 
-	void MemoryBarrier(IImage* _image) const override final;
+	void AddMemoryBarrier(IImage* _image) const override final;
 	void Copy(IImage* _destination, IImage* _source) const override final;
 	void Copy(IImage* _destination, IBuffer* _source) const override final;
 

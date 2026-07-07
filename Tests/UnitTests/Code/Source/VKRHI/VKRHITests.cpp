@@ -9,7 +9,6 @@
 #include <VKRHI/VKCommandBuffer.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
-#include <VKRHI/VKCommandAllocator.h>
 #include <VKRHI/VKShaderModule.h>
 
 #include <Window/Window.h>
@@ -139,20 +138,59 @@ TEST(VKRHITest, RenderLoop)
 	VKDevice device;
 	device.CreateDevice(&instance);
 
+	VKCommandAllocator cmdAlloc;
+	cmdAlloc.CreateCommandAllocator(&device);
+
+	std::vector<ICommandBuffer*> cmdBuffers(ISwapChain::MAX_FRAMES_IN_FLIGHT);
+	for (uint32_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		cmdBuffers[i] = cmdAlloc.AllocateCommandBuffer(&device);
+	}
+
 	VKSwapChain swapChain;
 	swapChain.CreateSwapChain(&device, &surface);
 
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
 
+	uint32_t frameIndex = 0;
+
 	while (!window.WindowShouldClose())
 	{
 		window.UpdateWindow();
+
+		// TODO: WAIT ON FENCE
+
+		swapChain.GetNextSwapChainImage(&device, frameIndex);
+
+		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
+
+		cCmdBuffer->Open();
+
+		//cCmdBuffer->AddMemoryBarrier();
+
+		cCmdBuffer->BeginRendering();
+
+		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
+
+		cCmdBuffer->SetScissor(window.GetWidth(), window.GetHeight());
+
+		cCmdBuffer->BindPipeline(&pipeline);
+
+		cCmdBuffer->DrawIndexed(3);
+
+		cCmdBuffer->EndRendering();
+
+		cCmdBuffer->Close();
+
+		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
 	pipeline.DestroyPipeline(&device);
-
+	
 	swapChain.DestroySwapChain(&device);
+
+	cmdAlloc.FreeCommandBuffers(&device, *cmdBuffers.data(), 2);
 
 	device.DestroyDevice();
 	surface.DestroySurface(&instance);
