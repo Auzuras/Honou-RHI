@@ -14,6 +14,7 @@ public:
     void DestroySwapChain(IDevice* _device) override final;
 
     uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
+    void Present(IDevice* _device) override final;
 
     VKSwapChain* CastToVK() override final { return this; }
     DX12SwapChain* CastToDX12() override final { return nullptr; }
@@ -24,6 +25,7 @@ private:
     VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
     std::vector<VkSemaphore> m_ImageSemaphores = std::vector<VkSemaphore>();
+    std::vector<VkFence> m_ImageFences = std::vector<VkFence>();
 };
 
 

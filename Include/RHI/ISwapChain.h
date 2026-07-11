@@ -20,6 +20,7 @@ public:
     virtual void DestroySwapChain(IDevice* _device) = 0;
 
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;
+    virtual void Present(IDevice* _device) = 0;
 
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
@@ -30,6 +31,8 @@ public:
     static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 protected:
+
+    uint32_t p_CurrentImageIndex = 0;
 
     std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
 };

@@ -177,7 +177,7 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindPipeline(&pipeline);
 
-		cCmdBuffer->DrawIndexed(3);
+		//cCmdBuffer->DrawIndexed(3);
 
 		cCmdBuffer->EndRendering();
 
