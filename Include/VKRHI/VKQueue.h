@@ -12,6 +12,8 @@ public:
 
 	void GetQueue(IDevice* _device) override final = 0;
 
+	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) override final;
+
 	VKQueue* CastToVK() override final { return this; }
 	DX12Queue* CastToDX12() override final { return nullptr; }
 	OGLQueue* CastToOGL() override final { return nullptr; }

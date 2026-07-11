@@ -1,8 +1,30 @@
 #include <VKRHI/VKQueue.h>
 
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKCommandBuffer.h>
 
 #include <vector>
+
+void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
+{
+	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
+
+	VkSubmitInfo submitInfo{
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = VK_NULL_HANDLE,
+		.pWaitDstStageMask = 0,
+
+		.commandBufferCount = 1,
+		.pCommandBuffers = &cmdBuffer,
+
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = VK_NULL_HANDLE
+	};
+
+	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
+}
 
 void VKQueue::GetQueue(IDevice* _device)
 {

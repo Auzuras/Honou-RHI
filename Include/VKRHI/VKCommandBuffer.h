@@ -16,6 +16,8 @@ class VKCommandBuffer : public ICommandBuffer
 public:
 	~VKCommandBuffer() override final = default;
 
+	VkCommandBuffer GetRaw() const { return m_CommandBuffer; }
+
 	void Open() const override final;
 	void Close() const override final;
 
