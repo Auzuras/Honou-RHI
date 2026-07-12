@@ -1,6 +1,6 @@
-# Honou Render
+# Honou RHI
 
-Custom render library with C++ 20
+Custom Render Hardware Interface library in C++ 20
 
 ## Features:
 
