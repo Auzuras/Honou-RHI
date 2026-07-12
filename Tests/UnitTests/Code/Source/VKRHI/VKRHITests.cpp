@@ -193,7 +193,8 @@ TEST(VKRHITest, RenderLoop)
 		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
 	}
 
-	device.WaitIdle();
+	graphicsQueue.WaitIdle();
+	// or device.WaitIdle();
 
 	pipeline.DestroyPipeline(&device);
 	

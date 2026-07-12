@@ -57,3 +57,8 @@ void VKQueue::CreateQueue(IDevice* _device)
 
 	vkGetDeviceQueue(lDevice, value, 0, &m_Queue);
 }
+
+void VKQueue::WaitIdle()
+{
+	vkQueueWaitIdle(m_Queue);
+}

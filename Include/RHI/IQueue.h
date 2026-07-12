@@ -19,6 +19,8 @@ public:
 
 	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) = 0;
 
+	virtual void WaitIdle() = 0;
+
 	virtual VKQueue* CastToVK() { return nullptr; }
 	virtual DX12Queue* CastToDX12() { return nullptr; }
 	virtual OGLQueue* CastToOGL() { return nullptr; }
