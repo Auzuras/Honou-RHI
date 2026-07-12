@@ -158,14 +158,6 @@ TEST(VKRHITest, RenderLoop)
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
 
-	std::vector<ISyncPoint*> renderFinished(ISwapChain::MAX_FRAMES_IN_FLIGHT);
-
-	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		renderFinished[i] = new VKSyncPoint();
-		renderFinished[i]->CreateSyncPoint(&device);
-	}
-
 	uint32_t frameIndex = 0;
 
 	while (!window.WindowShouldClose())
@@ -176,11 +168,13 @@ TEST(VKRHITest, RenderLoop)
 
 		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
 
+		cCmdBuffer->Reset();
+
 		cCmdBuffer->Open();
 
-		//cCmdBuffer->AddMemoryBarrier();
+		cCmdBuffer->AddMemoryBarrier0(swapChain.GetCurrentImage());
 
-		cCmdBuffer->BeginRendering(window.GetWidth(), window.GetHeight());
+		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), window.GetWidth(), window.GetHeight());
 
 		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
 
@@ -192,16 +186,18 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->EndRendering();
 
-		//cCmdBuffer->AddMemoryBarrier();
+		cCmdBuffer->AddMemoryBarrier1(swapChain.GetCurrentImage());
 
 		cCmdBuffer->Close();
 
-		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetSyncPoint(frameIndex), renderFinished[frameIndex]);
+		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
 
 		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
 
-		swapChain.Present(&device, &graphicsQueue);
+		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
 	}
+
+	device.WaitIdle();
 
 	pipeline.DestroyPipeline(&device);
 	

@@ -9,7 +9,7 @@ void VKCommandBuffer::Open() const
 {
 	VkCommandBufferBeginInfo cbBI{
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.flags = 0
+		.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
 	};
 
 	vkBeginCommandBuffer(m_CommandBuffer, &cbBI);
@@ -20,11 +20,18 @@ void VKCommandBuffer::Close() const
 	vkEndCommandBuffer(m_CommandBuffer);
 }
 
-void VKCommandBuffer::BeginRendering(uint32_t _width, uint32_t _height) const
+void VKCommandBuffer::Reset() const
 {
+	vkResetCommandBuffer(m_CommandBuffer, 0);
+}
+
+void VKCommandBuffer::BeginRendering(IImage* _image, uint32_t _width, uint32_t _height) const
+{
+	const VkImageView imageview = _image->CastToVK()->GetRawImageView();
+
 	const VkRenderingAttachmentInfo colorAttachementInfo{
 		.sType			=	VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		.imageView		=	VK_NULL_HANDLE,
+		.imageView		=	imageview,
 		.imageLayout	=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
 		.loadOp			=	VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp		=	VK_ATTACHMENT_STORE_OP_STORE,
@@ -91,7 +98,7 @@ void VKCommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
 }
 
-void VKCommandBuffer::AddMemoryBarrier(IImage* _image) const
+void VKCommandBuffer::AddMemoryBarrier0(IImage* _image) const
 {
 	VkImage image = _image->CastToVK()->GetRaw();
 
@@ -106,6 +113,40 @@ void VKCommandBuffer::AddMemoryBarrier(IImage* _image) const
 
 		.oldLayout		=	VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout		=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+
+		.image			=	image,
+
+		.subresourceRange{
+			.aspectMask		=	VK_IMAGE_ASPECT_COLOR_BIT,
+			.levelCount		=	1,
+			.layerCount		=	1
+		}
+	};
+
+	VkDependencyInfo barrierDependencyInfo{
+		.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+		.imageMemoryBarrierCount = 1,
+		.pImageMemoryBarriers = &barrier
+	};
+
+	vkCmdPipelineBarrier2(m_CommandBuffer, &barrierDependencyInfo);
+}
+
+void VKCommandBuffer::AddMemoryBarrier1(IImage* _image) const
+{
+	VkImage image = _image->CastToVK()->GetRaw();
+
+	const VkImageMemoryBarrier2 barrier{
+		.sType			=	VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+
+		.srcStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask	=	0,
+
+		.dstStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstAccessMask	=	VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+
+		.oldLayout		=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+		.newLayout		=	VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 
 		.image			=	image,
 

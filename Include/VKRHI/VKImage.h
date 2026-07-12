@@ -21,6 +21,7 @@ public:
 	virtual OGLImage* CastToOGL() override final { return nullptr; }
 
 	VkImage GetRaw() const { return m_Image; }
+	VkImageView GetRawImageView() const { return m_ImageView; }
 
 protected:
 
@@ -32,7 +33,6 @@ private:
 
 	VkImage m_Image = VK_NULL_HANDLE;
 	VkDeviceMemory m_ImageMemory = VK_NULL_HANDLE;
-
 	VkImageView m_ImageView = VK_NULL_HANDLE;
 };
 

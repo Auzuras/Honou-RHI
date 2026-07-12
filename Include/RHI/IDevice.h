@@ -15,6 +15,8 @@ public:
 	virtual void CreateDevice(IInstance* _instance) = 0;
 	virtual void DestroyDevice() = 0;
 
+	virtual void WaitIdle() = 0;
+
 	virtual VKDevice* const CastToVK() { return nullptr; }
 	virtual DX12Device* CastToDX12() { return nullptr; }
 	virtual OGLDevice* CastToOGL() { return nullptr; }

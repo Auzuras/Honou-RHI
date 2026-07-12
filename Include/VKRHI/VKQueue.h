@@ -12,7 +12,7 @@ public:
 
 	void CreateQueue(IDevice* _device) override final;
 
-	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) override final;
+	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) override final;
 
 	VKQueue* CastToVK() override final { return this; }
 	DX12Queue* CastToDX12() override final { return nullptr; }

@@ -77,7 +77,7 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .pDynamicStates     =   dynamicStates.data()
     };
 
-    const VkFormat imageFormat{ VK_FORMAT_B8G8R8A8_SRGB };
+    const VkFormat imageFormat{ VK_FORMAT_B8G8R8A8_UNORM };
 
     const VkPipelineRenderingCreateInfo renderingCI{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,

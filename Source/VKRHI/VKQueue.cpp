@@ -2,13 +2,16 @@
 
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKCommandBuffer.h>
+#include <VKRHI/VKFence.h>
 #include <VKRHI/VKSyncPoint.h>
 
 #include <vector>
 
-void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint)
+void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
+
+	const VkFence fence = _fence->CastToVK()->GetRaw();
 	const VkSemaphore waitPoint = _waitPoint->CastToVK()->GetRaw();
 	const VkSemaphore signalPoint = _signalPoint->CastToVK()->GetRaw();
 
@@ -28,7 +31,7 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _w
 		.pSignalSemaphores = &signalPoint
 	};
 
-	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueSubmit(m_Queue, 1, &submitInfo, fence);
 }
 
 void VKQueue::CreateQueue(IDevice* _device)

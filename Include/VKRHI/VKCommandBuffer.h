@@ -21,7 +21,9 @@ public:
 	void Open() const override final;
 	void Close() const override final;
 
-	void BeginRendering(uint32_t _width, uint32_t _height) const override final;
+	void Reset() const override final;
+
+	void BeginRendering(IImage* _image, uint32_t _width, uint32_t _height) const override final;
 	void EndRendering() const override final;
 
 	void BindPipeline(IPipeline* _pipeline) const override final;
@@ -29,7 +31,8 @@ public:
 	void SetViewport(float _width, float _height) const override final;
 	void SetScissor(uint32_t _width, uint32_t _height) const override final;
 
-	void AddMemoryBarrier(IImage* _image) const override final;
+	void AddMemoryBarrier0(IImage* _image) const override final;
+	void AddMemoryBarrier1(IImage* _image) const override final;
 	void Copy(IImage* _destination, IImage* _source) const override final;
 	void Copy(IImage* _destination, IBuffer* _source) const override final;
 

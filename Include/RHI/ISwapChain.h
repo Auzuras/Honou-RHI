@@ -23,10 +23,12 @@ public:
     virtual void DestroySwapChain(IDevice* _device) = 0;
 
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;
-    virtual void Present(IDevice* _device, IQueue* _presentQueue) = 0;
+    virtual void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) = 0;
 
-    ISyncPoint* GetSyncPoint(uint32_t _frameIndex) { return p_SwapChainSyncPoint[_frameIndex]; }
-    IFence* GetFence(uint32_t _frameIndex) { return p_SwapChainImagesFences[_frameIndex]; }
+    ISyncPoint* GetImageSyncPoint(uint32_t _frameIndex) const { return p_SwapChainImageSyncPoint[_frameIndex]; }
+    ISyncPoint* GetRenderSyncPoint() const { return p_SwapChainRenderSyncPoint[p_CurrentImageIndex]; }
+    IFence* GetFence() const { return p_SwapChainImagesFences[p_CurrentImageIndex]; }
+    IImage* GetCurrentImage() const { return p_SwapChainImages[p_CurrentImageIndex]; }
 
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
@@ -42,7 +44,8 @@ protected:
 
     std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
     std::vector<IFence*> p_SwapChainImagesFences = std::vector<IFence*>();
-    std::vector<ISyncPoint*> p_SwapChainSyncPoint = std::vector<ISyncPoint*>();
+    std::vector<ISyncPoint*> p_SwapChainImageSyncPoint = std::vector<ISyncPoint*>();
+    std::vector<ISyncPoint*> p_SwapChainRenderSyncPoint = std::vector<ISyncPoint*>();
 };
 
 #endif //HONOU_RENDER_ISWAPCHAIN_H

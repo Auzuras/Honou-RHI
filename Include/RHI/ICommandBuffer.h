@@ -20,7 +20,9 @@ public:
 	virtual void Open() const = 0;
 	virtual void Close() const = 0;
 
-	virtual void BeginRendering(uint32_t _width, uint32_t _height) const = 0;
+	virtual void Reset() const = 0;
+
+	virtual void BeginRendering(IImage* _image, uint32_t _width, uint32_t _height) const = 0;
 	virtual void EndRendering() const = 0;
 
 	virtual void BindPipeline(IPipeline* _pipeline) const = 0;
@@ -28,7 +30,8 @@ public:
 	virtual void SetViewport(float _width, float _height) const = 0;
 	virtual void SetScissor(uint32_t _width, uint32_t _height) const = 0;
 
-	virtual void AddMemoryBarrier(IImage* _image) const = 0;
+	virtual void AddMemoryBarrier0(IImage* _image) const = 0;
+	virtual void AddMemoryBarrier1(IImage* _image) const = 0;
 	virtual void Copy(IImage* _destination, IImage* _source) const = 0;
 	virtual void Copy(IImage* _destination, IBuffer* _source) const = 0;
 

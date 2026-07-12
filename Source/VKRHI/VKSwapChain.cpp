@@ -54,7 +54,8 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     scImages.resize(imageCount);
     p_SwapChainImages.resize(imageCount);
     p_SwapChainImagesFences.resize(imageCount);
-    p_SwapChainSyncPoint.resize(imageCount);
+    p_SwapChainImageSyncPoint.resize(imageCount);
+    p_SwapChainRenderSyncPoint.resize(imageCount);
 
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
 
@@ -72,13 +73,20 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
         image->CreateImageInternal(_device, scImages[i], desc);
         p_SwapChainImages[i] = image;
 
+        VKSyncPoint* renderSyncPoint = new VKSyncPoint();
+        renderSyncPoint->CreateSyncPoint(_device);
+        p_SwapChainRenderSyncPoint[i] = renderSyncPoint;
+    }
+
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
         VKFence* fence = new VKFence();
         fence->CreateFence(_device);
         p_SwapChainImagesFences[i] = fence;
 
-        VKSyncPoint* syncPoint = new VKSyncPoint();
-        syncPoint->CreateSyncPoint(_device);
-        p_SwapChainSyncPoint[i] = syncPoint;
+        VKSyncPoint* imageSyncPoint = new VKSyncPoint();
+        imageSyncPoint->CreateSyncPoint(_device);
+        p_SwapChainImageSyncPoint[i] = imageSyncPoint;
     }
 }
 
@@ -92,14 +100,21 @@ void VKSwapChain::DestroySwapChain(IDevice* _device)
         p_SwapChainImages[i]->DestroyImage(_device);
         delete p_SwapChainImages[i];
 
+        p_SwapChainRenderSyncPoint[i]->DestroySyncPoint(_device);
+        delete p_SwapChainRenderSyncPoint[i];
+    }
+
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
         p_SwapChainImagesFences[i]->DestroyFence(_device);
         delete p_SwapChainImagesFences[i];
 
-        p_SwapChainSyncPoint[i]->DestroySyncPoint(_device);
-        delete p_SwapChainSyncPoint[i];
+        p_SwapChainImageSyncPoint[i]->DestroySyncPoint(_device);
+        delete p_SwapChainImageSyncPoint[i];
     }
 
-    p_SwapChainSyncPoint.clear();
+    p_SwapChainRenderSyncPoint.clear();
+    p_SwapChainImageSyncPoint.clear();
     p_SwapChainImagesFences.clear();
     p_SwapChainImages.clear();
 
@@ -109,7 +124,7 @@ void VKSwapChain::DestroySwapChain(IDevice* _device)
 uint32_t VKSwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-    const VkSemaphore imageSemaphore = p_SwapChainSyncPoint[_frameIndex]->CastToVK()->GetRaw();
+    const VkSemaphore imageSemaphore = p_SwapChainImageSyncPoint[_frameIndex]->CastToVK()->GetRaw();
 
     p_SwapChainImagesFences[_frameIndex]->Wait(_device);
     p_SwapChainImagesFences[_frameIndex]->Reset(_device);
@@ -118,15 +133,16 @@ uint32_t VKSwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameInd
     return p_CurrentImageIndex;
 }
 
-void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue)
+void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+    const VkSemaphore semaphore = _syncPoint->CastToVK()->GetRaw();
     const VkQueue queue = _presentQueue->CastToVK()->GetRaw();
 
     VkPresentInfoKHR presentInfo{
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = VK_NULL_HANDLE,
+        .pWaitSemaphores = &semaphore,
         .swapchainCount = 1,
         .pSwapchains = &m_SwapChain,
         .pImageIndices = &p_CurrentImageIndex

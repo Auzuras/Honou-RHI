@@ -15,6 +15,8 @@ public:
 	void CreateDevice(IInstance* _instance) override final;
 	void DestroyDevice() override final;
 
+	void WaitIdle() override final;
+
 	VKDevice* const CastToVK() override final { return this; }
 	DX12Device* CastToDX12() override final { return nullptr; }
 	OGLDevice* CastToOGL() override final { return nullptr; }

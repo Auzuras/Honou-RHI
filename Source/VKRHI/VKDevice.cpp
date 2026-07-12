@@ -77,6 +77,11 @@ void VKDevice::DestroyDevice()
 	vkDestroyDevice(m_LogicalDevice, nullptr);
 }
 
+void VKDevice::WaitIdle()
+{
+	vkDeviceWaitIdle(m_LogicalDevice);
+}
+
 uint32_t VKDevice::SelectBestDevice(const std::vector<VkPhysicalDevice>& devices)
 {
 	// TODO: The method
