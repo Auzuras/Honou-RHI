@@ -6,6 +6,7 @@
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKFence.h>
+#include <VKRHI/VKSyncPoint.h>
 
 void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
 {
@@ -52,8 +53,8 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     
     scImages.resize(imageCount);
     p_SwapChainImages.resize(imageCount);
-    m_ImageSemaphores.resize(imageCount);
     p_SwapChainImagesFences.resize(imageCount);
+    p_SwapChainSyncPoint.resize(imageCount);
 
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
 
@@ -64,21 +65,20 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     };
 
     // TODO: Rework
-    const VkSemaphoreCreateInfo semaphoreCI{
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
-    };
 
     for (size_t i = 0; i < imageCount; ++i)
     {
         VKImage* image = new VKImage();
         image->CreateImageInternal(_device, scImages[i], desc);
         p_SwapChainImages[i] = image;
-        
-        vkCreateSemaphore(lDevice, &semaphoreCI, nullptr, &m_ImageSemaphores[i]);
 
         VKFence* fence = new VKFence();
         fence->CreateFence(_device);
         p_SwapChainImagesFences[i] = fence;
+
+        VKSyncPoint* syncPoint = new VKSyncPoint();
+        syncPoint->CreateSyncPoint(_device);
+        p_SwapChainSyncPoint[i] = syncPoint;
     }
 }
 
@@ -94,12 +94,13 @@ void VKSwapChain::DestroySwapChain(IDevice* _device)
 
         p_SwapChainImagesFences[i]->DestroyFence(_device);
         delete p_SwapChainImagesFences[i];
-        
-        vkDestroySemaphore(lDevice, m_ImageSemaphores[i], nullptr);
+
+        p_SwapChainSyncPoint[i]->DestroySyncPoint(_device);
+        delete p_SwapChainSyncPoint[i];
     }
 
+    p_SwapChainSyncPoint.clear();
     p_SwapChainImagesFences.clear();
-    m_ImageSemaphores.clear();
     p_SwapChainImages.clear();
 
     vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
@@ -108,11 +109,12 @@ void VKSwapChain::DestroySwapChain(IDevice* _device)
 uint32_t VKSwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+    const VkSemaphore imageSemaphore = p_SwapChainSyncPoint[_frameIndex]->CastToVK()->GetRaw();
 
     p_SwapChainImagesFences[_frameIndex]->Wait(_device);
     p_SwapChainImagesFences[_frameIndex]->Reset(_device);
 
-    vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, m_ImageSemaphores[_frameIndex], VK_NULL_HANDLE, &p_CurrentImageIndex);
+    vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, imageSemaphore, VK_NULL_HANDLE, &p_CurrentImageIndex);
     return p_CurrentImageIndex;
 }
 

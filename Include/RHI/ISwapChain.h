@@ -10,6 +10,7 @@ class ISurface;
 class IImage;
 class IQueue;
 class IFence;
+class ISyncPoint;
 
 #include <vector>
 
@@ -38,6 +39,7 @@ protected:
 
     std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
     std::vector<IFence*> p_SwapChainImagesFences = std::vector<IFence*>();
+    std::vector<ISyncPoint*> p_SwapChainSyncPoint = std::vector<ISyncPoint*>();
 };
 
 #endif //HONOU_RENDER_ISWAPCHAIN_H

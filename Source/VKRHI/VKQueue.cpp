@@ -2,25 +2,28 @@
 
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKCommandBuffer.h>
+#include <VKRHI/VKSyncPoint.h>
 
 #include <vector>
 
-void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
+void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
+	const VkSemaphore waitPoint = _waitPoint->CastToVK()->GetRaw();
+	const VkSemaphore signalPoint = _signalPoint->CastToVK()->GetRaw();
 
-	VkSubmitInfo submitInfo{
+	const VkSubmitInfo submitInfo{
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 
 		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = VK_NULL_HANDLE,
+		.pWaitSemaphores = &waitPoint,
 		.pWaitDstStageMask = 0,
 
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmdBuffer,
 
 		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = VK_NULL_HANDLE
+		.pSignalSemaphores = &signalPoint
 	};
 
 	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);

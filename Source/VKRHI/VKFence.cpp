@@ -10,7 +10,7 @@ void VKFence::CreateFence(IDevice* _device, bool _signaled)
 
 	const VkFenceCreateInfo fenceCI{
 		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		.flags = _signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0
+		.flags = _signaled ? VK_FENCE_CREATE_SIGNALED_BIT : static_cast<VkFenceCreateFlags>(0)
 	};
 
 	vkCreateFence(lDevice, &fenceCI, nullptr, &m_Fence);

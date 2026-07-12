@@ -23,8 +23,6 @@ public:
 private:
 
     VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
-
-    std::vector<VkSemaphore> m_ImageSemaphores = std::vector<VkSemaphore>();
 };
 
 #endif //HONOU_RENDER_VKSWAPCHAIN_H
