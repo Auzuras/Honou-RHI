@@ -26,7 +26,7 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
 	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
-void VKQueue::GetQueue(IDevice* _device)
+void VKQueue::CreateQueue(IDevice* _device)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();

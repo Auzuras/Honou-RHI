@@ -8,6 +8,8 @@ class OGLSwapChain;
 class IDevice;
 class ISurface;
 class IImage;
+class IQueue;
+class IFence;
 
 #include <vector>
 
@@ -20,7 +22,7 @@ public:
     virtual void DestroySwapChain(IDevice* _device) = 0;
 
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;
-    virtual void Present(IDevice* _device) = 0;
+    virtual void Present(IDevice* _device, IQueue* _presentQueue) = 0;
 
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
@@ -35,6 +37,7 @@ protected:
     uint32_t p_CurrentImageIndex = 0;
 
     std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
+    std::vector<IFence*> p_SwapChainImagesFences = std::vector<IFence*>();
 };
 
 #endif //HONOU_RENDER_ISWAPCHAIN_H

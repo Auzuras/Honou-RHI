@@ -13,7 +13,7 @@ class IQueue
 public:
 	virtual ~IQueue() = default;
 
-	virtual void GetQueue(IDevice* _device) = 0;
+	virtual void CreateQueue(IDevice* _device) = 0;
 
 	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) = 0;
 

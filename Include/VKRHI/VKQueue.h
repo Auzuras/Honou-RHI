@@ -10,13 +10,15 @@ class VKQueue : public IQueue
 public:
 	~VKQueue() override final = default;
 
-	void GetQueue(IDevice* _device) override final = 0;
+	void CreateQueue(IDevice* _device) override final = 0;
 
 	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) override final;
 
 	VKQueue* CastToVK() override final { return this; }
 	DX12Queue* CastToDX12() override final { return nullptr; }
 	OGLQueue* CastToOGL() override final { return nullptr; }
+
+	[[nordiscard]] VkQueue GetRaw() const { return m_Queue; }
 
 private:
 
