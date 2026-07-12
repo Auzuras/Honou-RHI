@@ -146,11 +146,7 @@ TEST(VKRHITest, RenderLoop)
 	VKCommandAllocator cmdAlloc;
 	cmdAlloc.CreateCommandAllocator(&device);
 
-	std::vector<ICommandBuffer*> cmdBuffers(ISwapChain::MAX_FRAMES_IN_FLIGHT);
-	for (uint32_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		cmdBuffers[i] = cmdAlloc.AllocateCommandBuffer(&device);
-	}
+	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	VKSwapChain swapChain;
 	swapChain.CreateSwapChain(&device, &surface);
@@ -203,7 +199,8 @@ TEST(VKRHITest, RenderLoop)
 	
 	swapChain.DestroySwapChain(&device);
 
-	cmdAlloc.FreeCommandBuffers(&device, *cmdBuffers.data(), 2);
+	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
+	cmdAlloc.DestroyCommandAllocator(&device);
 
 	device.DestroyDevice();
 	surface.DestroySurface(&instance);

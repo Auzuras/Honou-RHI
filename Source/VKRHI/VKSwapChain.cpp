@@ -52,11 +52,6 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, nullptr);
     
     scImages.resize(imageCount);
-    p_SwapChainImages.resize(imageCount);
-    p_SwapChainImagesFences.resize(imageCount);
-    p_SwapChainImageSyncPoint.resize(imageCount);
-    p_SwapChainRenderSyncPoint.resize(imageCount);
-
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
 
     const ImageDescription desc{
@@ -71,22 +66,22 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface)
     {
         VKImage* image = new VKImage();
         image->CreateImageInternal(_device, scImages[i], desc);
-        p_SwapChainImages[i] = image;
+        p_SwapChainImages.push_back(image);
 
         VKSyncPoint* renderSyncPoint = new VKSyncPoint();
         renderSyncPoint->CreateSyncPoint(_device);
-        p_SwapChainRenderSyncPoint[i] = renderSyncPoint;
+        p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
     }
 
     for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
     {
         VKFence* fence = new VKFence();
         fence->CreateFence(_device);
-        p_SwapChainImagesFences[i] = fence;
+        p_SwapChainImagesFences.push_back(fence);
 
         VKSyncPoint* imageSyncPoint = new VKSyncPoint();
         imageSyncPoint->CreateSyncPoint(_device);
-        p_SwapChainImageSyncPoint[i] = imageSyncPoint;
+        p_SwapChainImageSyncPoint.push_back(imageSyncPoint);
     }
 }
 

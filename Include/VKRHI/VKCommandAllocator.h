@@ -17,10 +17,10 @@ public:
 	void CreateCommandAllocator(IDevice* _device) override final;
 	void DestroyCommandAllocator(IDevice* _device) override final;
 
-	ICommandBuffer* AllocateCommandBuffers(IDevice* _device, uint32_t _count) override final;
+	std::vector<ICommandBuffer*> AllocateCommandBuffers(IDevice* _device, uint32_t _count) override final;
 	ICommandBuffer* AllocateCommandBuffer(IDevice* _device) override final;
 
-	void FreeCommandBuffers(IDevice* _device, ICommandBuffer* _buffers, uint32_t _count) override final;
+	void FreeCommandBuffers(IDevice* _device, const std::vector<ICommandBuffer*>& _buffers) override final;
 	void FreeCommandBuffer(IDevice* _device, ICommandBuffer* _buffer) override final;
 
 	VKCommandAllocator* const CastToVK() { return this; }

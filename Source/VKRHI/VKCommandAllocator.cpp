@@ -34,10 +34,10 @@ void VKCommandAllocator::CreateCommandAllocator(IDevice* _device)
 
 ICommandBuffer* VKCommandAllocator::AllocateCommandBuffer(IDevice* _device)
 {
-	return AllocateCommandBuffers(_device, 1);
+	return AllocateCommandBuffers(_device, 1)[0];
 }
 
-ICommandBuffer* VKCommandAllocator::AllocateCommandBuffers(IDevice* _device, uint32_t _count)
+std::vector<ICommandBuffer*> VKCommandAllocator::AllocateCommandBuffers(IDevice* _device, uint32_t _count)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
@@ -52,31 +52,28 @@ ICommandBuffer* VKCommandAllocator::AllocateCommandBuffers(IDevice* _device, uin
 	vkAllocateCommandBuffers(lDevice, &cbAllocCI, vkCmdBuffers.data());
 
 	// Temp allocation for now
-	VKCommandBuffer* cmdBuffers = new VKCommandBuffer[_count];
-
+	std::vector<ICommandBuffer*> commandBuffers = std::vector<ICommandBuffer*>(_count);
 	for (size_t i = 0; i < _count; ++i)
 	{
-		cmdBuffers[i].m_CommandBuffer = vkCmdBuffers[i];
+		VKCommandBuffer* cmdBuffer = new VKCommandBuffer();
+		cmdBuffer->m_CommandBuffer = vkCmdBuffers[i];
+		commandBuffers[i] = cmdBuffer;
 	}
 
-	return cmdBuffers;
+	return commandBuffers;
 }
 
 void VKCommandAllocator::FreeCommandBuffer(IDevice* _device, ICommandBuffer* _buffer)
 {
-	return FreeCommandBuffers(_device, _buffer, 1);
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	vkFreeCommandBuffers(lDevice, m_CommandAllocator, 1, &_buffer->CastToVK()->m_CommandBuffer);
+	delete _buffer;
 }
 
-void VKCommandAllocator::FreeCommandBuffers(IDevice* _device, ICommandBuffer* _buffers, uint32_t _count)
+void VKCommandAllocator::FreeCommandBuffers(IDevice* _device, const std::vector<ICommandBuffer*>& _buffers)
 {
-	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-
-	for (size_t i = 0; i < _count; ++i)
-	{
-		vkFreeCommandBuffers(lDevice, m_CommandAllocator, 1, &_buffers[i].CastToVK()->m_CommandBuffer);
-	}
-
-	delete[] _buffers;
+	for (size_t i = 0; i < _buffers.size(); ++i)
+		FreeCommandBuffer(_device, _buffers[i]);
 }
 
 void VKCommandAllocator::DestroyCommandAllocator(IDevice* _device)
