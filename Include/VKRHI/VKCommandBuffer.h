@@ -21,7 +21,7 @@ public:
 	void Open() const override final;
 	void Close() const override final;
 
-	void BeginRendering() const override final;
+	void BeginRendering(uint32_t _width, uint32_t _height) const override final;
 	void EndRendering() const override final;
 
 	void BindPipeline(IPipeline* _pipeline) const override final;

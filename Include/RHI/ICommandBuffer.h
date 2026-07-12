@@ -20,7 +20,7 @@ public:
 	virtual void Open() const = 0;
 	virtual void Close() const = 0;
 
-	virtual void BeginRendering() const = 0;
+	virtual void BeginRendering(uint32_t _width, uint32_t _height) const = 0;
 	virtual void EndRendering() const = 0;
 
 	virtual void BindPipeline(IPipeline* _pipeline) const = 0;

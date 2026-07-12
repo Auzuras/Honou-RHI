@@ -25,6 +25,9 @@ public:
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;
     virtual void Present(IDevice* _device, IQueue* _presentQueue) = 0;
 
+    ISyncPoint* GetSyncPoint(uint32_t _frameIndex) { return p_SwapChainSyncPoint[_frameIndex]; }
+    IFence* GetFence(uint32_t _frameIndex) { return p_SwapChainImagesFences[_frameIndex]; }
+
     virtual VKSwapChain* CastToVK() { return nullptr; }
     virtual DX12SwapChain* CastToDX12() { return nullptr; }
     virtual OGLSwapChain* CastToOGL() { return nullptr; }

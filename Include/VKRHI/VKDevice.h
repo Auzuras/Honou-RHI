@@ -28,7 +28,6 @@ private:
 private:
 	VkDevice m_LogicalDevice = VK_NULL_HANDLE;
 	VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-	VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
 };
 
 #endif //HONOU_RENDER_VKDEVICE_H

@@ -20,7 +20,7 @@ void VKCommandBuffer::Close() const
 	vkEndCommandBuffer(m_CommandBuffer);
 }
 
-void VKCommandBuffer::BeginRendering() const
+void VKCommandBuffer::BeginRendering(uint32_t _width, uint32_t _height) const
 {
 	const VkRenderingAttachmentInfo colorAttachementInfo{
 		.sType			=	VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -36,10 +36,11 @@ void VKCommandBuffer::BeginRendering() const
 	};
 
 	const VkRenderingInfo renderingInfo{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_AREA_INFO,
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
 		.renderArea{
 			.extent{
-
+				.width = _width,
+				.height = _height
 			}
 		},
 		.layerCount = 1,

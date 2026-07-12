@@ -70,7 +70,6 @@ void VKDevice::CreateDevice(IInstance* _instance)
 	};
 
 	vkCreateDevice(m_PhysicalDevice, &deviceCI, nullptr, &m_LogicalDevice);
-	vkGetDeviceQueue(m_LogicalDevice, queueFamily, 0, &m_GraphicsQueue);
 }
 
 void VKDevice::DestroyDevice()

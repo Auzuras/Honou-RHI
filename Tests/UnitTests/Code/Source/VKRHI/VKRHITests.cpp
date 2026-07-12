@@ -10,6 +10,8 @@
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKShaderModule.h>
+#include <VKRHI/VKSyncPoint.h>
+#include <VKRHI/VKQueue.h>
 
 #include <Window/Window.h>
 
@@ -138,6 +140,9 @@ TEST(VKRHITest, RenderLoop)
 	VKDevice device;
 	device.CreateDevice(&instance);
 
+	VKQueue graphicsQueue;
+	graphicsQueue.CreateQueue(&device);
+
 	VKCommandAllocator cmdAlloc;
 	cmdAlloc.CreateCommandAllocator(&device);
 
@@ -153,13 +158,19 @@ TEST(VKRHITest, RenderLoop)
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
 
+	std::vector<ISyncPoint*> renderFinished(ISwapChain::MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		renderFinished[i] = new VKSyncPoint();
+		renderFinished[i]->CreateSyncPoint(&device);
+	}
+
 	uint32_t frameIndex = 0;
 
 	while (!window.WindowShouldClose())
 	{
 		window.UpdateWindow();
-
-		// TODO: WAIT ON FENCE
 
 		swapChain.GetNextSwapChainImage(&device, frameIndex);
 
@@ -169,7 +180,7 @@ TEST(VKRHITest, RenderLoop)
 
 		//cCmdBuffer->AddMemoryBarrier();
 
-		cCmdBuffer->BeginRendering();
+		cCmdBuffer->BeginRendering(window.GetWidth(), window.GetHeight());
 
 		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
 
@@ -177,13 +188,19 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindPipeline(&pipeline);
 
-		//cCmdBuffer->DrawIndexed(3);
+		cCmdBuffer->Draw(3);
 
 		cCmdBuffer->EndRendering();
 
+		//cCmdBuffer->AddMemoryBarrier();
+
 		cCmdBuffer->Close();
 
+		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetSyncPoint(frameIndex), renderFinished[frameIndex]);
+
 		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
+
+		swapChain.Present(&device, &graphicsQueue);
 	}
 
 	pipeline.DestroyPipeline(&device);

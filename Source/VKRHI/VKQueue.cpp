@@ -12,12 +12,14 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _w
 	const VkSemaphore waitPoint = _waitPoint->CastToVK()->GetRaw();
 	const VkSemaphore signalPoint = _signalPoint->CastToVK()->GetRaw();
 
+	VkPipelineStageFlags waitStages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+
 	const VkSubmitInfo submitInfo{
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 
 		.waitSemaphoreCount = 1,
 		.pWaitSemaphores = &waitPoint,
-		.pWaitDstStageMask = 0,
+		.pWaitDstStageMask = &waitStages,
 
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmdBuffer,

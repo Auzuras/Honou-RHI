@@ -10,7 +10,7 @@ class VKQueue : public IQueue
 public:
 	~VKQueue() override final = default;
 
-	void CreateQueue(IDevice* _device) override final = 0;
+	void CreateQueue(IDevice* _device) override final;
 
 	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) override final;
 
