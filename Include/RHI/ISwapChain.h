@@ -19,7 +19,8 @@ class ISwapChain
 public:
     virtual ~ISwapChain() = default;
 
-    virtual void CreateSwapChain(IDevice* _device, ISurface* _surface) = 0;
+    virtual void CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) = 0;
+    virtual void RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) = 0;
     virtual void DestroySwapChain(IDevice* _device) = 0;
 
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;

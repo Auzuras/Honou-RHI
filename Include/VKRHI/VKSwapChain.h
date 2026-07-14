@@ -10,7 +10,8 @@ class VKSwapChain : public ISwapChain
 public:
     ~VKSwapChain() override final = default;
 
-    void CreateSwapChain(IDevice* _device, ISurface* _surface) override final;
+    void CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) override final;
+    void RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) override final;
     void DestroySwapChain(IDevice* _device) override final;
 
     uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
@@ -19,6 +20,10 @@ public:
     VKSwapChain* CastToVK() override final { return this; }
     DX12SwapChain* CastToDX12() override final { return nullptr; }
     OGLSwapChain* CastToOGL() override final { return nullptr; }
+
+private:
+
+    VkSwapchainCreateInfoKHR CreateSwapChainHelper(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height);
 
 private:
 

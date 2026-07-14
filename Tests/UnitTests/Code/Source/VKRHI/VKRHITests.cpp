@@ -76,7 +76,7 @@ TEST(VKRHITest, SwapChainTest)
 	device.CreateDevice(&instance);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device, &surface);
+	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
 	swapChain.DestroySwapChain(&device);
 
 	device.DestroyDevice();
@@ -149,7 +149,7 @@ TEST(VKRHITest, RenderLoop)
 	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device, &surface);
+	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
 
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
