@@ -14,47 +14,13 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainHelper(lDevice, pDevice, surface, _width, _height);
+    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _width, _height);
 
     vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &m_SwapChain);
 
-    uint32_t imageCount = 0;
-    std::vector<VkImage> scImages = std::vector<VkImage>();
-    
-    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, nullptr);
-    
-    scImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &imageCount, scImages.data());
+    CreateSwapChainImages(_device, _width, _height);
 
-    const ImageDescription desc{
-        .width = _width,
-        .height = _height,
-        .format = TextureFormat::HONOU_FORMAT_B8G8R8A8_UNORM
-    };
-
-    // TODO: Rework
-
-    for (size_t i = 0; i < imageCount; ++i)
-    {
-        VKImage* image = new VKImage();
-        image->CreateImageInternal(_device, scImages[i], desc);
-        p_SwapChainImages.push_back(image);
-
-        VKSyncPoint* renderSyncPoint = new VKSyncPoint();
-        renderSyncPoint->CreateSyncPoint(_device);
-        p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
-    }
-
-    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-    {
-        VKFence* fence = new VKFence();
-        fence->CreateFence(_device);
-        p_SwapChainImagesFences.push_back(fence);
-
-        VKSyncPoint* imageSyncPoint = new VKSyncPoint();
-        imageSyncPoint->CreateSyncPoint(_device);
-        p_SwapChainImageSyncPoint.push_back(imageSyncPoint);
-    }
+    CreateSwapChainSyncObjects(_device);
 }
 
 void VKSwapChain::RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height)
@@ -63,39 +29,28 @@ void VKSwapChain::RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainHelper(lDevice, pDevice, surface, _width, _height);
+    VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _width, _height);
     swapChainCI.oldSwapchain = m_SwapChain;
 
-    vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &m_SwapChain);
+    VkSwapchainKHR swapChain = VK_NULL_HANDLE;
+    vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &swapChain);
+
+    DestroySwapChainImages(_device);
+
+    vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
+
+    m_SwapChain = swapChain;
+
+    CreateSwapChainImages(_device, _width, _height);
 }
 
 void VKSwapChain::DestroySwapChain(IDevice* _device)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    // TODO: Rework
-    for (size_t i = 0; i < p_SwapChainImages.size(); ++i)
-    {
-        p_SwapChainImages[i]->DestroyImage(_device);
-        delete p_SwapChainImages[i];
+    DestroySwapChainImages(_device);
 
-        p_SwapChainRenderSyncPoint[i]->DestroySyncPoint(_device);
-        delete p_SwapChainRenderSyncPoint[i];
-    }
-
-    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-    {
-        p_SwapChainImagesFences[i]->DestroyFence(_device);
-        delete p_SwapChainImagesFences[i];
-
-        p_SwapChainImageSyncPoint[i]->DestroySyncPoint(_device);
-        delete p_SwapChainImageSyncPoint[i];
-    }
-
-    p_SwapChainRenderSyncPoint.clear();
-    p_SwapChainImageSyncPoint.clear();
-    p_SwapChainImagesFences.clear();
-    p_SwapChainImages.clear();
+    DestroySwapChainSyncObjects(_device);
 
     vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
 }
@@ -130,7 +85,82 @@ void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _
     vkQueuePresentKHR(queue, &presentInfo);
 }
 
-VkSwapchainCreateInfoKHR VKSwapChain::CreateSwapChainHelper(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height)
+void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height)
+{
+    const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+    std::vector<VkImage> scImages = std::vector<VkImage>();
+
+    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, nullptr);
+    scImages.resize(p_SwapChainImagesCount);
+    vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, scImages.data());
+
+    const ImageDescription desc{
+        .width = _width,
+        .height = _height,
+        .format = TextureFormat::HONOU_FORMAT_B8G8R8A8_UNORM
+    };
+
+    // TODO: Rework
+    for (size_t i = 0; i < p_SwapChainImagesCount; ++i)
+    {
+        VKSyncPoint* renderSyncPoint = new VKSyncPoint();
+        renderSyncPoint->CreateSyncPoint(_device);
+        p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
+
+        VKImage* image = new VKImage();
+        image->CreateImageInternal(_device, scImages[i], desc);
+        p_SwapChainImages.push_back(image);
+    }
+}
+
+void VKSwapChain::DestroySwapChainImages(IDevice* _device)
+{
+    for (size_t i = 0; i < p_SwapChainImagesCount; ++i)
+    {
+        p_SwapChainImages[i]->DestroyImage(_device);
+        delete p_SwapChainImages[i];
+
+        p_SwapChainRenderSyncPoint[i]->DestroySyncPoint(_device);
+        delete p_SwapChainRenderSyncPoint[i];
+    }
+
+    p_SwapChainRenderSyncPoint.clear();
+    p_SwapChainImages.clear();
+}
+
+void VKSwapChain::CreateSwapChainSyncObjects(IDevice* _device)
+{
+    // TODO: Rework
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        VKFence* fence = new VKFence();
+        fence->CreateFence(_device);
+        p_SwapChainImagesFences.push_back(fence);
+
+        VKSyncPoint* imageSyncPoint = new VKSyncPoint();
+        imageSyncPoint->CreateSyncPoint(_device);
+        p_SwapChainImageSyncPoint.push_back(imageSyncPoint);
+    }
+}
+
+void VKSwapChain::DestroySwapChainSyncObjects(IDevice* _device)
+{
+    // TODO: Rework
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        p_SwapChainImagesFences[i]->DestroyFence(_device);
+        delete p_SwapChainImagesFences[i];
+
+        p_SwapChainImageSyncPoint[i]->DestroySyncPoint(_device);
+        delete p_SwapChainImageSyncPoint[i];
+    }
+
+    p_SwapChainImageSyncPoint.clear();
+    p_SwapChainImagesFences.clear();
+}
+
+VkSwapchainCreateInfoKHR VKSwapChain::CreateSwapChainInfo(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height)
 {
     VkSurfaceCapabilitiesKHR surfaceCaps{};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_physicalDevice, _surface, &surfaceCaps);

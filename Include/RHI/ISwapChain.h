@@ -27,8 +27,8 @@ public:
     virtual void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) = 0;
 
     ISyncPoint* GetImageSyncPoint(uint32_t _frameIndex) const { return p_SwapChainImageSyncPoint[_frameIndex]; }
+    IFence* GetFence(uint32_t _frameIndex) const { return p_SwapChainImagesFences[_frameIndex]; }
     ISyncPoint* GetRenderSyncPoint() const { return p_SwapChainRenderSyncPoint[p_CurrentImageIndex]; }
-    IFence* GetFence() const { return p_SwapChainImagesFences[p_CurrentImageIndex]; }
     IImage* GetCurrentImage() const { return p_SwapChainImages[p_CurrentImageIndex]; }
 
     virtual VKSwapChain* CastToVK() { return nullptr; }
@@ -42,6 +42,7 @@ public:
 protected:
 
     uint32_t p_CurrentImageIndex = 0;
+    uint32_t p_SwapChainImagesCount = 0;
 
     std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
     std::vector<IFence*> p_SwapChainImagesFences = std::vector<IFence*>();

@@ -127,7 +127,14 @@ TEST(VKRHITest, RenderLoop)
 	VKInstance instance;
 	instance.CreateInstance();
 
+	bool windowResized = false;
 	Window window(1920, 1080);
+	window.SetResizeCallback(
+		[&](uint32_t _width, uint32_t _height)
+		{
+			windowResized = true;
+		}
+	);
 
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
@@ -158,8 +165,6 @@ TEST(VKRHITest, RenderLoop)
 
 	while (!window.WindowShouldClose())
 	{
-		window.UpdateWindow();
-
 		swapChain.GetNextSwapChainImage(&device, frameIndex);
 
 		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
@@ -186,11 +191,21 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->Close();
 
-		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
 
 		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
 
 		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
+
+		window.UpdateWindow();
+
+		if (windowResized)
+		{
+			windowResized = false;
+
+			device.WaitIdle();
+			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+		}
 	}
 
 	graphicsQueue.WaitIdle();

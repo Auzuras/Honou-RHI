@@ -23,7 +23,13 @@ public:
 
 private:
 
-    VkSwapchainCreateInfoKHR CreateSwapChainHelper(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height);
+    void CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height);
+    void DestroySwapChainImages(IDevice* _device);
+
+    void CreateSwapChainSyncObjects(IDevice* _device);
+    void DestroySwapChainSyncObjects(IDevice* _device);
+
+    VkSwapchainCreateInfoKHR CreateSwapChainInfo(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height);
 
 private:
 
