@@ -18,6 +18,9 @@
 
 #include <Window/Window.h>
 
+#include <Matrix/Matrix4.h>
+#include <Vector/Vector3.h>
+
 class VKRHITest : public testing::Test {};
 
 TEST(VKRHITest, InstanceTest)
@@ -127,6 +130,11 @@ TEST(VKRHITest, CommandAllocatorTest)
 
 TEST(VKRHITest, Mesh)
 {
+	Matrix4f projection(Matrix4f::Identity);
+	projection = projection.PerspectiveProjection(0.01f, 100.f, 16.f / 9.f, 90.f);
+
+	Vector3f position(0.f, 10.f, 0.f);
+
 	tinyobj::attrib_t attrib{};
 	std::vector<tinyobj::shape_t> shapes{};
 	std::vector<tinyobj::material_t> materials{};

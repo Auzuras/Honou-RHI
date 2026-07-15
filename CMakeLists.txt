@@ -21,7 +21,6 @@ target_link_libraries(HonouRender PRIVATE d3d12 dxgi dxguid d3dcompiler)
 
 target_link_libraries(HonouRender PUBLIC Vulkan::Vulkan)
 
-
 if(HONOU_RENDER_TEST_OPT)
     enable_testing()
 

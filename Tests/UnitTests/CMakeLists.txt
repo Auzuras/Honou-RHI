@@ -4,6 +4,7 @@ set(BUILD_GMOCK OFF)
 set(INSTALL_GTEST OFF)
 set(gtest_disable_pthreads ON)
 set(KOORI_WINDOW_TEST_OPT OFF)
+set(KOORI_MATH_TEST_OPT OFF)
 
 FetchContent_Declare(
         googletest
@@ -20,13 +21,20 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+        Koori-Math
+        GIT_REPOSITORY https://github.com/Auzuras/Koori-Math.git 
+        GIT_TAG dev
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Koori-Math
+)
+
+FetchContent_Declare(
         Koori-Window
         GIT_REPOSITORY https://github.com/Auzuras/Koori-Window.git 
         GIT_TAG dev
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Koori-Window
 )
 
-FetchContent_MakeAvailable(googletest Koori-Window tinyobjloader)
+FetchContent_MakeAvailable(googletest tinyobjloader Koori-Math Koori-Window)
 
 set(HONOU_RENDER_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
@@ -41,6 +49,8 @@ add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
 target_link_libraries(HonouRenderTests PRIVATE gtest)
 
 target_link_libraries(HonouRenderTests PRIVATE tinyobjloader)
+
+target_link_libraries(HonouRenderTests PRIVATE KooriMath)
 
 target_link_libraries(HonouRenderTests PRIVATE KooriWindow)
 
