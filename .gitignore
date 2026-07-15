@@ -4,6 +4,7 @@
 
 # Third Party folder
 ThirtParty/
+Tests/UnitTests/ThirtParty
 
 # CMake folders
 out/
