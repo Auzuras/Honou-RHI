@@ -212,7 +212,7 @@ void VKCommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 {
 	VKBuffer* const vkBuffer = _indexBuffer->CastToVK();
 
-	vkCmdBindIndexBuffer(m_CommandBuffer, vkBuffer->GetRaw(), 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(m_CommandBuffer, vkBuffer->GetRaw(), 0, VK_INDEX_TYPE_UINT16);
 }
 
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const

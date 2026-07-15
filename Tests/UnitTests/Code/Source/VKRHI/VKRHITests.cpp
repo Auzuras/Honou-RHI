@@ -13,6 +13,9 @@
 #include <VKRHI/VKSyncPoint.h>
 #include <VKRHI/VKQueue.h>
 
+#include <tiny_obj_loader.h>
+#include <Helpers/Vertex.h>
+
 #include <Window/Window.h>
 
 class VKRHITest : public testing::Test {};
@@ -122,6 +125,42 @@ TEST(VKRHITest, CommandAllocatorTest)
 	instance.DestroyInstance();
 }
 
+TEST(VKRHITest, Mesh)
+{
+	tinyobj::attrib_t attrib{};
+	std::vector<tinyobj::shape_t> shapes{};
+	std::vector<tinyobj::material_t> materials{};
+	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Sphere.obj");
+
+	const size_t indicesCount = shapes[0].mesh.indices.size();
+	std::vector<Vertex> vertices{};
+	std::vector<uint16_t> indices{};
+
+	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
+	{
+		const Vertex v{
+			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] }
+		};
+
+		vertices.push_back(v);
+		indices.push_back(indices.size());
+	}
+
+	VKInstance instance;
+	instance.CreateInstance();
+
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKBuffer vertexBuffer;
+	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+	vertexBuffer.DestroyBuffer(&device);
+
+	VKBuffer indexBuffer;
+	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+	indexBuffer.DestroyBuffer(&device);
+}
+
 TEST(VKRHITest, RenderLoop)
 {
 	VKInstance instance;
@@ -161,6 +200,31 @@ TEST(VKRHITest, RenderLoop)
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
 
+	tinyobj::attrib_t attrib{};
+	std::vector<tinyobj::shape_t> shapes{};
+	std::vector<tinyobj::material_t> materials{};
+	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Sphere.obj");
+
+	const size_t indicesCount = shapes[0].mesh.indices.size();
+	std::vector<Vertex> vertices{};
+	std::vector<uint16_t> indices{};
+
+	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
+	{
+		const Vertex v{
+			.position = { attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] }
+		};
+
+		vertices.push_back(v);
+		indices.push_back(indices.size());
+	}
+
+	VKBuffer vertexBuffer;
+	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+
+	VKBuffer indexBuffer;
+	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+
 	uint32_t frameIndex = 0;
 
 	while (!window.WindowShouldClose())
@@ -183,7 +247,11 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindPipeline(&pipeline);
 
-		cCmdBuffer->Draw(3);
+		cCmdBuffer->BindVertexBuffer(&vertexBuffer);
+
+		cCmdBuffer->BindIndexBuffer(&indexBuffer);
+		
+		cCmdBuffer->DrawIndexed(indices.size());
 
 		cCmdBuffer->EndRendering();
 
@@ -210,6 +278,9 @@ TEST(VKRHITest, RenderLoop)
 
 	graphicsQueue.WaitIdle();
 	// or device.WaitIdle();
+
+	vertexBuffer.DestroyBuffer(&device);
+	indexBuffer.DestroyBuffer(&device);
 
 	pipeline.DestroyPipeline(&device);
 	

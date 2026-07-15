@@ -27,7 +27,7 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     };
 
     const std::vector<VkVertexInputAttributeDescription> vertexAttributes{
-        //{ .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT },
+        { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT }
         //{ .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 3 * sizeof(float) },
         //{ .location = 2, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 6 * sizeof(float) }
     };
@@ -48,8 +48,8 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     VKShaderModule vertModule = VKShaderModule();
     VKShaderModule fragModule = VKShaderModule();
 
-    vertModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Shaders/HelloTriangle.vert.spv"));
-    fragModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Shaders/HelloTriangle.frag.spv"));
+    vertModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
+    fragModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
 
     const std::vector<VkPipelineShaderStageCreateInfo> shaderStagesCI{
         {   .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,

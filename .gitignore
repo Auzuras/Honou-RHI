@@ -2,11 +2,8 @@
 .vs/
 .idea/
 
-# Google test folder
-googletest/
-
-# Koori Window test folder
-Koori-Window/
+# Third Party folder
+ThirtParty/
 
 # CMake folders
 out/

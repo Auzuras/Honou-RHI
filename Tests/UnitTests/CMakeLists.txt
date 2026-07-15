@@ -13,13 +13,20 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+        tinyobjloader
+        GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+        GIT_TAG release
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/tinyobjloader
+)
+
+FetchContent_Declare(
         Koori-Window
-        GIT_TAG dev
         GIT_REPOSITORY https://github.com/Auzuras/Koori-Window.git 
+        GIT_TAG dev
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Koori-Window
 )
 
-FetchContent_MakeAvailable(googletest Koori-Window)
+FetchContent_MakeAvailable(googletest Koori-Window tinyobjloader)
 
 set(HONOU_RENDER_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
@@ -32,6 +39,8 @@ file(GLOB_RECURSE HONOU_RENDER_UT_SOURCES "Code/Source/*.cpp")
 add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
 
 target_link_libraries(HonouRenderTests PRIVATE gtest)
+
+target_link_libraries(HonouRenderTests PRIVATE tinyobjloader)
 
 target_link_libraries(HonouRenderTests PRIVATE KooriWindow)
 
