@@ -22,6 +22,7 @@ public:
 
 private:
 
+	VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
 	VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
 	VkPipeline m_Pipeline = VK_NULL_HANDLE;
 };

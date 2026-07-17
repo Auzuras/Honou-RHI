@@ -40,6 +40,7 @@ public:
 	void BindIndexBuffer(IBuffer* const _indexBuffer) const override final;
 
 	void BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const override final;
+	void BindDescriptor(IPipeline* _pipeline, IDescriptor* _descriptor, uint32_t _set) const override final;
 
 	void Draw(uint32_t _vertexCount) const override final;
 	void DrawIndexed(uint32_t _indexCount) const override final;

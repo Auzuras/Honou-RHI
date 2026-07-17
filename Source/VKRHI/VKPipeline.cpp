@@ -16,10 +16,30 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .size = 128
     };
 
+    std::vector<VkDescriptorSetLayoutBinding> bindings(2);
+    bindings[0].binding = 0,
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+    bindings[0].descriptorCount = 1;
+    bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings[0].pImmutableSamplers = nullptr;
+    bindings[1].binding = 1,
+    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    bindings[1].descriptorCount = 1;
+    bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings[1].pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = static_cast<uint32_t>(bindings.size()),
+        .pBindings = bindings.data(),
+    };
+
+    vkCreateDescriptorSetLayout(ldevice, &descriptorSetLayoutCI, nullptr, &m_DescriptorSetLayout);
+
     const VkPipelineLayoutCreateInfo pipelineLayoutCI{
         .sType                      =   VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount             =   0,
-        .pSetLayouts                =   VK_NULL_HANDLE,
+        .setLayoutCount             =   1,
+        .pSetLayouts                =   &m_DescriptorSetLayout,
         .pushConstantRangeCount     =   1,
         .pPushConstantRanges        =   &range
     };
@@ -136,6 +156,7 @@ void VKPipeline::CreatePipeline(IDevice* _device)
 void VKPipeline::DestroyPipeline(IDevice* _device)
 {
     const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
+    vkDestroyDescriptorSetLayout(ldevice, m_DescriptorSetLayout, nullptr);
     vkDestroyPipelineLayout(ldevice, m_PipelineLayout, nullptr);
     vkDestroyPipeline(ldevice, m_Pipeline, nullptr);
 }

@@ -4,6 +4,7 @@
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKPipeline.h>
+#include <VKRHI/VKDescriptor.h>
 
 void VKCommandBuffer::Open() const
 {
@@ -218,8 +219,14 @@ void VKCommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 void VKCommandBuffer::BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const
 {
 	const VkPipelineLayout pipelineLayout = _pipeline->CastToVK()->GetLayout();
-
 	vkCmdPushConstants(m_CommandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, _offset, _size, _data);
+}
+
+void VKCommandBuffer::BindDescriptor(IPipeline* _pipeline, IDescriptor* _descriptor, uint32_t _set) const
+{
+	const VkPipelineLayout pipelineLayout = _pipeline->CastToVK()->GetLayout();
+	const VkDescriptorSet descriptor = _descriptor->CastToVK()->GetRaw();
+	vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, _set, 1, &descriptor, 0, nullptr);
 }
 
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const

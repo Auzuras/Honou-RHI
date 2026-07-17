@@ -283,6 +283,10 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
 
+		cCmdBuffer->BindDescriptor(&pipeline, nullptr, 0);
+
+		cCmdBuffer->BindDescriptor(&pipeline, nullptr, 1);
+
 		cCmdBuffer->DrawIndexed(indices.size());
 
 		cCmdBuffer->EndRendering();

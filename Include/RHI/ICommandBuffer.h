@@ -11,6 +11,7 @@ class IDevice;
 class IBuffer;
 class IImage;
 class IPipeline;
+class IDescriptor;
 
 class ICommandBuffer
 {
@@ -39,6 +40,7 @@ public:
 	virtual void BindIndexBuffer(IBuffer* const _indexBuffer) const = 0;
 	
 	virtual void BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const = 0;
+	virtual void BindDescriptor(IPipeline* _pipeline, IDescriptor* _descriptor, uint32_t _set) const = 0;
 
 	virtual void Draw(uint32_t _vertexCount) const = 0;
 	virtual void DrawIndexed(uint32_t _indexCount) const = 0;
