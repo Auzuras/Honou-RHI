@@ -20,6 +20,7 @@
 
 #include <Matrix/Matrix4.h>
 #include <Vector/Vector3.h>
+#include <chrono>
 
 class VKRHITest : public testing::Test {};
 
@@ -138,7 +139,7 @@ TEST(VKRHITest, Mesh)
 	tinyobj::attrib_t attrib{};
 	std::vector<tinyobj::shape_t> shapes{};
 	std::vector<tinyobj::material_t> materials{};
-	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Sphere.obj");
+	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/DamagedHelmet.obj");
 
 	const size_t indicesCount = shapes[0].mesh.indices.size();
 	std::vector<Vertex> vertices{};
@@ -211,7 +212,7 @@ TEST(VKRHITest, RenderLoop)
 	tinyobj::attrib_t attrib{};
 	std::vector<tinyobj::shape_t> shapes{};
 	std::vector<tinyobj::material_t> materials{};
-	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Sphere.obj");
+	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/DamagedHelmet.obj");
 
 	const size_t indicesCount = shapes[0].mesh.indices.size();
 	std::vector<Vertex> vertices{};
@@ -234,9 +235,16 @@ TEST(VKRHITest, RenderLoop)
 	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
 
 	uint32_t frameIndex = 0;
+	
+	float rotation = 0.f;
 
+	auto lastTime = std::chrono::high_resolution_clock::now();
 	while (!window.WindowShouldClose())
 	{
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float dt = std::chrono::duration<float>(currentTime - lastTime).count();
+		lastTime = currentTime;
+
 		swapChain.GetNextSwapChainImage(&device, frameIndex);
 
 		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
@@ -270,7 +278,8 @@ TEST(VKRHITest, RenderLoop)
 
 		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, -1.f), Vector3f(0.f, 1.f, 0.f));
 		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_INTERNAL_DEG_2_RAD);
-		constants.Model = M.TRS(M.Translation(0.f, 0.f, 1.f), Matrix4f::Identity, M.Scaling(0.5f, 0.5f, 0.5f)).Transpose();
+		constants.Model = M.TRS(M.Translation(0.f, 0.f, 1.f), M.XRotation(-180.f * KM_INTERNAL_DEG_2_RAD) * M.YRotation(rotation * KM_INTERNAL_DEG_2_RAD), M.Scaling(0.5f, 0.5f, 0.5f)).Transpose();
+		rotation += 100.f * dt;
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
 

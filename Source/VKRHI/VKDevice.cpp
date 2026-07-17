@@ -45,7 +45,7 @@ void VKDevice::CreateDevice(IInstance* _instance)
 		.shaderSampledImageArrayNonUniformIndexing = true,
 		.descriptorBindingVariableDescriptorCount = true,
 		.runtimeDescriptorArray = true,
-		.bufferDeviceAddress = true
+		.bufferDeviceAddress = true,
 	};
 
 	const VkPhysicalDeviceVulkan13Features enabledVk13Features{
@@ -56,6 +56,7 @@ void VKDevice::CreateDevice(IInstance* _instance)
 	};
 
 	const VkPhysicalDeviceFeatures enabledVk10Features{
+		.geometryShader = VK_TRUE,
 		.samplerAnisotropy = VK_TRUE
 	};
 
