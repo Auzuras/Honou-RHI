@@ -14,6 +14,7 @@ public:
 	virtual void DestroyPipeline(IDevice* _device) override final;
 
 	VkPipeline GetRaw() const { return m_Pipeline; }
+	VkPipelineLayout GetLayout() const { return m_PipelineLayout; }
 
 	VKPipeline* CastToVK() override final { return this; }
 	DX12Pipeline* CastToDX12() override final { return nullptr; }

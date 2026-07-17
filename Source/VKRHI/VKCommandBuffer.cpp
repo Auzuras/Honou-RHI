@@ -215,6 +215,13 @@ void VKCommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 	vkCmdBindIndexBuffer(m_CommandBuffer, vkBuffer->GetRaw(), 0, VK_INDEX_TYPE_UINT16);
 }
 
+void VKCommandBuffer::BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const
+{
+	const VkPipelineLayout pipelineLayout = _pipeline->CastToVK()->GetLayout();
+
+	vkCmdPushConstants(m_CommandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, _offset, _size, _data);
+}
+
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const
 {
 	vkCmdDraw(m_CommandBuffer, _vertexCount, 1, 0, 0);

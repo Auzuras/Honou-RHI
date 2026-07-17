@@ -10,12 +10,18 @@ void VKPipeline::CreatePipeline(IDevice* _device)
 {
     const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
 
+    const VkPushConstantRange range{
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .offset = 0,
+        .size = 128
+    };
+
     const VkPipelineLayoutCreateInfo pipelineLayoutCI{
         .sType                      =   VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount             =   0,
         .pSetLayouts                =   VK_NULL_HANDLE,
-        .pushConstantRangeCount     =   0,
-        .pPushConstantRanges        =   VK_NULL_HANDLE
+        .pushConstantRangeCount     =   1,
+        .pPushConstantRanges        =   &range
     };
 
     vkCreatePipelineLayout(ldevice, &pipelineLayoutCI, nullptr, &m_PipelineLayout);

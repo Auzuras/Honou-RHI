@@ -259,6 +259,21 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindIndexBuffer(&indexBuffer);
 		
+		Matrix4f M;
+		Matrix4f VP;
+
+		struct
+		{
+			Matrix4f Model;
+			Matrix4f ProjectionView;
+		} constants;
+
+		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, -1.f), Vector3f(0.f, 1.f, 0.f));
+		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_INTERNAL_DEG_2_RAD);
+		constants.Model = M.TRS(M.Translation(0.f, 0.f, 1.f), Matrix4f::Identity, M.Scaling(0.5f, 0.5f, 0.5f)).Transpose();
+
+		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
+
 		cCmdBuffer->DrawIndexed(indices.size());
 
 		cCmdBuffer->EndRendering();
