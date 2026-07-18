@@ -5,6 +5,7 @@
 #include <VKRHI/VKShaderModule.h>
 
 #include <vector>
+#include <Helpers/Vertex.h>
 
 void VKPipeline::CreatePipeline(IDevice* _device)
 {
@@ -48,14 +49,14 @@ void VKPipeline::CreatePipeline(IDevice* _device)
 
     const VkVertexInputBindingDescription vertexBinding{
         .binding    =   0,
-        .stride     =   3 * sizeof(float),
+        .stride     =   sizeof(Vertex),
         .inputRate  =   VK_VERTEX_INPUT_RATE_VERTEX
     };
 
     const std::vector<VkVertexInputAttributeDescription> vertexAttributes{
-        { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT }
-        //{ .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 3 * sizeof(float) },
-        //{ .location = 2, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 6 * sizeof(float) }
+        { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT },
+        { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 3 * sizeof(float) },
+        { .location = 2, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 6 * sizeof(float) }
     };
 
     const VkPipelineVertexInputStateCreateInfo vertexInputStateCI{

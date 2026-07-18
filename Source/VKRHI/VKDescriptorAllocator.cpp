@@ -1,6 +1,7 @@
 #include <VKRHI/VKDescriptorAllocator.h>
 
 #include <VKRHI/VKDevice.h>
+#include <VKRHI/VKPipeline.h>
 #include <VKRHI/VKDescriptor.h>
 
 #include <array>
@@ -38,33 +39,48 @@ void VKDescriptorAllocator::CreateDescriptorAllocator(IDevice* _device)
 void VKDescriptorAllocator::DestroyDescriptorAllocator(IDevice* _device)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	vkResetDescriptorPool(lDevice, m_DescriptorAllocator, 0);
 	vkDestroyDescriptorPool(lDevice, m_DescriptorAllocator, nullptr);
 }
 
-IDescriptor* VKDescriptorAllocator::AllocateDescriptors(IDevice* _device, uint32_t _count)
+std::vector<IDescriptor*> VKDescriptorAllocator::AllocateDescriptors(IDevice* _device, IPipeline* _pipeline, uint32_t _count)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	const VkDescriptorSetLayout layout = _pipeline->CastToVK()->GetDescriptorLayout();
+
+	std::vector<VkDescriptorSetLayout> layouts(_count, layout);
 
 	const VkDescriptorSetAllocateInfo allocateInfo{
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 		.descriptorPool = m_DescriptorAllocator,
-		.descriptorSetCount = 1,
-		.pSetLayouts = VK_NULL_HANDLE
+		.descriptorSetCount = _count,
+		.pSetLayouts = layouts.data()
 	};
 
-	vkAllocateDescriptorSets(lDevice, &allocateInfo, VK_NULL_HANDLE);
+	std::vector<VkDescriptorSet> vkDescriptors{ _count };
+	vkAllocateDescriptorSets(lDevice, &allocateInfo, vkDescriptors.data());
 
-	return nullptr;
+	std::vector<IDescriptor*> descriptors = std::vector<IDescriptor*>(_count);
+	for (size_t i = 0; i < _count; ++i)
+	{
+		VKDescriptor* descriptor = new VKDescriptor();
+		descriptor->m_Descriptor = vkDescriptors[i];
+		descriptors[i] = descriptor;
+	}
+
+	return descriptors;
 }
 
-IDescriptor* VKDescriptorAllocator::AllocateDescriptor(IDevice* _device)
+IDescriptor* VKDescriptorAllocator::AllocateDescriptor(IDevice* _device, IPipeline* _pipeline)
 {
-	return nullptr;
+	return AllocateDescriptors(_device, _pipeline, 1)[0];
 }
 
-void VKDescriptorAllocator::FreeDescriptors(IDevice* _device, IDescriptor* _descriptor, uint32_t _count)
+void VKDescriptorAllocator::FreeDescriptors(IDevice* _device, const std::vector<IDescriptor*>& _descriptors)
 {
-
+	// Require a flag or to reset the pool
+	for (size_t i = 0; i < _descriptors.size(); ++i)
+		FreeDescriptor(_device, _descriptors[i]);
 }
 
 void VKDescriptorAllocator::FreeDescriptor(IDevice* _device, IDescriptor* _descriptor)

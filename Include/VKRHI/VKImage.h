@@ -26,7 +26,7 @@ public:
 protected:
 
 	static VkImage CreateImage(VkDevice _device, const ImageDescription& _description);
-	static VkDeviceMemory AllocateImage(VkDevice _device, VkImage _image);
+	static VkDeviceMemory AllocateImage(VkDevice _device, VkPhysicalDevice _physicalDevice, VkImage _image);
 	static VkImageView CreateImageView(VkDevice _device, VkImage _image, const ImageDescription& _description);
 
 private:

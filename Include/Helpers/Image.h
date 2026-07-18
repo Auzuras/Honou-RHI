@@ -29,6 +29,8 @@ struct ImageDescription
 {
 	uint32_t width = 0;
 	uint32_t height = 0;
+	uint8_t channelCount = 0;
+	void* data = nullptr;
 	TextureFormat format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM;
 };
 

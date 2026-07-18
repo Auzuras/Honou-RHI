@@ -5,7 +5,7 @@
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKSampler.h>
 
-void VKDescriptor::Update(IDevice* _device, IBuffer* _buffer) const
+void VKDescriptor::Update(IDevice* _device, IBuffer* _buffer, uint32_t _binding) const
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkBuffer buffer = _buffer->CastToVK()->GetRaw();
@@ -19,17 +19,17 @@ void VKDescriptor::Update(IDevice* _device, IBuffer* _buffer) const
 	const VkWriteDescriptorSet descriptorWrite{
 		.sType				=	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet				=	m_Descriptor,
-		.dstBinding			=	0,
+		.dstBinding			=	_binding,
 		.dstArrayElement	=	0,
 		.descriptorCount	=	1,
-		.descriptorType		=	VK_DESCRIPTOR_TYPE_SAMPLER,
+		.descriptorType		=	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		.pBufferInfo		=	&bufferInfo
 	};
 
 	vkUpdateDescriptorSets(lDevice, 1, &descriptorWrite, 0, nullptr);
 }
 
-void VKDescriptor::Update(IDevice* _device, IImage* _image) const
+void VKDescriptor::Update(IDevice* _device, IImage* _image, uint32_t _binding) const
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkImageView imageView = _image->CastToVK()->GetRawImageView();
@@ -42,17 +42,17 @@ void VKDescriptor::Update(IDevice* _device, IImage* _image) const
 	const VkWriteDescriptorSet descriptorWrite{
 		.sType				=	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet				=	m_Descriptor,
-		.dstBinding			=	0,
+		.dstBinding			=	_binding,
 		.dstArrayElement	=	0,
 		.descriptorCount	=	1,
-		.descriptorType		=	VK_DESCRIPTOR_TYPE_SAMPLER,
+		.descriptorType		=	VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
 		.pImageInfo			=	&imageInfo
 	};
 
 	vkUpdateDescriptorSets(lDevice, 1, &descriptorWrite, 0, nullptr);
 }
 
-void VKDescriptor::Update(IDevice* _device, ISampler* _sampler) const
+void VKDescriptor::Update(IDevice* _device, ISampler* _sampler, uint32_t _binding) const
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkSampler sampler = _sampler->CastToVK()->GetRaw();
@@ -64,7 +64,7 @@ void VKDescriptor::Update(IDevice* _device, ISampler* _sampler) const
 	const VkWriteDescriptorSet descriptorWrite{
 		.sType				=	VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet				=	m_Descriptor,
-		.dstBinding			=	0,
+		.dstBinding			=	_binding,
 		.dstArrayElement	=	0,
 		.descriptorCount	=	1,
 		.descriptorType		=	VK_DESCRIPTOR_TYPE_SAMPLER,

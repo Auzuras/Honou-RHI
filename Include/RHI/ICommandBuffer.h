@@ -16,6 +16,62 @@ class IDescriptor;
 class ICommandBuffer
 {
 public:
+
+	enum class Layout : uint64_t
+	{
+		UNDEFINED = 0,
+
+		RENDER_TARGET = 1,
+		SHADER_READ = 2,
+		UNORDERED_ACCESS = 3,
+
+		TRANSFER_SRC = 4,
+		TRANSFER_DST = 5,
+
+		PRESENT = 6
+	};
+
+	enum class PipelineStage : uint64_t
+	{
+		NONE = 0,
+
+		VERTEX_SHADER = 1ull << 0,
+		FRAGMENT_SHADER = 1ull << 1,
+
+		COLOR_ATTACHMENT = 1ull << 2,
+
+		TRANSFER = 1ull << 3
+	};
+
+	enum class Access : uint64_t
+	{
+		NONE = 0,
+
+		SHADER_READ = 1ull << 0,
+		SHADER_WRITE = 1ull << 1,
+
+		COLOR_ATTACHMENT_READ = 1ull << 2,
+		COLOR_ATTACHMENT_WRITE = 1ull << 3,
+
+		TRANSFER_READ = 1ull << 4,
+		TRANSFER_WRITE = 1ull << 5,
+	};
+
+	struct MemoryBarrierInfo
+	{
+		struct SyncScope
+		{
+			PipelineStage stages;
+			Access access;
+		};
+
+		Layout oldLayout = Layout::UNDEFINED;
+		Layout newLayout = Layout::UNDEFINED;
+
+		SyncScope syncSource;
+		SyncScope syncDest;
+	};
+
 	virtual ~ICommandBuffer() = default;
 
 	virtual void Open() const = 0;
@@ -31,10 +87,11 @@ public:
 	virtual void SetViewport(float _width, float _height) const = 0;
 	virtual void SetScissor(uint32_t _width, uint32_t _height) const = 0;
 
-	virtual void AddMemoryBarrier0(IImage* _image) const = 0;
-	virtual void AddMemoryBarrier1(IImage* _image) const = 0;
+	virtual void AddMemoryBarrier(IImage* _image, MemoryBarrierInfo _memoryBarrier) const = 0;
 	virtual void Copy(IImage* _destination, IImage* _source) const = 0;
 	virtual void Copy(IImage* _destination, IBuffer* _source) const = 0;
+	virtual void Copy(IBuffer* _source, IImage* _destination) const = 0;
+	virtual void Copy(IBuffer* _source, IBuffer* _destination) const = 0;
 
 	virtual void BindVertexBuffer(IBuffer* const _vertexBuffer) const = 0;
 	virtual void BindIndexBuffer(IBuffer* const _indexBuffer) const = 0;

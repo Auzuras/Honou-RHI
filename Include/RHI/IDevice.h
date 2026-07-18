@@ -6,6 +6,7 @@ class DX12Device;
 class OGLDevice;
 
 class IInstance;
+class IQueue;
 
 class IDevice
 {
@@ -17,9 +18,16 @@ public:
 
 	virtual void WaitIdle() = 0;
 
+	void SetGraphicsQueue(IQueue* _queue) { m_GraphicsQueueRef = _queue; }
+	IQueue* GetGraphicsQueue() const { return m_GraphicsQueueRef; }
+
 	virtual VKDevice* const CastToVK() { return nullptr; }
 	virtual DX12Device* CastToDX12() { return nullptr; }
 	virtual OGLDevice* CastToOGL() { return nullptr; }
+
+private:
+
+	IQueue* m_GraphicsQueueRef = nullptr;
 };
 
 #endif //HONOU_RENDER_IDEVICE_H

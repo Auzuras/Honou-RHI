@@ -21,6 +21,13 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG master
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb
+)
+
+FetchContent_Declare(
         Koori-Math
         GIT_REPOSITORY https://github.com/Auzuras/Koori-Math.git 
         GIT_TAG dev
@@ -34,7 +41,8 @@ FetchContent_Declare(
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Koori-Window
 )
 
-FetchContent_MakeAvailable(googletest tinyobjloader Koori-Math Koori-Window)
+FetchContent_MakeAvailable(googletest tinyobjloader stb Koori-Math Koori-Window)
+
 
 set(HONOU_RENDER_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
@@ -45,6 +53,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${HONOU_RENDER_UT_BIN_OUTPUT_DIR}")
 file(GLOB_RECURSE HONOU_RENDER_UT_SOURCES "Code/Source/*.cpp")
 
 add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
+
+target_include_directories(HonouRenderTests PRIVATE ${stb_SOURCE_DIR})
 
 target_link_libraries(HonouRenderTests PRIVATE gtest)
 

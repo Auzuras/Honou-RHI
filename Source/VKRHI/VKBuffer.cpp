@@ -46,9 +46,11 @@ VkBufferUsageFlags VKBuffer::MapToVulkan(BufferUsage _usage)
 {
 	switch (_usage)
 	{
-	case IBuffer::BufferUsage::USAGE_VERTEX_BUFFER:	return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	case IBuffer::BufferUsage::USAGE_INDEX_BUFFER:	return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	default:										return 0;
+	case IBuffer::BufferUsage::USAGE_VERTEX_BUFFER:		return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	case IBuffer::BufferUsage::USAGE_INDEX_BUFFER:		return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	case IBuffer::BufferUsage::USAGE_TRANSFER_SRC:		return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	case IBuffer::BufferUsage::USAGE_TRANSFER_DST:		return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	default:											return 0;
 	}
 }
 

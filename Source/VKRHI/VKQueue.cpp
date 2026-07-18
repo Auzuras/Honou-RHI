@@ -7,6 +7,19 @@
 
 #include <vector>
 
+void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
+{
+	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
+
+	const VkSubmitInfo submitInfo{
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &cmdBuffer,
+	};
+
+	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
+}
+
 void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
@@ -54,6 +67,8 @@ void VKQueue::CreateQueue(IDevice* _device)
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 			value = i;
 	}
+
+	_device->SetGraphicsQueue(this);
 
 	vkGetDeviceQueue(lDevice, value, 0, &m_Queue);
 }

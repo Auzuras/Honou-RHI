@@ -4,6 +4,7 @@
 #include <RHI/IPipeline.h>
 
 #include <vulkan/vulkan.h>
+#include <array>
 
 class VKPipeline : public IPipeline
 {
@@ -15,6 +16,7 @@ public:
 
 	VkPipeline GetRaw() const { return m_Pipeline; }
 	VkPipelineLayout GetLayout() const { return m_PipelineLayout; }
+	VkDescriptorSetLayout GetDescriptorLayout() const { return m_DescriptorSetLayout; }
 
 	VKPipeline* CastToVK() override final { return this; }
 	DX12Pipeline* CastToDX12() override final { return nullptr; }

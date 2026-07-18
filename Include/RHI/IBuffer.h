@@ -16,7 +16,9 @@ public:
 	enum class BufferUsage : uint32_t
 	{
 		USAGE_VERTEX_BUFFER		=	0,
-		USAGE_INDEX_BUFFER		=	1
+		USAGE_INDEX_BUFFER		=	1,
+		USAGE_TRANSFER_SRC		=	2,
+		USAGE_TRANSFER_DST		=	3
 	};
 
 	virtual ~IBuffer() = default;

@@ -3,11 +3,14 @@
 
 #include <cstdint>
 
+#include <vector>
+
 class VKDescriptorAllocator;
 class DX12DescriptorAllocator;
 class OGLDescriptorAllocator;
 
 class IDevice;
+class IPipeline;
 class IDescriptor;
 
 class IDescriptorAllocator
@@ -18,10 +21,10 @@ public:
 	virtual void CreateDescriptorAllocator(IDevice* _device) = 0;
 	virtual void DestroyDescriptorAllocator(IDevice* _device) = 0;
 
-	virtual IDescriptor* AllocateDescriptors(IDevice* _device, uint32_t _count) = 0;
-	virtual IDescriptor* AllocateDescriptor(IDevice* _device) = 0;
+	virtual std::vector<IDescriptor*> AllocateDescriptors(IDevice* _device, IPipeline* _pipeline, uint32_t _count) = 0;
+	virtual IDescriptor* AllocateDescriptor(IDevice* _device, IPipeline* _pipeline) = 0;
 
-	virtual void FreeDescriptors(IDevice* _device, IDescriptor* _descriptors, uint32_t _count) = 0;
+	virtual void FreeDescriptors(IDevice* _device, const std::vector<IDescriptor*>& _descriptors) = 0;
 	virtual void FreeDescriptor(IDevice* _device, IDescriptor* _descriptor) = 0;
 
 	virtual VKDescriptorAllocator* CastToVK() { return nullptr; }

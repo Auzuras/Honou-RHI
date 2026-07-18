@@ -12,6 +12,7 @@ public:
 
 	void CreateQueue(IDevice* _device) override final;
 
+	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) override final;
 	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) override final;
 
 	void WaitIdle() override final;

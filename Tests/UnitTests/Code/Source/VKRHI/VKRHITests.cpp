@@ -12,8 +12,14 @@
 #include <VKRHI/VKShaderModule.h>
 #include <VKRHI/VKSyncPoint.h>
 #include <VKRHI/VKQueue.h>
+#include <VKRHI/VKSampler.h>
+#include <VKRHI/VKDescriptorAllocator.h>
+#include <VKRHI/VKDescriptor.h>
 
 #include <tiny_obj_loader.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <Helpers/Vertex.h>
 
 #include <Window/Window.h>
@@ -131,11 +137,6 @@ TEST(VKRHITest, CommandAllocatorTest)
 
 TEST(VKRHITest, Mesh)
 {
-	Matrix4f projection(Matrix4f::Identity);
-	projection = projection.PerspectiveProjection(0.01f, 100.f, 16.f / 9.f, 90.f);
-
-	Vector3f position(0.f, 10.f, 0.f);
-
 	tinyobj::attrib_t attrib{};
 	std::vector<tinyobj::shape_t> shapes{};
 	std::vector<tinyobj::material_t> materials{};
@@ -148,7 +149,9 @@ TEST(VKRHITest, Mesh)
 	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
 	{
 		const Vertex v{
-			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] }
+			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] },
+			.normal		=	{ attrib.normals[index.normal_index * 3], attrib.normals[index.normal_index * 3 + 1], attrib.normals[index.normal_index * 3 + 2] },
+			.textCoords	=	{ attrib.texcoords[index.texcoord_index * 2], attrib.texcoords[index.texcoord_index * 2 + 1] }
 		};
 
 		vertices.push_back(v);
@@ -168,6 +171,37 @@ TEST(VKRHITest, Mesh)
 	VKBuffer indexBuffer;
 	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
 	indexBuffer.DestroyBuffer(&device);
+}
+
+TEST(VKRHITest, Texture)
+{
+	int width, height, channels;
+	unsigned char* data = stbi_load("Assets/Textures/Iris.png", &width, &height, &channels, STBI_rgb_alpha);
+
+	if (!data) return;
+
+	VKInstance instance;
+	instance.CreateInstance();
+
+	VKDevice device;
+	device.CreateDevice(&instance);
+
+	VKQueue graphicsQueue;
+	graphicsQueue.CreateQueue(&device);
+
+	const ImageDescription imgDesc{
+		.width = static_cast<uint32_t>(width),
+		.height = static_cast<uint32_t>(height),
+		.channelCount = static_cast<uint8_t>(channels),
+		.data = data,
+		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_SRGB
+	};
+
+	VKImage texture;
+	texture.CreateImage(&device, imgDesc);
+	texture.DestroyImage(&device);
+
+	stbi_image_free(data);
 }
 
 TEST(VKRHITest, RenderLoop)
@@ -212,7 +246,7 @@ TEST(VKRHITest, RenderLoop)
 	tinyobj::attrib_t attrib{};
 	std::vector<tinyobj::shape_t> shapes{};
 	std::vector<tinyobj::material_t> materials{};
-	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/DamagedHelmet.obj");
+	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Plane.obj");
 
 	const size_t indicesCount = shapes[0].mesh.indices.size();
 	std::vector<Vertex> vertices{};
@@ -221,7 +255,9 @@ TEST(VKRHITest, RenderLoop)
 	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
 	{
 		const Vertex v{
-			.position = { attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] }
+			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] },
+			.normal		=	{ attrib.normals[index.normal_index * 3], attrib.normals[index.normal_index * 3 + 1], attrib.normals[index.normal_index * 3 + 2] },
+			.textCoords	=	{ attrib.texcoords[index.texcoord_index * 2], attrib.texcoords[index.texcoord_index * 2 + 1] }
 		};
 
 		vertices.push_back(v);
@@ -233,6 +269,33 @@ TEST(VKRHITest, RenderLoop)
 
 	VKBuffer indexBuffer;
 	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+
+	int width, height, channels;
+	unsigned char* data = stbi_load("Assets/Textures/Iris.png", &width, &height, &channels, STBI_rgb_alpha);
+
+	if (!data) return;
+
+	const ImageDescription imgDesc{
+		.width = static_cast<uint32_t>(width),
+		.height = static_cast<uint32_t>(height),
+		.channelCount = static_cast<uint8_t>(channels),
+		.data = data,
+		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM
+	};
+
+	VKImage texture;
+	texture.CreateImage(&device, imgDesc);
+
+	stbi_image_free(data);
+
+	VKSampler sampler;
+	const ISampler::SamplerInfo sInfo{};
+	sampler.CreateSampler(&device, sInfo);
+
+	VKDescriptorAllocator descAllocator;
+	descAllocator.CreateDescriptorAllocator(&device);
+
+	std::vector<IDescriptor*> descs = descAllocator.AllocateDescriptors(&device, &pipeline, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	uint32_t frameIndex = 0;
 	
@@ -253,7 +316,22 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->Open();
 
-		cCmdBuffer->AddMemoryBarrier0(swapChain.GetCurrentImage());
+		const ICommandBuffer::MemoryBarrierInfo info{
+			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+			.newLayout = ICommandBuffer::Layout::RENDER_TARGET,
+
+			.syncSource{
+				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.access = ICommandBuffer::Access::NONE
+			},
+
+			.syncDest{
+				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.access = (ICommandBuffer::Access)((uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_READ | (uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE)
+			}
+		};
+
+		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info);
 
 		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), window.GetWidth(), window.GetHeight());
 
@@ -276,22 +354,67 @@ TEST(VKRHITest, RenderLoop)
 			Matrix4f ProjectionView;
 		} constants;
 
-		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, -1.f), Vector3f(0.f, 1.f, 0.f));
+		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, 1.f), Vector3f(0.f, 1.f, 0.f));
 		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_INTERNAL_DEG_2_RAD);
-		constants.Model = M.TRS(M.Translation(0.f, 0.f, 1.f), M.XRotation(-180.f * KM_INTERNAL_DEG_2_RAD) * M.YRotation(rotation * KM_INTERNAL_DEG_2_RAD), M.Scaling(0.5f, 0.5f, 0.5f)).Transpose();
-		rotation += 100.f * dt;
+		constants.Model = M.TRS(M.Translation(0.f, 0.f, -1.f), M.XRotation(90.f * KM_INTERNAL_DEG_2_RAD) * M.YRotation(rotation * KM_INTERNAL_DEG_2_RAD), M.Scaling(1.f, 1.f, 1.f)).Transpose();
+		rotation += 25.f * dt;
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
 
-		cCmdBuffer->BindDescriptor(&pipeline, nullptr, 0);
+		const VkDescriptorImageInfo samplerInfo{
+			.sampler = sampler.CastToVK()->GetRaw()
+		};
 
-		cCmdBuffer->BindDescriptor(&pipeline, nullptr, 1);
+		const VkDescriptorImageInfo imageInfo{
+			.imageView = texture.CastToVK()->GetRawImageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+		};
+
+		const std::array<VkWriteDescriptorSet, 2> descriptorWrites{
+			VkWriteDescriptorSet{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
+				.dstBinding = 0,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+				.pImageInfo = &samplerInfo
+			},
+			VkWriteDescriptorSet{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
+				.dstBinding = 1,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				.pImageInfo = &imageInfo
+			}
+		};
+
+		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
+
+		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
 
 		cCmdBuffer->DrawIndexed(indices.size());
 
 		cCmdBuffer->EndRendering();
 
-		cCmdBuffer->AddMemoryBarrier1(swapChain.GetCurrentImage());
+		const ICommandBuffer::MemoryBarrierInfo info2{
+			.oldLayout = ICommandBuffer::Layout::RENDER_TARGET,
+			.newLayout = ICommandBuffer::Layout::PRESENT,
+
+			.syncSource{
+				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.access = ICommandBuffer::Access::NONE
+			},
+
+			.syncDest{
+				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.access = ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE
+			}
+		};
+
+		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info2);
 
 		cCmdBuffer->Close();
 
@@ -314,6 +437,12 @@ TEST(VKRHITest, RenderLoop)
 
 	graphicsQueue.WaitIdle();
 	// or device.WaitIdle();
+
+	sampler.DestroySampler(&device);
+
+	texture.DestroyImage(&device);
+
+	descAllocator.DestroyDescriptorAllocator(&device);
 
 	vertexBuffer.DestroyBuffer(&device);
 	indexBuffer.DestroyBuffer(&device);

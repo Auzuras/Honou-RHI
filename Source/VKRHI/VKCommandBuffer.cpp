@@ -6,6 +6,57 @@
 #include <VKRHI/VKPipeline.h>
 #include <VKRHI/VKDescriptor.h>
 
+VkImageLayout ToVkLayout(ICommandBuffer::Layout _layout)
+{
+	switch (_layout)
+	{
+	default:
+	case ICommandBuffer::Layout::UNDEFINED:			return VK_IMAGE_LAYOUT_UNDEFINED;
+	case ICommandBuffer::Layout::RENDER_TARGET:		return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	case ICommandBuffer::Layout::SHADER_READ:		return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	case ICommandBuffer::Layout::UNORDERED_ACCESS:	return VK_IMAGE_LAYOUT_GENERAL;
+	case ICommandBuffer::Layout::TRANSFER_SRC:		return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	case ICommandBuffer::Layout::TRANSFER_DST:		return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	case ICommandBuffer::Layout::PRESENT:			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	}
+}
+
+VkPipelineStageFlags2 ToVkPipelineStage(uint64_t _stage)
+{
+	VkPipelineStageFlags2 flags = 0;
+
+	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::VERTEX_SHADER) != 0)
+		flags |= VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
+	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::FRAGMENT_SHADER) != 0)
+		flags |= VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::COLOR_ATTACHMENT) != 0)
+		flags |= VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::TRANSFER) != 0)
+		flags |= VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+
+	return flags;
+}
+
+VkAccessFlagBits2 ToVkAccess(uint64_t _layout)
+{
+	VkAccessFlagBits2 flags = 0;
+
+	if ((_layout & (uint64_t)ICommandBuffer::Access::SHADER_READ) != 0)
+		flags |= VK_ACCESS_2_SHADER_READ_BIT;
+	if ((_layout & (uint64_t)ICommandBuffer::Access::SHADER_WRITE) != 0)
+		flags |= VK_ACCESS_2_SHADER_WRITE_BIT;
+	if ((_layout & (uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_READ) != 0)
+		flags |= VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT;
+	if ((_layout & (uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE) != 0)
+		flags |= VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+	if ((_layout & (uint64_t)ICommandBuffer::Access::TRANSFER_READ) != 0)
+		flags |= VK_ACCESS_2_TRANSFER_READ_BIT;
+	if ((_layout & (uint64_t)ICommandBuffer::Access::TRANSFER_WRITE) != 0)
+		flags |= VK_ACCESS_2_TRANSFER_WRITE_BIT;
+
+	return flags;
+}
+
 void VKCommandBuffer::Open() const
 {
 	VkCommandBufferBeginInfo cbBI{
@@ -99,55 +150,21 @@ void VKCommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
 }
 
-void VKCommandBuffer::AddMemoryBarrier0(IImage* _image) const
+void VKCommandBuffer::AddMemoryBarrier(IImage* _image, MemoryBarrierInfo _memoryBarrier) const
 {
 	VkImage image = _image->CastToVK()->GetRaw();
 
 	const VkImageMemoryBarrier2 barrier{
 		.sType			=	VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
 
-		.srcStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask	=	0,
+		.srcStageMask	=	ToVkPipelineStage((uint64_t)_memoryBarrier.syncSource.stages),
+		.srcAccessMask	=	ToVkAccess((uint64_t)_memoryBarrier.syncSource.access),
 
-		.dstStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstAccessMask	=	VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.dstStageMask	=	ToVkPipelineStage((uint64_t)_memoryBarrier.syncDest.stages),
+		.dstAccessMask	=	ToVkAccess((uint64_t)_memoryBarrier.syncDest.access),
 
-		.oldLayout		=	VK_IMAGE_LAYOUT_UNDEFINED,
-		.newLayout		=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-
-		.image			=	image,
-
-		.subresourceRange{
-			.aspectMask		=	VK_IMAGE_ASPECT_COLOR_BIT,
-			.levelCount		=	1,
-			.layerCount		=	1
-		}
-	};
-
-	VkDependencyInfo barrierDependencyInfo{
-		.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-		.imageMemoryBarrierCount = 1,
-		.pImageMemoryBarriers = &barrier
-	};
-
-	vkCmdPipelineBarrier2(m_CommandBuffer, &barrierDependencyInfo);
-}
-
-void VKCommandBuffer::AddMemoryBarrier1(IImage* _image) const
-{
-	VkImage image = _image->CastToVK()->GetRaw();
-
-	const VkImageMemoryBarrier2 barrier{
-		.sType			=	VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-
-		.srcStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask	=	0,
-
-		.dstStageMask	=	VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstAccessMask	=	VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-
-		.oldLayout		=	VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-		.newLayout		=	VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.oldLayout		=	ToVkLayout(_memoryBarrier.oldLayout),
+		.newLayout		=	ToVkLayout(_memoryBarrier.newLayout),
 
 		.image			=	image,
 
@@ -193,10 +210,20 @@ void VKCommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
 		},
 
 		.imageOffset = { 0, 0, 0 },
-		.imageExtent = { 0, 0, 1 }
+		.imageExtent = { _destination->GetWidth(), _destination->GetHeight(), 1}
 	};
 
 	vkCmdCopyBufferToImage(m_CommandBuffer, srcBuffer, destImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+}
+
+void VKCommandBuffer::Copy(IBuffer* _destination, IImage* _source) const
+{
+	// TODO
+}
+
+void VKCommandBuffer::Copy(IBuffer* _destination, IBuffer* _source) const
+{
+	// TODO
 }
 
 void VKCommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const
