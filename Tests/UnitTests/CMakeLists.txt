@@ -54,6 +54,12 @@ file(GLOB_RECURSE HONOU_RENDER_UT_SOURCES "Code/Source/*.cpp")
 
 add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
 
+add_custom_command(TARGET HonouRenderTests POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/Assets
+            $<TARGET_FILE_DIR:HonouRenderTests>/Assets
+)
+
 target_include_directories(HonouRenderTests PRIVATE ${stb_SOURCE_DIR})
 
 target_link_libraries(HonouRenderTests PRIVATE gtest)
