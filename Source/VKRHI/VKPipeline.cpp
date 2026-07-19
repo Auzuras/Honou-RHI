@@ -9,6 +9,8 @@
 
 void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription)
 {
+    p_PipelineType = PipelineType::HOUNOU_PIPELINE_TYPE_GRAPHICS;
+
     const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
 
     const VkPushConstantRange range{
@@ -159,6 +161,8 @@ void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsPipelineDescript
 
 void VKPipeline::CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription)
 {
+    p_PipelineType = PipelineType::HOUNOU_PIPELINE_TYPE_COMPUTE;
+
     const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
     const VkShaderModule computeShaderModule = _pipelineDescription.computeShader.shader->CastToVK()->GetRaw();
 

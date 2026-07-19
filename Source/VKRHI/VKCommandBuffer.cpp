@@ -6,6 +6,16 @@
 #include <VKRHI/VKPipeline.h>
 #include <VKRHI/VKDescriptor.h>
 
+VkPipelineBindPoint ToVkPipelineBindPoint(IPipeline::PipelineType _pipelineType)
+{
+	switch (_pipelineType)
+	{
+	default:
+	case IPipeline::PipelineType::HOUNOU_PIPELINE_TYPE_GRAPHICS:	return VK_PIPELINE_BIND_POINT_GRAPHICS;
+	case IPipeline::PipelineType::HOUNOU_PIPELINE_TYPE_COMPUTE:		return VK_PIPELINE_BIND_POINT_COMPUTE;
+	}
+}
+
 VkImageLayout ToVkLayout(ICommandBuffer::Layout _layout)
 {
 	switch (_layout)
@@ -145,7 +155,7 @@ void VKCommandBuffer::EndRendering() const
 void VKCommandBuffer::BindPipeline(IPipeline* _pipeline) const
 {
 	VkPipeline pipeline = _pipeline->CastToVK()->GetRaw();
-	vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+	vkCmdBindPipeline(m_CommandBuffer, ToVkPipelineBindPoint(_pipeline->GetPipelineType()), pipeline);
 }
 
 void VKCommandBuffer::SetViewport(float _width, float _height) const
@@ -307,7 +317,7 @@ void VKCommandBuffer::BindDescriptor(IPipeline* _pipeline, IDescriptor* _descrip
 {
 	const VkPipelineLayout pipelineLayout = _pipeline->CastToVK()->GetLayout();
 	const VkDescriptorSet descriptor = _descriptor->CastToVK()->GetRaw();
-	vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, _set, 1, &descriptor, 0, nullptr);
+	vkCmdBindDescriptorSets(m_CommandBuffer, ToVkPipelineBindPoint(_pipeline->GetPipelineType()), pipelineLayout, _set, 1, &descriptor, 0, nullptr);
 }
 
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const
