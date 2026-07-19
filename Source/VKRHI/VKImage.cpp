@@ -14,84 +14,6 @@ void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
 
-	VkDeviceSize totalSize = _description.width * _description.height * 4;
-
-	VKBuffer stagingBuffer;
-	stagingBuffer.CreateBuffer(_device, _description.data, totalSize, IBuffer::BufferUsage::USAGE_TRANSFER_SRC);
-
-	// Image creation
-	{
-		m_Image = VKImage::CreateImage(lDevice, _description);
-	}
-
-	VKCommandAllocator allocator;
-	allocator.CreateCommandAllocator(_device);
-	ICommandBuffer* cmdBuffer = allocator.AllocateCommandBuffer(_device);
-
-	// Image Memory allocation
-	{
-		m_ImageMemory = VKImage::AllocateImage(lDevice, pDevice, m_Image);
-	}
-
-	// Image View creation
-	{
-		m_ImageView = VKImage::CreateImageView(lDevice, m_Image, _description);
-	}
-
-	cmdBuffer->Open();
-
-	const ICommandBuffer::MemoryBarrierInfo info{
-		.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-		.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
-
-		.syncDest{
-			.stages = ICommandBuffer::PipelineStage::TRANSFER,
-			.access = ICommandBuffer::Access::TRANSFER_WRITE
-		}
-	};
-
-	cmdBuffer->AddMemoryBarrier(this, info);
-
-	cmdBuffer->Copy(this, &stagingBuffer);
-
-	const ICommandBuffer::MemoryBarrierInfo info2{
-		.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
-		.newLayout = ICommandBuffer::Layout::SHADER_READ,
-
-		.syncSource{
-			.stages = ICommandBuffer::PipelineStage::TRANSFER,
-			.access = ICommandBuffer::Access::TRANSFER_WRITE
-		},
-
-		.syncDest{
-			.stages = ICommandBuffer::PipelineStage::FRAGMENT_SHADER,
-			.access = ICommandBuffer::Access::SHADER_READ
-		}
-	};
-
-	cmdBuffer->AddMemoryBarrier(this, info2);
-
-	cmdBuffer->Close();
-
-	_device->GetGraphicsQueue()->SubmitCommandBuffer(cmdBuffer);
-
-	_device->GetGraphicsQueue()->WaitIdle();
-
-	stagingBuffer.DestroyBuffer(_device);
-
-	allocator.FreeCommandBuffer(_device, cmdBuffer);
-
-	allocator.DestroyCommandAllocator(_device);
-}
-
-void VKImage::CreateDepthImage(IDevice* _device, const ImageDescription& _description)
-{
-	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
-	p_Format = _description.format;
-
-	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-	VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
-
 	// Image creation
 	{
 		m_Image = VKImage::CreateImage(lDevice, _description);
@@ -105,6 +27,12 @@ void VKImage::CreateDepthImage(IDevice* _device, const ImageDescription& _descri
 	// Image View creation
 	{
 		m_ImageView = VKImage::CreateImageView(lDevice, m_Image, _description);
+	}
+
+	// Data Upload
+	if (_description.data)
+	{
+		UploadData(_device, _description);
 	}
 }
 
@@ -222,4 +150,61 @@ VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Ima
 	vkCreateImageView(_device, &imageViewCI, nullptr, &imageView);
 
 	return imageView;
+}
+
+void VKImage::UploadData(IDevice* _device, const ImageDescription& _description)
+{
+	VkDeviceSize totalSize = _description.width * _description.height * 4;
+
+	VKBuffer stagingBuffer;
+	stagingBuffer.CreateBuffer(_device, _description.data, totalSize, IBuffer::BufferUsage::USAGE_TRANSFER_SRC);
+
+	VKCommandAllocator allocator;
+	allocator.CreateCommandAllocator(_device);
+	ICommandBuffer* cmdBuffer = allocator.AllocateCommandBuffer(_device);
+
+	cmdBuffer->Open();
+
+	const ICommandBuffer::MemoryBarrierInfo info{
+		.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+		.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
+
+		.syncDest{
+			.stages = ICommandBuffer::PipelineStage::TRANSFER,
+			.access = ICommandBuffer::Access::TRANSFER_WRITE
+		}
+	};
+
+	cmdBuffer->AddMemoryBarrier(this, info);
+
+	cmdBuffer->Copy(this, &stagingBuffer);
+
+	const ICommandBuffer::MemoryBarrierInfo info2{
+		.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
+		.newLayout = ICommandBuffer::Layout::SHADER_READ,
+
+		.syncSource{
+			.stages = ICommandBuffer::PipelineStage::TRANSFER,
+			.access = ICommandBuffer::Access::TRANSFER_WRITE
+		},
+
+		.syncDest{
+			.stages = ICommandBuffer::PipelineStage::FRAGMENT_SHADER,
+			.access = ICommandBuffer::Access::SHADER_READ
+		}
+	};
+
+	cmdBuffer->AddMemoryBarrier(this, info2);
+
+	cmdBuffer->Close();
+
+	_device->GetGraphicsQueue()->SubmitCommandBuffer(cmdBuffer);
+
+	_device->GetGraphicsQueue()->WaitIdle();
+
+	stagingBuffer.DestroyBuffer(_device);
+
+	allocator.FreeCommandBuffer(_device, cmdBuffer);
+
+	allocator.DestroyCommandAllocator(_device);
 }

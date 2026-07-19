@@ -15,7 +15,6 @@ public:
 	virtual ~IImage() = default;
 
 	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) = 0;
-	virtual void CreateDepthImage(IDevice* _device, const ImageDescription& _description) = 0;
 	virtual void DestroyImage(IDevice* _device) = 0;
 
 	virtual uint32_t GetWidth() const { return p_Width; }

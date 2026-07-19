@@ -11,7 +11,6 @@ public:
 	~VKImage() override final = default;
 
 	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) override final;
-	virtual void CreateDepthImage(IDevice* _device, const ImageDescription& _description) override final;
 	virtual void DestroyImage(IDevice* _device) override final;
 
 	void CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description);
@@ -29,6 +28,8 @@ protected:
 	static VkImage CreateImage(VkDevice _device, const ImageDescription& _description);
 	static VkDeviceMemory AllocateImage(VkDevice _device, VkPhysicalDevice _physicalDevice, VkImage _image);
 	static VkImageView CreateImageView(VkDevice _device, VkImage _image, const ImageDescription& _description);
+
+	void UploadData(IDevice* _device, const ImageDescription& _description);
 
 private:
 

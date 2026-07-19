@@ -249,7 +249,7 @@ TEST(VKRHITest, RenderLoop)
 		.data = nullptr,
 		.format = TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
 	};
-	depthBuffer.CreateDepthImage(&device, depth);
+	depthBuffer.CreateImage(&device, depth);
 
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
@@ -466,7 +466,7 @@ TEST(VKRHITest, RenderLoop)
 			depth.width = window.GetWidth();
 			depth.height = window.GetHeight();
 
-			depthBuffer.CreateDepthImage(&device, depth);
+			depthBuffer.CreateImage(&device, depth);
 		}
 	}
 
