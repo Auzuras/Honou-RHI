@@ -1,5 +1,6 @@
 #include <VKRHI/VKBuffer.h>
 
+#include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 
 void VKBuffer::CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage)
@@ -40,6 +41,20 @@ void VKBuffer::DestroyBuffer(IDevice* _device)
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	vkDestroyBuffer(lDevice, m_Buffer, nullptr);
 	vkFreeMemory(lDevice, m_BufferMemory, nullptr);
+}
+
+void VKBuffer::SetName(IDevice* _device, const char* _name)
+{
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+	const VkDebugUtilsObjectNameInfoEXT objectNameInfo{
+		.sType			=	VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+		.objectType		=	VK_OBJECT_TYPE_BUFFER,
+		.objectHandle	=	reinterpret_cast<uint64_t>(m_Buffer),
+		.pObjectName	=	_name
+	};
+
+	Hounou::Internal::vkSetDebugUtilsObjectNameEXT(lDevice, &objectNameInfo);
 }
 
 VkBufferUsageFlags VKBuffer::MapToVulkan(BufferUsage _usage)

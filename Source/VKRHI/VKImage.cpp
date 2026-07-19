@@ -1,5 +1,6 @@
 #include <VKRHI/VKImage.h>
 
+#include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKCommandAllocator.h>
@@ -69,6 +70,21 @@ void VKImage::DestroyImage(IDevice* _device)
 	if (m_ImageMemory)
 		vkFreeMemory(lDevice, m_ImageMemory, nullptr);
 }
+
+void VKImage::SetName(IDevice* _device, const char* _name)
+{
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+	const VkDebugUtilsObjectNameInfoEXT objectNameInfo{
+		.sType			=	VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+		.objectType		=	VK_OBJECT_TYPE_IMAGE,
+		.objectHandle	=	reinterpret_cast<uint64_t>(m_Image),
+		.pObjectName	=	_name
+	};
+
+	Hounou::Internal::vkSetDebugUtilsObjectNameEXT(lDevice, &objectNameInfo);
+}
+
 
 void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description)
 {

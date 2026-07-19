@@ -2,6 +2,7 @@
 #define HONOU_RHI_ICOMMANDBUFFER_H
 
 #include <cstdint>
+#include <array>
 
 class VKCommandBuffer;
 class DX12CommandBuffer;
@@ -110,6 +111,9 @@ public:
 	virtual void Draw(uint32_t _vertexCount) const = 0;
 	virtual void DrawIndexed(uint32_t _indexCount) const = 0;
 	virtual void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const = 0;
+
+	virtual void AddLabel(const char* _name, const std::array<float, 4>& _color) const = 0;
+	virtual void EndLabel() const = 0;
 
 	virtual VKCommandBuffer* const CastToVK() { return nullptr; }
 	virtual DX12CommandBuffer* CastToDX12() { return nullptr; }

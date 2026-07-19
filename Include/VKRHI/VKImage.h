@@ -10,11 +10,12 @@ class VKImage : public IImage
 public:
 	~VKImage() override final = default;
 
-	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) override final;
-	virtual void DestroyImage(IDevice* _device) override final;
+	void CreateImage(IDevice* _device, const ImageDescription& _description) override final;
+	void DestroyImage(IDevice* _device) override final;
+
+	void SetName(IDevice* _device, const char* _name) override final;
 
 	void CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description);
-
 
 	virtual VKImage* CastToVK() override final { return this; }
 	virtual DX12Image* CastToDX12() override final { return nullptr; }

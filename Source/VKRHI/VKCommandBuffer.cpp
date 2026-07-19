@@ -1,5 +1,6 @@
 #include <VKRHI/VKCommandBuffer.h>
 
+#include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKImage.h>
@@ -361,4 +362,20 @@ void VKCommandBuffer::DrawIndexed(uint32_t _indexCount) const
 void VKCommandBuffer::Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const
 {
 	vkCmdDispatch(m_CommandBuffer, _groupCountX, _groupCountY, _groupCountZ);
+}
+
+void VKCommandBuffer::AddLabel(const char* _name, const std::array<float, 4>& _color) const
+{
+	const VkDebugUtilsLabelEXT label{
+		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+		.pLabelName = _name,
+		.color = { _color[0], _color[1], _color[2], _color[3] }
+	};
+
+	Hounou::Internal::vkCmdBeginDebugUtilsLabelEXT(m_CommandBuffer, &label);
+}
+
+void VKCommandBuffer::EndLabel() const
+{
+	Hounou::Internal::vkCmdEndDebugUtilsLabelEXT(m_CommandBuffer);
 }

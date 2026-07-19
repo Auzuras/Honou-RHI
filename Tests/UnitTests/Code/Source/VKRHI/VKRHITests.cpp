@@ -365,6 +365,8 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 		cCmdBuffer->Open();
 
+		cCmdBuffer->AddLabel("Render Frame", {0.0, 1.0, 0.0, 1.0});
+
 		const ICommandBuffer::MemoryBarrierInfo barrierInfo{
 			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
 			.newLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
@@ -398,6 +400,8 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		};
 
 		cCmdBuffer->AddMemoryBarrier(&depthBuffer, infoDepth);
+
+		cCmdBuffer->AddLabel("Pipeline", { 0.0, 0.0, 1.0, 1.0 });
 
 		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), &depthBuffer, window.GetWidth(), window.GetHeight());
 
@@ -465,6 +469,8 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 		cCmdBuffer->EndRendering();
 
+		cCmdBuffer->EndLabel();
+
 		const ICommandBuffer::MemoryBarrierInfo info2{
 			.oldLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
 			.newLayout = ICommandBuffer::Layout::PRESENT,
@@ -481,6 +487,8 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		};
 
 		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info2);
+
+		cCmdBuffer->EndLabel();
 
 		cCmdBuffer->Close();
 

@@ -3,52 +3,64 @@
 #include <vector>
 #include <iostream>
 
+namespace Hounou::Internal
+{
+	PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT = nullptr;
+	PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT = nullptr;
+	PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT = nullptr;
+}
+
 void VKInstance::CreateInstance()
 {
-	VkApplicationInfo appInfo {
+	VkApplicationInfo appInfo{
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 		.pApplicationName = "Vulkan",
 		.apiVersion = VK_API_VERSION_1_3
 	};
-	
+
 	const bool enableVL = CheckValidationLayerSupport();
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	
+
 	std::vector<const char*> extensions;
 
 	if (enableVL)
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-		extensions.push_back("VK_KHR_surface");
-		extensions.push_back("VK_KHR_win32_surface");
+
+	extensions.push_back("VK_KHR_surface");
+	extensions.push_back("VK_KHR_win32_surface");
 
 	VkInstanceCreateInfo instanceDesc{
-		.sType						=	VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-		.pApplicationInfo			=	&appInfo,
-		.enabledLayerCount			=	enableVL ? static_cast<uint32_t>(validationLayers.size()) : 0u,
-		.ppEnabledLayerNames		=	enableVL ? validationLayers.data() : nullptr,
-		.enabledExtensionCount		=	enableVL ? static_cast<uint32_t>(extensions.size()) : 0u,
-		.ppEnabledExtensionNames	=	enableVL ? extensions.data() : nullptr
+		.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+		.pApplicationInfo = &appInfo,
+		.enabledLayerCount = enableVL ? static_cast<uint32_t>(validationLayers.size()) : 0u,
+		.ppEnabledLayerNames = enableVL ? validationLayers.data() : nullptr,
+		.enabledExtensionCount = enableVL ? static_cast<uint32_t>(extensions.size()) : 0u,
+		.ppEnabledExtensionNames = enableVL ? extensions.data() : nullptr
 	};
 
 	vkCreateInstance(&instanceDesc, nullptr, &m_Instance);
 
 	VkDebugUtilsMessengerCreateInfoEXT debugMessengerCI{
-		.sType				=	VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
 
-		.messageSeverity	=	VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT 
-							|	VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT 
-							|	VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+		.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+							| VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+							| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
 
-		.messageType		=	VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT 
-							|	VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT 
-							|	VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+		.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+							| VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+							| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
 
-		.pfnUserCallback	=	DebugCallback,
-		.pUserData			=	nullptr
+		.pfnUserCallback = DebugCallback,
+		.pUserData = nullptr
 	};
 
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugUtilsMessengerEXT");
 	if (func) func(m_Instance, &debugMessengerCI, nullptr, &m_DebugMessenger);
+
+	Hounou::Internal::vkCmdBeginDebugUtilsLabelEXT = (PFN_vkCmdBeginDebugUtilsLabelEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdBeginDebugUtilsLabelEXT");
+	Hounou::Internal::vkCmdEndDebugUtilsLabelEXT = (PFN_vkCmdEndDebugUtilsLabelEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdEndDebugUtilsLabelEXT");
+	Hounou::Internal::vkSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(m_Instance, "vkSetDebugUtilsObjectNameEXT");
 }
 
 void VKInstance::DestroyInstance()

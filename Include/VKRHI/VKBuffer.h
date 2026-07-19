@@ -17,6 +17,8 @@ public:
 	void CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage) override final;
 	void DestroyBuffer(IDevice* _device) override final;
 
+	void SetName(IDevice* _device, const char* _name) override final;
+
 	VKBuffer* const CastToVK() override final { return this; }
 	DX12Buffer* CastToDX12() override final { return nullptr; }
 	OGLBuffer* CastToOGL() override final { return nullptr; }

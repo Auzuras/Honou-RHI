@@ -26,6 +26,8 @@ public:
 	virtual void CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage) = 0;
 	virtual void DestroyBuffer(IDevice* _device) = 0;
 
+	virtual void SetName(IDevice* _device, const char* _name) = 0;
+
 	virtual VKBuffer* const CastToVK() { return nullptr; }
 	virtual DX12Buffer* CastToDX12() { return nullptr; }
 	virtual OGLBuffer* CastToOGL() { return nullptr; }

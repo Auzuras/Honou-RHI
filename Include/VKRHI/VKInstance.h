@@ -5,6 +5,13 @@
 
 #include <vulkan/vulkan.h>
 
+namespace Hounou::Internal
+{
+	extern PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT;
+	extern PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT;
+	extern PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
+}
+
 class VKInstance : public IInstance
 {
 public:

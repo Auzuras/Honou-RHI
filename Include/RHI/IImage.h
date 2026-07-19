@@ -17,6 +17,8 @@ public:
 	virtual void CreateImage(IDevice* _device, const ImageDescription& _description) = 0;
 	virtual void DestroyImage(IDevice* _device) = 0;
 
+	virtual void SetName(IDevice* _device, const char* _name) = 0;
+
 	virtual uint32_t GetWidth() const { return p_Width; }
 	virtual uint32_t GetHeight() const { return p_Height; }
 	virtual uint8_t GetChannelCount() const { return p_ChannelCount; }

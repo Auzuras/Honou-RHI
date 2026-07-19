@@ -8,6 +8,8 @@
 #include <VKRHI/VKFence.h>
 #include <VKRHI/VKSyncPoint.h>
 
+#include <string>
+
 void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height)
 {
     const VkSurfaceKHR surface = _surface->CastToVK()->GetRaw();
@@ -110,6 +112,8 @@ void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint3
 
         VKImage* image = new VKImage();
         image->CreateImageInternal(_device, scImages[i], desc);
+        std::string name = "Hounou RHI - SwapChain Image " + std::to_string(i);
+        image->SetName(_device, name.c_str());
         p_SwapChainImages.push_back(image);
     }
 }
