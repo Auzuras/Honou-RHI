@@ -107,9 +107,26 @@ TEST(VKRHITest, PipelineTest)
 	VKDevice device;
 	device.CreateDevice(&instance);
 
+	VKShaderModule vertSM;
+	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
+
+	VKShaderModule fragSM;
+	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
+
 	VKPipeline pipeline;
-	pipeline.CreatePipeline(&device);
+	const IPipeline::GraphicsPipelineDescription gPipeline{
+		.vertexShader = {
+			.shader = &vertSM
+		},
+		.fragmentShader = {
+			.shader = &fragSM
+		}
+	};
+	pipeline.CreatePipeline(&device, gPipeline);
 	pipeline.DestroyPipeline(&device);
+
+	fragSM.DestroyShaderModule(&device);
+	vertSM.DestroyShaderModule(&device);
 
 	device.DestroyDevice();
 	instance.DestroyInstance();
@@ -192,8 +209,9 @@ TEST(VKRHITest, Texture)
 		.width = static_cast<uint32_t>(width),
 		.height = static_cast<uint32_t>(height),
 		.channelCount = static_cast<uint8_t>(channels),
-		.data = data,
-		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_SRGB
+		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM,
+		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT | (uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED | (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST),
+		.data = data
 	};
 
 	VKImage texture;
@@ -203,7 +221,319 @@ TEST(VKRHITest, Texture)
 	stbi_image_free(data);
 }
 
-TEST(VKRHITest, RenderLoop)
+//TEST(VKRHITest, GraphicsRenderLoop)
+//{
+//	VKInstance instance;
+//	instance.CreateInstance();
+//
+//	bool windowResized = false;
+//	Window window(1920, 1080);
+//	window.SetResizeCallback(
+//		[&](uint32_t _width, uint32_t _height)
+//		{
+//			static_cast<void>(_width);
+//			static_cast<void>(_height);
+//			windowResized = true;
+//		}
+//	);
+//
+//	VKSurface surface;
+//	ISurface::SurfaceInformation info{
+//		.instance = GetModuleHandle(NULL),
+//		.hwnd = window.GetHandle()
+//	};
+//
+//	surface.CreateSurface(&instance, info);
+//
+//	VKDevice device;
+//	device.CreateDevice(&instance);
+//
+//	VKQueue graphicsQueue;
+//	graphicsQueue.CreateQueue(&device);
+//
+//	VKCommandAllocator cmdAlloc;
+//	cmdAlloc.CreateCommandAllocator(&device);
+//
+//	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
+//
+//	VKSwapChain swapChain;
+//	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+//
+//	VKImage depthBuffer;
+//	ImageDescription depth{
+//		.width = window.GetWidth(),
+//		.height = window.GetHeight(),
+//		.channelCount = 4,
+//		.data = nullptr,
+//		.format = TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
+//	};
+//	depthBuffer.CreateImage(&device, depth);
+//
+//	VKShaderModule vertSM;
+//	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
+//
+//	VKShaderModule fragSM;
+//	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
+//
+//	VKPipeline pipeline;
+//	const IPipeline::GraphicsPipelineDescription gPipeline{
+//		.vertexShader = {
+//			.shader = &vertSM
+//		},
+//		.fragmentShader = {
+//			.shader = &fragSM
+//		}
+//	};
+//	pipeline.CreatePipeline(&device, gPipeline);
+//
+//	fragSM.DestroyShaderModule(&device);
+//	vertSM.DestroyShaderModule(&device);
+//
+//	tinyobj::attrib_t attrib{};
+//	std::vector<tinyobj::shape_t> shapes{};
+//	std::vector<tinyobj::material_t> materials{};
+//	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Knight.obj");
+//
+//	std::vector<Vertex> vertices{};
+//	std::vector<uint16_t> indices{};
+//
+//	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
+//	{
+//		const Vertex v{
+//			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] },
+//			.normal		=	{ attrib.normals[index.normal_index * 3], attrib.normals[index.normal_index * 3 + 1], attrib.normals[index.normal_index * 3 + 2] },
+//			.textCoords	=	{ attrib.texcoords[index.texcoord_index * 2], attrib.texcoords[index.texcoord_index * 2 + 1] }
+//		};
+//
+//		vertices.push_back(v);
+//		indices.push_back(static_cast<uint16_t>(indices.size()));
+//	}
+//
+//	VKBuffer vertexBuffer;
+//	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+//
+//	VKBuffer indexBuffer;
+//	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+//
+//	stbi_set_flip_vertically_on_load(true);
+//
+//	int width, height, channels;
+//	unsigned char* data = stbi_load("Assets/Textures/Knight.png", &width, &height, &channels, STBI_rgb_alpha);
+//
+//	if (!data) return;
+//
+//	const ImageDescription imgDesc{
+//		.width = static_cast<uint32_t>(width),
+//		.height = static_cast<uint32_t>(height),
+//		.channelCount = static_cast<uint8_t>(channels),
+//		.data = data,
+//		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM
+//	};
+//
+//	VKImage texture;
+//	texture.CreateImage(&device, imgDesc);
+//
+//	stbi_image_free(data);
+//
+//	VKSampler sampler;
+//	const ISampler::SamplerInfo sInfo{};
+//	sampler.CreateSampler(&device, sInfo);
+//
+//	VKDescriptorAllocator descAllocator;
+//	descAllocator.CreateDescriptorAllocator(&device);
+//
+//	std::vector<IDescriptor*> descs = descAllocator.AllocateDescriptors(&device, &pipeline, ISwapChain::MAX_FRAMES_IN_FLIGHT);
+//
+//	uint32_t frameIndex = 0;
+//	
+//	float rotation = 0.f;
+//
+//	auto lastTime = std::chrono::high_resolution_clock::now();
+//	while (!window.WindowShouldClose())
+//	{
+//		auto currentTime = std::chrono::high_resolution_clock::now();
+//		float dt = std::chrono::duration<float>(currentTime - lastTime).count();
+//		lastTime = currentTime;
+//
+//		swapChain.GetNextSwapChainImage(&device, frameIndex);
+//
+//		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
+//
+//		cCmdBuffer->Reset();
+//
+//		cCmdBuffer->Open();
+//
+//		const ICommandBuffer::MemoryBarrierInfo barrierInfo{
+//			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+//			.newLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+//				.access = ICommandBuffer::Access::NONE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+//				.access = (ICommandBuffer::Access)((uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_READ | (uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE)
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
+//
+//		const ICommandBuffer::MemoryBarrierInfo infoDepth{
+//			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+//			.newLayout = ICommandBuffer::Layout::DEPTH_STENCIL_OPTIMAL,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::EARLY_FRAGMENT_TEST,
+//				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::LATE_FRAGMENT_TEST,
+//				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(&depthBuffer, infoDepth);
+//
+//		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), &depthBuffer, window.GetWidth(), window.GetHeight());
+//
+//		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
+//
+//		cCmdBuffer->SetScissor(window.GetWidth(), window.GetHeight());
+//
+//		cCmdBuffer->BindPipeline(&pipeline);
+//
+//		cCmdBuffer->BindVertexBuffer(&vertexBuffer);
+//
+//		cCmdBuffer->BindIndexBuffer(&indexBuffer);
+//		
+//		Matrix4f M;
+//		Matrix4f VP;
+//
+//		struct
+//		{
+//			Matrix4f Model;
+//			Matrix4f ProjectionView;
+//		} constants;
+//
+//		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, 1.f), Vector3f(0.f, 1.f, 0.f));
+//		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_DEG_2_RAD(float));
+//		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * KM_DEG_2_RAD(float)) * M.YRotation(rotation * KM_DEG_2_RAD(float)), M.Scaling(1.f, 1.f, 1.f)).Transpose();
+//		rotation += 25.f * dt;
+//
+//		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
+//
+//		const VkDescriptorImageInfo samplerInfo{
+//			.sampler = sampler.CastToVK()->GetRaw()
+//		};
+//
+//		const VkDescriptorImageInfo imageInfo{
+//			.imageView = texture.CastToVK()->GetRawImageView(),
+//			.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+//		};
+//
+//		const std::array<VkWriteDescriptorSet, 2> descriptorWrites{
+//			VkWriteDescriptorSet{
+//				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
+//				.dstBinding = 0,
+//				.dstArrayElement = 0,
+//				.descriptorCount = 1,
+//				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+//				.pImageInfo = &samplerInfo
+//			},
+//			VkWriteDescriptorSet{
+//				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
+//				.dstBinding = 1,
+//				.dstArrayElement = 0,
+//				.descriptorCount = 1,
+//				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+//				.pImageInfo = &imageInfo
+//			}
+//		};
+//
+//		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
+//
+//		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
+//
+//		cCmdBuffer->DrawIndexed(static_cast<uint32_t>(indices.size()));
+//
+//		cCmdBuffer->EndRendering();
+//
+//		const ICommandBuffer::MemoryBarrierInfo info2{
+//			.oldLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
+//			.newLayout = ICommandBuffer::Layout::PRESENT,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+//				.access = ICommandBuffer::Access::NONE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+//				.access = ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info2);
+//
+//		cCmdBuffer->Close();
+//
+//		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+//
+//		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
+//
+//		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
+//
+//		window.UpdateWindow();
+//
+//		if (windowResized)
+//		{
+//			windowResized = false;
+//
+//			device.WaitIdle();
+//			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+//			depthBuffer.DestroyImage(&device);
+//
+//			depth.width = window.GetWidth();
+//			depth.height = window.GetHeight();
+//
+//			depthBuffer.CreateImage(&device, depth);
+//		}
+//	}
+//
+//	graphicsQueue.WaitIdle();
+//	// or device.WaitIdle();
+//
+//	depthBuffer.DestroyImage(&device);
+//
+//	sampler.DestroySampler(&device);
+//
+//	texture.DestroyImage(&device);
+//
+//	descAllocator.DestroyDescriptorAllocator(&device);
+//
+//	vertexBuffer.DestroyBuffer(&device);
+//	indexBuffer.DestroyBuffer(&device);
+//
+//	pipeline.DestroyPipeline(&device);
+//	
+//	swapChain.DestroySwapChain(&device);
+//
+//	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
+//	cmdAlloc.DestroyCommandAllocator(&device);
+//
+//	device.DestroyDevice();
+//	surface.DestroySurface(&instance);
+//	instance.DestroyInstance();
+//
+//	window.KooriDestroyWindow();
+//}
+
+TEST(VKRHITest, ComputeRenderLoop)
 {
 	VKInstance instance;
 	instance.CreateInstance();
@@ -241,85 +571,47 @@ TEST(VKRHITest, RenderLoop)
 	VKSwapChain swapChain;
 	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
 
-	VKImage depthBuffer;
-	ImageDescription depth{
-		.width = window.GetWidth(),
-		.height = window.GetHeight(),
-		.channelCount = 4,
-		.data = nullptr,
-		.format = TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
-	};
-	depthBuffer.CreateImage(&device, depth);
+	VKShaderModule computeSM;
+	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
 
 	VKPipeline pipeline;
-	pipeline.CreatePipeline(&device);
-
-	tinyobj::attrib_t attrib{};
-	std::vector<tinyobj::shape_t> shapes{};
-	std::vector<tinyobj::material_t> materials{};
-	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Knight.obj");
-
-	std::vector<Vertex> vertices{};
-	std::vector<uint16_t> indices{};
-
-	for (const tinyobj::index_t& index : shapes[0].mesh.indices)
-	{
-		const Vertex v{
-			.position	=	{ attrib.vertices[index.vertex_index * 3], attrib.vertices[index.vertex_index * 3 + 1], attrib.vertices[index.vertex_index * 3 + 2] },
-			.normal		=	{ attrib.normals[index.normal_index * 3], attrib.normals[index.normal_index * 3 + 1], attrib.normals[index.normal_index * 3 + 2] },
-			.textCoords	=	{ attrib.texcoords[index.texcoord_index * 2], attrib.texcoords[index.texcoord_index * 2 + 1] }
-		};
-
-		vertices.push_back(v);
-		indices.push_back(static_cast<uint16_t>(indices.size()));
-	}
-
-	VKBuffer vertexBuffer;
-	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
-
-	VKBuffer indexBuffer;
-	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
-
-	stbi_set_flip_vertically_on_load(true);
-
-	int width, height, channels;
-	unsigned char* data = stbi_load("Assets/Textures/Knight.png", &width, &height, &channels, STBI_rgb_alpha);
-
-	if (!data) return;
-
-	const ImageDescription imgDesc{
-		.width = static_cast<uint32_t>(width),
-		.height = static_cast<uint32_t>(height),
-		.channelCount = static_cast<uint8_t>(channels),
-		.data = data,
-		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM
+	const IPipeline::ComputePipelineDescription cPipeline{
+		.computeShader = {
+			.shader = &computeSM
+		}
 	};
+	pipeline.CreatePipeline(&device, cPipeline);
 
-	VKImage texture;
-	texture.CreateImage(&device, imgDesc);
-
-	stbi_image_free(data);
-
-	VKSampler sampler;
-	const ISampler::SamplerInfo sInfo{};
-	sampler.CreateSampler(&device, sInfo);
+	computeSM.DestroyShaderModule(&device);
 
 	VKDescriptorAllocator descAllocator;
 	descAllocator.CreateDescriptorAllocator(&device);
 
+	ImageDescription computeImageDesc{
+		.width = window.GetWidth(),
+		.height = window.GetHeight(),
+		.channelCount = 4,
+		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM,
+		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT | 
+			(uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED | 
+			(uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST |
+			(uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_SRC |
+			(uint64_t)TextureUsage::HOUNOU_USAGE_STORAGE),
+		.data = nullptr
+	};
+
+	std::vector<VKImage> computeImages(ISwapChain::MAX_FRAMES_IN_FLIGHT);
+	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		computeImages[i].CreateImage(&device, computeImageDesc);
+	}
+
 	std::vector<IDescriptor*> descs = descAllocator.AllocateDescriptors(&device, &pipeline, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	uint32_t frameIndex = 0;
-	
-	float rotation = 0.f;
 
-	auto lastTime = std::chrono::high_resolution_clock::now();
 	while (!window.WindowShouldClose())
 	{
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float dt = std::chrono::duration<float>(currentTime - lastTime).count();
-		lastTime = currentTime;
-
 		swapChain.GetNextSwapChainImage(&device, frameIndex);
 
 		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
@@ -328,122 +620,100 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->Open();
 
-		const ICommandBuffer::MemoryBarrierInfo barrierInfo{
+		ICommandBuffer::MemoryBarrierInfo barrierInfo{
 			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-			.newLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
+			.newLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
 
 			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.stages = ICommandBuffer::PipelineStage::NONE,
 				.access = ICommandBuffer::Access::NONE
 			},
 
 			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
-				.access = (ICommandBuffer::Access)((uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_READ | (uint64_t)ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE)
+				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
+				.access = ICommandBuffer::Access::SHADER_WRITE
 			}
 		};
 
-		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
-
-		const ICommandBuffer::MemoryBarrierInfo infoDepth{
-			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-			.newLayout = ICommandBuffer::Layout::DEPTH_STENCIL_OPTIMAL,
-
-			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::EARLY_FRAGMENT_TEST,
-				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
-			},
-
-			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::LATE_FRAGMENT_TEST,
-				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
-			}
-		};
-
-		cCmdBuffer->AddMemoryBarrier(&depthBuffer, infoDepth);
-
-		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), &depthBuffer, window.GetWidth(), window.GetHeight());
-
-		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
-
-		cCmdBuffer->SetScissor(window.GetWidth(), window.GetHeight());
+		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
 
 		cCmdBuffer->BindPipeline(&pipeline);
 
-		cCmdBuffer->BindVertexBuffer(&vertexBuffer);
-
-		cCmdBuffer->BindIndexBuffer(&indexBuffer);
-		
-		Matrix4f M;
-		Matrix4f VP;
-
-		struct
-		{
-			Matrix4f Model;
-			Matrix4f ProjectionView;
-		} constants;
-
-		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, 1.f), Vector3f(0.f, 1.f, 0.f));
-		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_DEG_2_RAD(float));
-		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * KM_DEG_2_RAD(float)) * M.YRotation(rotation * KM_DEG_2_RAD(float)), M.Scaling(1.f, 1.f, 1.f)).Transpose();
-		rotation += 25.f * dt;
-
-		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
-
-		const VkDescriptorImageInfo samplerInfo{
-			.sampler = sampler.CastToVK()->GetRaw()
-		};
-
 		const VkDescriptorImageInfo imageInfo{
-			.imageView = texture.CastToVK()->GetRawImageView(),
-			.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+			.imageView = computeImages[frameIndex].CastToVK()->GetRawImageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
 		};
 
-		const std::array<VkWriteDescriptorSet, 2> descriptorWrites{
+		const std::array<VkWriteDescriptorSet, 1> descriptorWrites{
 			VkWriteDescriptorSet{
 				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
 				.dstBinding = 0,
 				.dstArrayElement = 0,
 				.descriptorCount = 1,
-				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
-				.pImageInfo = &samplerInfo
-			},
-			VkWriteDescriptorSet{
-				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
-				.dstBinding = 1,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 				.pImageInfo = &imageInfo
 			}
 		};
 
-		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 1, descriptorWrites.data(), 0, nullptr);
 
 		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
 
-		cCmdBuffer->DrawIndexed(static_cast<uint32_t>(indices.size()));
+		cCmdBuffer->Dispatch((window.GetWidth() + 15) / 16, (window.GetHeight() + 15) / 16, 1);
 
-		cCmdBuffer->EndRendering();
-
-		const ICommandBuffer::MemoryBarrierInfo info2{
-			.oldLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
-			.newLayout = ICommandBuffer::Layout::PRESENT,
+		barrierInfo = {
+			.oldLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
+			.newLayout = ICommandBuffer::Layout::TRANSFER_SRC,
 
 			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
+				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
+				.access = ICommandBuffer::Access::SHADER_WRITE
+			},
+
+			.syncDest{
+				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+				.access = ICommandBuffer::Access::TRANSFER_READ
+			}
+		};
+
+		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
+
+		barrierInfo = {
+			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+			.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
+
+			.syncSource{
+				.stages = ICommandBuffer::PipelineStage::NONE,
 				.access = ICommandBuffer::Access::NONE
 			},
 
 			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
-				.access = ICommandBuffer::Access::COLOR_ATTACHMENT_WRITE
+				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+				.access = ICommandBuffer::Access::TRANSFER_WRITE
 			}
 		};
 
-		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info2);
+		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
+
+		cCmdBuffer->Copy(swapChain.GetCurrentImage(), &computeImages[frameIndex]);
+
+		barrierInfo = {
+			.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
+			.newLayout = ICommandBuffer::Layout::PRESENT,
+
+			.syncSource{
+				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+				.access = ICommandBuffer::Access::TRANSFER_WRITE
+			},
+
+			.syncDest{
+				.stages = ICommandBuffer::PipelineStage::NONE,
+				.access = ICommandBuffer::Access::NONE
+			}
+		};
+
+		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
 
 		cCmdBuffer->Close();
 
@@ -460,32 +730,31 @@ TEST(VKRHITest, RenderLoop)
 			windowResized = false;
 
 			device.WaitIdle();
+
+			for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+			{
+				computeImages[i].DestroyImage(&device);
+				computeImageDesc.width = window.GetWidth();
+				computeImageDesc.height = window.GetHeight();
+				computeImages[i].CreateImage(&device, computeImageDesc);
+			}
+
 			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
-			depthBuffer.DestroyImage(&device);
-
-			depth.width = window.GetWidth();
-			depth.height = window.GetHeight();
-
-			depthBuffer.CreateImage(&device, depth);
 		}
 	}
 
 	graphicsQueue.WaitIdle();
 	// or device.WaitIdle();
 
-	depthBuffer.DestroyImage(&device);
-
-	sampler.DestroySampler(&device);
-
-	texture.DestroyImage(&device);
+	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		computeImages[i].DestroyImage(&device);
+	}
 
 	descAllocator.DestroyDescriptorAllocator(&device);
 
-	vertexBuffer.DestroyBuffer(&device);
-	indexBuffer.DestroyBuffer(&device);
-
 	pipeline.DestroyPipeline(&device);
-	
+
 	swapChain.DestroySwapChain(&device);
 
 	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);

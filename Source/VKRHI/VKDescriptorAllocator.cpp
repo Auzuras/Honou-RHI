@@ -11,7 +11,7 @@ void VKDescriptorAllocator::CreateDescriptorAllocator(IDevice* _device)
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const uint32_t maxSet = 10;
 
-	std::array<VkDescriptorPoolSize, 3> pools{
+	std::array<VkDescriptorPoolSize, 4> pools{
 		VkDescriptorPoolSize{
 			.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.descriptorCount = maxSet
@@ -22,6 +22,10 @@ void VKDescriptorAllocator::CreateDescriptorAllocator(IDevice* _device)
 		},
 		VkDescriptorPoolSize{
 			.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			.descriptorCount = maxSet
+		},
+		VkDescriptorPoolSize{
+			.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 			.descriptorCount = maxSet
 		}
 	};

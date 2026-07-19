@@ -6,13 +6,33 @@ class DX12Pipeline;
 class OGLPipeline;
 
 class IDevice;
+class IShaderModule;
 
 class IPipeline
 {
 public:
+
+	struct ShaderDescription
+	{
+		IShaderModule* shader = nullptr;
+		const char* entryPoint = "main";
+	};
+
+	struct GraphicsPipelineDescription
+	{
+		ShaderDescription vertexShader;
+		ShaderDescription fragmentShader;
+	};
+
+	struct ComputePipelineDescription
+	{
+		ShaderDescription computeShader;
+	};
+
 	virtual ~IPipeline() = default;
 
-	virtual void CreatePipeline(IDevice* _device) = 0;
+	virtual void CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription) = 0;
+	virtual void CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription) = 0;
 	virtual void DestroyPipeline(IDevice* _device) = 0;
 
 	virtual VKPipeline* CastToVK() { return nullptr; }

@@ -7,7 +7,7 @@
 #include <vector>
 #include <Helpers/Vertex.h>
 
-void VKPipeline::CreatePipeline(IDevice* _device)
+void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription)
 {
     const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
 
@@ -72,22 +72,19 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
     };
 
-    VKShaderModule vertModule = VKShaderModule();
-    VKShaderModule fragModule = VKShaderModule();
-
-    vertModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
-    fragModule.CreateShaderModule(_device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
+    const VkShaderModule vertexShaderModule = _pipelineDescription.vertexShader.shader->CastToVK()->GetRaw();
+    const VkShaderModule fragmentShaderModule = _pipelineDescription.fragmentShader.shader->CastToVK()->GetRaw();
 
     const std::vector<VkPipelineShaderStageCreateInfo> shaderStagesCI{
         {   .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_VERTEX_BIT,
-            .module = vertModule.CastToVK()->GetRaw(),
-            .pName = "main"
+            .module = vertexShaderModule,
+            .pName = _pipelineDescription.vertexShader.entryPoint
         },
         {   .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .module = fragModule.CastToVK()->GetRaw(),
-            .pName = "main"
+            .module = fragmentShaderModule,
+            .pName = _pipelineDescription.fragmentShader.entryPoint
         },
     };
 
@@ -158,9 +155,52 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     };
 
     vkCreateGraphicsPipelines(ldevice, VK_NULL_HANDLE, 1, &gPipelineCI, nullptr, &m_Pipeline);
+}
 
-    fragModule.DestroyShaderModule(_device);
-    vertModule.DestroyShaderModule(_device);
+void VKPipeline::CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription)
+{
+    const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
+    const VkShaderModule computeShaderModule = _pipelineDescription.computeShader.shader->CastToVK()->GetRaw();
+
+    const VkPipelineShaderStageCreateInfo computeShaderStageCI{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+        .module = computeShaderModule,
+        .pName = _pipelineDescription.computeShader.entryPoint
+    };
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings(1);
+    bindings[0].binding = 0,
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    bindings[0].descriptorCount = 1;
+    bindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    bindings[0].pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = static_cast<uint32_t>(bindings.size()),
+        .pBindings = bindings.data(),
+    };
+
+    vkCreateDescriptorSetLayout(ldevice, &descriptorSetLayoutCI, nullptr, &m_DescriptorSetLayout);
+
+    const VkPipelineLayoutCreateInfo pipelineLayoutCI{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .setLayoutCount = 1,
+        .pSetLayouts = &m_DescriptorSetLayout,
+        .pushConstantRangeCount = 0,
+        .pPushConstantRanges = VK_NULL_HANDLE
+    };
+
+    vkCreatePipelineLayout(ldevice, &pipelineLayoutCI, nullptr, &m_PipelineLayout);
+
+    const VkComputePipelineCreateInfo cPipelineCI{
+        .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+        .stage = computeShaderStageCI,
+        .layout = m_PipelineLayout
+    };
+
+    vkCreateComputePipelines(ldevice, VK_NULL_HANDLE, 1, &cPipelineCI, nullptr, &m_Pipeline);
 }
 
 void VKPipeline::DestroyPipeline(IDevice* _device)

@@ -25,13 +25,29 @@ enum class TextureFormat : uint32_t
 	HOUNOU_FORMAT_D24_UNORM_S8_UINT		=	13
 };
 
+enum class TextureUsage : uint64_t
+{
+	HOUNOU_USAGE_NONE						=	0,
+
+	HOUNOU_USAGE_COLOR_ATTACHMENT			=	1 << 0ull,
+	HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT	=	1 << 1ull,
+
+	HOUNOU_USAGE_TRANSFER_SRC				=	1 << 2ull,
+	HOUNOU_USAGE_TRANSFER_DST				=	1 << 3ull,
+
+	HOUNOU_USAGE_SAMPLED					=	1 << 4ull,
+
+	HOUNOU_USAGE_STORAGE					=	1 << 5ull,
+};
+
 struct ImageDescription
 {
 	uint32_t width = 0;
 	uint32_t height = 0;
 	uint8_t channelCount = 0;
-	void* data = nullptr;
 	TextureFormat format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM;
+	TextureUsage usage = TextureUsage::HOUNOU_USAGE_NONE;
+	void* data = nullptr;
 };
 
 #endif //HONOU_RHI_SURFACE_H

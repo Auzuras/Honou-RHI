@@ -11,8 +11,9 @@ class VKPipeline : public IPipeline
 public:
 	~VKPipeline() override final = default;
 
-	virtual void CreatePipeline(IDevice* _device) override final;
-	virtual void DestroyPipeline(IDevice* _device) override final;
+	void CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription) override final;
+	void CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription) override final;
+	void DestroyPipeline(IDevice* _device) override final;
 
 	VkPipeline GetRaw() const { return m_Pipeline; }
 	VkPipelineLayout GetLayout() const { return m_PipelineLayout; }

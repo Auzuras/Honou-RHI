@@ -12,7 +12,7 @@ VkImageLayout ToVkLayout(ICommandBuffer::Layout _layout)
 	{
 	default:
 	case ICommandBuffer::Layout::UNDEFINED:					return VK_IMAGE_LAYOUT_UNDEFINED;
-	case ICommandBuffer::Layout::COLOR_OPTIMAL:				return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	case ICommandBuffer::Layout::COLOR_OPTIMAL:				return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 	case ICommandBuffer::Layout::DEPTH_OPTIMAL:				return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 	case ICommandBuffer::Layout::DEPTH_STENCIL_OPTIMAL:		return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	case ICommandBuffer::Layout::SHADER_READ:				return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -31,6 +31,8 @@ VkPipelineStageFlags2 ToVkPipelineStage(uint64_t _stage)
 		flags |= VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
 	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::FRAGMENT_SHADER) != 0)
 		flags |= VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::COMPUTE_SHADER) != 0)
+		flags |= VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::EARLY_FRAGMENT_TEST) != 0)
 		flags |= VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT;
 	if ((_stage & (uint64_t)ICommandBuffer::PipelineStage::LATE_FRAGMENT_TEST) != 0)
@@ -90,7 +92,7 @@ void VKCommandBuffer::Reset() const
 void VKCommandBuffer::BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const
 {
 	const VkImageView imageview = _image->CastToVK()->GetRawImageView();
-	const VkImageView depthview = _depth->CastToVK()->GetRawImageView();
+	const VkImageView depthview = _depth ? _depth->CastToVK()->GetRawImageView() : VK_NULL_HANDLE;
 
 	const VkRenderingAttachmentInfo colorAttachmentInfo{
 		.sType			=	VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -129,7 +131,7 @@ void VKCommandBuffer::BeginRendering(IImage* _image, IImage* _depth, uint32_t _w
 		.layerCount = 1,
 		.colorAttachmentCount = 1,
 		.pColorAttachments = &colorAttachmentInfo,
-		.pDepthAttachment = &depthAttachmentInfo,
+		.pDepthAttachment = _depth ? &depthAttachmentInfo : VK_NULL_HANDLE,
 	};
 
 	vkCmdBeginRendering(m_CommandBuffer, &renderingInfo);
@@ -143,7 +145,7 @@ void VKCommandBuffer::EndRendering() const
 void VKCommandBuffer::BindPipeline(IPipeline* _pipeline) const
 {
 	VkPipeline pipeline = _pipeline->CastToVK()->GetRaw();
-	vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+	vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 }
 
 void VKCommandBuffer::SetViewport(float _width, float _height) const
@@ -214,7 +216,34 @@ void VKCommandBuffer::Copy(IImage* _destination, IImage* _source) const
 	VkImage destImage = _destination->CastToVK()->GetRaw();
 	VkImage srcImage = _source->CastToVK()->GetRaw();
 
-	// TODO
+	const VkImageCopy region{
+		.srcSubresource{
+			.aspectMask		=	VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel		=	0,
+			.baseArrayLayer =	0,
+			.layerCount		=	1
+		},
+		.srcOffset{
+			0, 0, 0
+		},
+
+		.dstSubresource{
+			.aspectMask		=	VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel		=	0,
+			.baseArrayLayer =	0,
+			.layerCount		=	1
+		},
+		.dstOffset{
+			0, 0, 0
+		},
+		.extent{
+			.width	= std::min(_destination->GetWidth(), _source->GetWidth()),
+			.height = std::min(_destination->GetHeight(), _source->GetHeight()),
+			.depth  = 1
+		}
+	};
+
+	vkCmdCopyImage(m_CommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, destImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
 void VKCommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
@@ -278,7 +307,7 @@ void VKCommandBuffer::BindDescriptor(IPipeline* _pipeline, IDescriptor* _descrip
 {
 	const VkPipelineLayout pipelineLayout = _pipeline->CastToVK()->GetLayout();
 	const VkDescriptorSet descriptor = _descriptor->CastToVK()->GetRaw();
-	vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, _set, 1, &descriptor, 0, nullptr);
+	vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, _set, 1, &descriptor, 0, nullptr);
 }
 
 void VKCommandBuffer::Draw(uint32_t _vertexCount) const

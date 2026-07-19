@@ -6,6 +6,26 @@
 #include <VKRHI/VKCommandBuffer.h>
 #include <VKRHI/VKQueue.h>
 
+static VkImageUsageFlags ToVkImageUsage(uint64_t _usage)
+{
+	VkImageUsageFlags flags = 0;
+
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT) != 0)
+		flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT) != 0)
+		flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_SRC) != 0)
+		flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST) != 0)
+		flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED) != 0)
+		flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_STORAGE) != 0)
+		flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+
+	return flags;
+}
+
 void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description)
 {
 	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
@@ -52,6 +72,9 @@ void VKImage::DestroyImage(IDevice* _device)
 
 void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description)
 {
+	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
+	p_Format = _description.format;
+
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
 	p_FromSwapChain = true;
@@ -79,12 +102,7 @@ VkImage VKImage::CreateImage(VkDevice _device, const ImageDescription& _descript
 		.arrayLayers	= 1,
 		.samples		= VK_SAMPLE_COUNT_1_BIT,
 		.tiling			= VK_IMAGE_TILING_OPTIMAL,
-		.usage = static_cast<VkImageUsageFlags>(
-			_description.format == TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
-				? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-				: (VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-				   VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-				   VK_IMAGE_USAGE_SAMPLED_BIT)),
+		.usage			= static_cast<VkImageUsageFlags>(ToVkImageUsage(static_cast<uint64_t>(_description.usage))),
 		.initialLayout	= VK_IMAGE_LAYOUT_UNDEFINED
 	};
 

@@ -1,0 +1,74 @@
+#version 460
+
+vec2 positions[3] = vec2[](
+	vec2(0.0, -0.5),
+	vec2(0.5, 0.5),
+	vec2(-0.5, 0.5)
+);
+
+vec3 colors[3] = vec3[](
+	vec3(1.0, 0.0, 0.0),
+	vec3(0.0, 1.0, 0.0),
+	vec3(0.0, 0.0, 1.0)
+);
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(rgba8, set = 0, binding = 0) uniform image2D image;
+
+float D()
+{
+	return (positions[1].y - positions[2].y) * (positions[0].x - positions[2].x) + (positions[2].x - positions[1].x) * (positions[0].y - positions[2].y);
+}
+
+
+float Lambda0(float _d, float _x, float _y)
+{
+	return ((positions[1].y - positions[2].y) * (_x - positions[2].x) + (positions[2].x - positions[1].x) * (_y - positions[2].y)) / _d;
+}
+
+float Lambda1(float _d, float _x, float _y)
+{
+	return ((positions[2].y - positions[0].y) * (_x - positions[2].x) + (positions[0].x - positions[2].x) * (_y - positions[2].y)) / _d;
+}
+
+float Lambda2(float _lambda0, float _lambda1)
+{
+	return 1.0 - _lambda0 - _lambda1;
+}
+
+vec3 SampleColor(float _lambda0, float _lambda1, float _lambda2)
+{
+	return _lambda0 * colors[0] + _lambda1 * colors[1] + _lambda2 * colors[2];
+}
+
+bool IsInTriangle(float _lambda0, float _lambda1, float _lambda2)
+{
+	return _lambda0 >= 0.0 && _lambda1 >= 0.0 && _lambda2 >= 0.0;
+}
+
+void main()
+{
+	ivec2 textCoord = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 size = imageSize(image);
+
+	if (textCoord.x >= size.x || textCoord.y >= size.y)
+		return;
+
+	vec2 p = (vec2(textCoord) + 0.5) / vec2(imageSize(image));
+	p = p * 2.0 - 1.0;
+
+	float d = D();
+
+	float lambda0 = Lambda0(d, p.x, p.y);
+	float lambda1 = Lambda1(d, p.x, p.y);
+	float lambda2 = Lambda2(lambda0, lambda1);
+
+	if (!IsInTriangle(lambda0, lambda1, lambda2))
+	{
+		imageStore(image, textCoord, vec4(0.3, 0.0, 0.0, 1.0));
+		return;
+	}
+
+	imageStore(image, textCoord, vec4(SampleColor(lambda0, lambda1, lambda2), 1.0));
+}
