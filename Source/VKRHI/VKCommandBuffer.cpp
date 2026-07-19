@@ -223,7 +223,7 @@ void VKCommandBuffer::AddMemoryBarrier(IImage* _image, MemoryBarrierInfo _memory
 
 void VKCommandBuffer::Copy(IImage* _destination, IImage* _source) const
 {
-	VkImage destImage = _destination->CastToVK()->GetRaw();
+	VkImage dstImage = _destination->CastToVK()->GetRaw();
 	VkImage srcImage = _source->CastToVK()->GetRaw();
 
 	const VkImageCopy region{
@@ -253,12 +253,12 @@ void VKCommandBuffer::Copy(IImage* _destination, IImage* _source) const
 		}
 	};
 
-	vkCmdCopyImage(m_CommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, destImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+	vkCmdCopyImage(m_CommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
 void VKCommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
 {
-	VkImage destImage = _destination->CastToVK()->GetRaw();
+	VkImage dstImage = _destination->CastToVK()->GetRaw();
 	VkBuffer srcBuffer = _source->CastToVK()->GetRaw();
 
 	const VkBufferImageCopy region{
@@ -277,17 +277,45 @@ void VKCommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
 		.imageExtent = { _destination->GetWidth(), _destination->GetHeight(), 1}
 	};
 
-	vkCmdCopyBufferToImage(m_CommandBuffer, srcBuffer, destImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+	vkCmdCopyBufferToImage(m_CommandBuffer, srcBuffer, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
 void VKCommandBuffer::Copy(IBuffer* _destination, IImage* _source) const
 {
-	// TODO
+	VkBuffer dstBuffer = _destination->CastToVK()->GetRaw();
+	VkImage srcImage = _source->CastToVK()->GetRaw();
+
+	const VkBufferImageCopy region{
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+
+		.imageSubresource = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		},
+
+		.imageOffset = { 0, 0, 0 },
+		.imageExtent = { _source->GetWidth(), _source->GetHeight(), 1}
+	};
+
+	vkCmdCopyImageToBuffer(m_CommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dstBuffer, 1, &region);
 }
 
 void VKCommandBuffer::Copy(IBuffer* _destination, IBuffer* _source) const
 {
-	// TODO
+	VkBuffer dstBuffer = _destination->CastToVK()->GetRaw();
+	VkBuffer srcBuffer = _source->CastToVK()->GetRaw();
+
+	const VkBufferCopy region{
+		.srcOffset = 0,
+		.dstOffset = 0,
+		.size = 0
+	};
+
+	vkCmdCopyBuffer(m_CommandBuffer, srcBuffer, dstBuffer, 1, &region);
 }
 
 void VKCommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const
