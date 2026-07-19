@@ -241,7 +241,7 @@ TEST(VKRHITest, RenderLoop)
 	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
 
 	VKImage depthBuffer;
-	const ImageDescription depth{
+	ImageDescription depth{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
 		.channelCount = 4,
@@ -461,11 +461,19 @@ TEST(VKRHITest, RenderLoop)
 
 			device.WaitIdle();
 			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+			depthBuffer.DestroyImage(&device);
+
+			depth.width = window.GetWidth();
+			depth.height = window.GetHeight();
+
+			depthBuffer.CreateDepthImage(&device, depth);
 		}
 	}
 
 	graphicsQueue.WaitIdle();
 	// or device.WaitIdle();
+
+	depthBuffer.DestroyImage(&device);
 
 	sampler.DestroySampler(&device);
 
