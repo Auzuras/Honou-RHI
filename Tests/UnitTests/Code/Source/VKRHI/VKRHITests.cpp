@@ -182,11 +182,16 @@ TEST(VKRHITest, Mesh)
 
 	VKBuffer vertexBuffer;
 	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+	vertexBuffer.SetName(&device, "Knight Vertex Buffer");
 	vertexBuffer.DestroyBuffer(&device);
 
 	VKBuffer indexBuffer;
 	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+	indexBuffer.SetName(&device, "Knight Index Buffer");
 	indexBuffer.DestroyBuffer(&device);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
 }
 
 TEST(VKRHITest, Texture)
@@ -217,8 +222,11 @@ TEST(VKRHITest, Texture)
 	VKImage texture;
 	texture.CreateImage(&device, imgDesc);
 	texture.DestroyImage(&device);
-
+	
 	stbi_image_free(data);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
 }
 
 TEST(VKRHITest, GraphicsRenderLoop)
