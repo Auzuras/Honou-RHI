@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IFENCE_H
-#define HONOU_RENDER_IFENCE_H
+#ifndef HONOU_RHI_IFENCE_H
+#define HONOU_RHI_IFENCE_H
 
 class VKFence;
 class DX12Fence;
@@ -29,4 +29,4 @@ protected:
 	bool p_IsSignaled = false;
 };
 
-#endif //HONOU_RENDER_IFENCE_H
+#endif //HONOU_RHI_IFENCE_H

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKCOMMANDBUFFER_H
-#define HONOU_RENDER_VKCOMMANDBUFFER_H
+#ifndef HONOU_RHI_VKCOMMANDBUFFER_H
+#define HONOU_RHI_VKCOMMANDBUFFER_H
 
 class VKCommandBuffer;
 class DX12CommandBuffer;
@@ -57,4 +57,4 @@ private:
 	VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKCOMMANDBUFFER_H
+#endif //HONOU_RHI_VKCOMMANDBUFFER_H

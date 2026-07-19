@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKFENCE_H
-#define HONOU_RENDER_VKFENCE_H
+#ifndef HONOU_RHI_VKFENCE_H
+#define HONOU_RHI_VKFENCE_H
 
 #include <RHI/IFence.h>
 
@@ -27,4 +27,4 @@ private:
 	VkFence m_Fence = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKFENCE_H
+#endif //HONOU_RHI_VKFENCE_H

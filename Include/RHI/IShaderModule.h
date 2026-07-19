@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ISHADERMODULE_H
-#define HONOU_RENDER_ISHADERMODULE_H
+#ifndef HONOU_RHI_ISHADERMODULE_H
+#define HONOU_RHI_ISHADERMODULE_H
 
 class VKShaderModule;
 class DX12ShaderModule;
@@ -40,4 +40,4 @@ public:
 	virtual OGLShaderModule* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ISHADERMODULE_H
+#endif //HONOU_RHI_ISHADERMODULE_H

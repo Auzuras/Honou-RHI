@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IINSTANCE_H
-#define HONOU_RENDER_IINSTANCE_H
+#ifndef HONOU_RHI_IINSTANCE_H
+#define HONOU_RHI_IINSTANCE_H
 
 class VKInstance;
 class DX12Instance;
@@ -18,4 +18,4 @@ public:
 	virtual OGLInstance* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_IINSTANCE_H
+#endif //HONOU_RHI_IINSTANCE_H

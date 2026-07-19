@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKDEVICE_H
-#define HONOU_RENDER_VKDEVICE_H
+#ifndef HONOU_RHI_VKDEVICE_H
+#define HONOU_RHI_VKDEVICE_H
 
 #include <RHI/IDevice.h>
 
@@ -32,4 +32,4 @@ private:
 	VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKDEVICE_H
+#endif //HONOU_RHI_VKDEVICE_H

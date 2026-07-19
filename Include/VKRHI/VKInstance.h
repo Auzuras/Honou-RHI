@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKINSTANCE_H
-#define HONOU_RENDER_VKINSTANCE_H
+#ifndef HONOU_RHI_VKINSTANCE_H
+#define HONOU_RHI_VKINSTANCE_H
 
 #include <RHI/IInstance.h>
 
@@ -34,4 +34,4 @@ private:
 	VkInstance m_Instance = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKINSTANCE_H
+#endif //HONOU_RHI_VKINSTANCE_H

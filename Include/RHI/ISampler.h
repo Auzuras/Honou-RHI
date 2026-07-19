@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ISAMPLER_H
-#define HONOU_RENDER_ISAMPLER_H
+#ifndef HONOU_RHI_ISAMPLER_H
+#define HONOU_RHI_ISAMPLER_H
 
 #include <cstdint>
 
@@ -52,4 +52,4 @@ public:
 	virtual OGLSampler* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ISAMPLER_H
+#endif //HONOU_RHI_ISAMPLER_H

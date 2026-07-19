@@ -44,30 +44,30 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest tinyobjloader stb Koori-Math Koori-Window)
 
 
-set(HONOU_RENDER_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
+set(HONOU_RHI_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${HONOU_RENDER_UT_BIN_OUTPUT_DIR}/Libs")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${HONOU_RENDER_UT_BIN_OUTPUT_DIR}/Libs")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${HONOU_RENDER_UT_BIN_OUTPUT_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${HONOU_RHI_UT_BIN_OUTPUT_DIR}/Libs")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${HONOU_RHI_UT_BIN_OUTPUT_DIR}/Libs")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${HONOU_RHI_UT_BIN_OUTPUT_DIR}")
 
-file(GLOB_RECURSE HONOU_RENDER_UT_SOURCES "Code/Source/*.cpp")
+file(GLOB_RECURSE HONOU_RHI_UT_SOURCES "Code/Source/*.cpp")
 
-add_executable(HonouRenderTests ${HONOU_RENDER_UT_SOURCES})
+add_executable(HonouRHITests ${HONOU_RHI_UT_SOURCES})
 
-add_custom_command(TARGET HonouRenderTests POST_BUILD
+add_custom_command(TARGET HonouRHITests POST_BUILD
 COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/Assets
-            $<TARGET_FILE_DIR:HonouRenderTests>/Assets
+            $<TARGET_FILE_DIR:HonouRHITests>/Assets
 )
 
-target_include_directories(HonouRenderTests PRIVATE ${stb_SOURCE_DIR})
+target_include_directories(HonouRHITests PRIVATE ${stb_SOURCE_DIR})
 
-target_link_libraries(HonouRenderTests PRIVATE gtest)
+target_link_libraries(HonouRHITests PRIVATE gtest)
 
-target_link_libraries(HonouRenderTests PRIVATE tinyobjloader)
+target_link_libraries(HonouRHITests PRIVATE tinyobjloader)
 
-target_link_libraries(HonouRenderTests PRIVATE KooriMath)
+target_link_libraries(HonouRHITests PRIVATE KooriMath)
 
-target_link_libraries(HonouRenderTests PRIVATE KooriWindow)
+target_link_libraries(HonouRHITests PRIVATE KooriWindow)
 
-target_link_libraries(HonouRenderTests PRIVATE HonouRender)
+target_link_libraries(HonouRHITests PRIVATE HonouRHI)

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IIMAGE_H
-#define HONOU_RENDER_IIMAGE_H
+#ifndef HONOU_RHI_IIMAGE_H
+#define HONOU_RHI_IIMAGE_H
 
 class VKImage;
 class DX12Image;
@@ -37,4 +37,4 @@ protected:
 	bool p_FromSwapChain = false;
 };
 
-#endif //HONOU_RENDER_IIMAGE_H
+#endif //HONOU_RHI_IIMAGE_H

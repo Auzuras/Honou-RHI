@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKSHADERMODULE_H
-#define HONOU_RENDER_VKSHADERMODULE_H
+#ifndef HONOU_RHI_VKSHADERMODULE_H
+#define HONOU_RHI_VKSHADERMODULE_H
 
 #include <RHI/IShaderModule.h>
 
@@ -24,4 +24,4 @@ private:
 	VkShaderModule m_ShaderModule = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKSHADERMODULE_H
+#endif //HONOU_RHI_VKSHADERMODULE_H

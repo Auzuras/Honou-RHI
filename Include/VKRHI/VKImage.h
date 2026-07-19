@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKIMAGE_H
-#define HONOU_RENDER_VKIMAGE_H
+#ifndef HONOU_RHI_VKIMAGE_H
+#define HONOU_RHI_VKIMAGE_H
 
 #include <RHI/IImage.h>
 
@@ -60,4 +60,4 @@ static VkFormat MapToVkFormat(const TextureFormat _format)
 	}
 }
 
-#endif //HONOU_RENDER_VKIMAGE_H
+#endif //HONOU_RHI_VKIMAGE_H

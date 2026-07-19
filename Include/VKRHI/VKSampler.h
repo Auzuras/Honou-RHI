@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKSAMPLER_H
-#define HONOU_RENDER_VKSAMPLER_H
+#ifndef HONOU_RHI_VKSAMPLER_H
+#define HONOU_RHI_VKSAMPLER_H
 
 #include <RHI/ISampler.h>
 
@@ -50,4 +50,4 @@ private:
 	VkSampler m_Sampler = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKSAMPLER_H
+#endif //HONOU_RHI_VKSAMPLER_H

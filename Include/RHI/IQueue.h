@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IQUEUE_H
-#define HONOU_RENDER_IQUEUE_H
+#ifndef HONOU_RHI_IQUEUE_H
+#define HONOU_RHI_IQUEUE_H
 
 class VKQueue;
 class DX12Queue;
@@ -27,4 +27,4 @@ public:
 	virtual OGLQueue* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_VKQUEUE_H
+#endif //HONOU_RHI_VKQUEUE_H

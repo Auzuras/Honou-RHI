@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKSYNCPOINT_H
-#define HONOU_RENDER_VKSYNCPOINT_H
+#ifndef HONOU_RHI_VKSYNCPOINT_H
+#define HONOU_RHI_VKSYNCPOINT_H
 
 #include <RHI/ISyncPoint.h>
 
@@ -24,4 +24,4 @@ private:
     VkSemaphore m_Semaphore = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKSYNCPOINT_H
+#endif //HONOU_RHI_VKSYNCPOINT_H

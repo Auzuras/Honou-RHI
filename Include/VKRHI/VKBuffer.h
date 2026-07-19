@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKBUFFER_H
-#define HONOU_RENDER_VKBUFFER_H
+#ifndef HONOU_RHI_VKBUFFER_H
+#define HONOU_RHI_VKBUFFER_H
 
 class VKBuffer;
 class DX12Buffer;
@@ -34,4 +34,4 @@ private:
 	VkDeviceMemory m_BufferMemory = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKBUFFER_H
+#endif //HONOU_RHI_VKBUFFER_H

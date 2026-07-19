@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ISWAPCHAIN_H
-#define HONOU_RENDER_ISWAPCHAIN_H
+#ifndef HONOU_RHI_ISWAPCHAIN_H
+#define HONOU_RHI_ISWAPCHAIN_H
 
 class VKSwapChain;
 class DX12SwapChain;
@@ -50,4 +50,4 @@ protected:
     std::vector<ISyncPoint*> p_SwapChainRenderSyncPoint = std::vector<ISyncPoint*>();
 };
 
-#endif //HONOU_RENDER_ISWAPCHAIN_H
+#endif //HONOU_RHI_ISWAPCHAIN_H

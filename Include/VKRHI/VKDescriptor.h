@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKDESCRIPTOR_H
-#define HONOU_RENDER_VKDESCRIPTOR_H
+#ifndef HONOU_RHI_VKDESCRIPTOR_H
+#define HONOU_RHI_VKDESCRIPTOR_H
 
 #include <RHI/IDescriptor.h>
 
@@ -26,4 +26,4 @@ private:
 	VkDescriptorSet m_Descriptor = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKDESCRIPTOR_H
+#endif //HONOU_RHI_VKDESCRIPTOR_H

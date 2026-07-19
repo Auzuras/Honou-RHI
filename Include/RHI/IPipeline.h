@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IPIPELINE_H
-#define HONOU_RENDER_IPIPELINE_H
+#ifndef HONOU_RHI_IPIPELINE_H
+#define HONOU_RHI_IPIPELINE_H
 
 class VKPipeline;
 class DX12Pipeline;
@@ -20,4 +20,4 @@ public:
 	virtual OGLPipeline* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_IPIPELINE_H
+#endif //HONOU_RHI_IPIPELINE_H

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IDESCRIPTOR_H
-#define HONOU_RENDER_IDESCRIPTOR_H
+#ifndef HONOU_RHI_IDESCRIPTOR_H
+#define HONOU_RHI_IDESCRIPTOR_H
 
 class VKDescriptor;
 class DX12Descriptor;
@@ -26,4 +26,4 @@ public:
 	virtual OGLDescriptor* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_IDESCRIPTOR_H
+#endif //HONOU_RHI_IDESCRIPTOR_H

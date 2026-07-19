@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKSWAPCHAIN_H
-#define HONOU_RENDER_VKSWAPCHAIN_H
+#ifndef HONOU_RHI_VKSWAPCHAIN_H
+#define HONOU_RHI_VKSWAPCHAIN_H
 
 #include <RHI/ISwapChain.h>
 
@@ -36,4 +36,4 @@ private:
     VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKSWAPCHAIN_H
+#endif //HONOU_RHI_VKSWAPCHAIN_H

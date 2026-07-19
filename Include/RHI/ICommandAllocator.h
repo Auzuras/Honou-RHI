@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ICOMMANDALLOCATOR_H
-#define HONOU_RENDER_ICOMMANDALLOCATOR_H
+#ifndef HONOU_RHI_ICOMMANDALLOCATOR_H
+#define HONOU_RHI_ICOMMANDALLOCATOR_H
 
 #include <cstdint>
 #include <vector>
@@ -30,4 +30,4 @@ public:
 	virtual OGLCommandAllocator* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ICOMMANDALLOCATOR_H
+#endif //HONOU_RHI_ICOMMANDALLOCATOR_H

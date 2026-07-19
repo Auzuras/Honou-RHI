@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ISYNCPOINT_H
-#define HONOU_RENDER_ISYNCPOINT_H
+#ifndef HONOU_RHI_ISYNCPOINT_H
+#define HONOU_RHI_ISYNCPOINT_H
 
 class VKSyncPoint;
 class DX12SyncPoint;
@@ -20,4 +20,4 @@ public:
     virtual OGLSyncPoint* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ISYNCPOINT_H
+#endif //HONOU_RHI_ISYNCPOINT_H

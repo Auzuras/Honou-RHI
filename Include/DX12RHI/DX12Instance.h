@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_DX12INSTANCE_H
-#define HONOU_RENDER_DX12INSTANCE_H
+#ifndef HONOU_RHI_DX12INSTANCE_H
+#define HONOU_RHI_DX12INSTANCE_H
 
 #include <RHI/IInstance.h>
 
@@ -25,4 +25,4 @@ private:
 	Microsoft::WRL::ComPtr<IDXGIFactory6> m_Factory = nullptr;
 };
 
-#endif //HONOU_RENDER_DX12INSTANCE_H
+#endif //HONOU_RHI_DX12INSTANCE_H

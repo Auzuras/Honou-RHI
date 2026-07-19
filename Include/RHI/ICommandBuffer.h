@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ICOMMANDBUFFER_H
-#define HONOU_RENDER_ICOMMANDBUFFER_H
+#ifndef HONOU_RHI_ICOMMANDBUFFER_H
+#define HONOU_RHI_ICOMMANDBUFFER_H
 
 #include <cstdint>
 
@@ -115,4 +115,4 @@ public:
 	virtual OGLCommandBuffer* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ICOMMANDBUFFER_H
+#endif //HONOU_RHI_ICOMMANDBUFFER_H

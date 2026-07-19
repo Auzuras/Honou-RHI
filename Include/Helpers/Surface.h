@@ -1,9 +1,9 @@
-#ifndef HONOU_RENDER_SURFACE_H
-#define HONOU_RENDER_SURFACE_H
+#ifndef HONOU_RHI_SURFACE_H
+#define HONOU_RHI_SURFACE_H
 
 struct Surface
 {
 
 };
 
-#endif //HONOU_RENDER_SURFACE_H
+#endif //HONOU_RHI_SURFACE_H

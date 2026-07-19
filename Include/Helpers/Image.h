@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IMAGE_H
-#define HONOU_RENDER_IMAGE_H
+#ifndef HONOU_RHI_IMAGE_H
+#define HONOU_RHI_IMAGE_H
 
 #include <cstdint>
 
@@ -34,4 +34,4 @@ struct ImageDescription
 	TextureFormat format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM;
 };
 
-#endif //HONOU_RENDER_SURFACE_H
+#endif //HONOU_RHI_SURFACE_H

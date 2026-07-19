@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKQUEUE_H
-#define HONOU_RENDER_VKQUEUE_H
+#ifndef HONOU_RHI_VKQUEUE_H
+#define HONOU_RHI_VKQUEUE_H
 
 #include <RHI/IQueue.h>
 
@@ -28,4 +28,4 @@ private:
 	VkQueue m_Queue = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKPIPELINE_H
+#endif //HONOU_RHI_VKPIPELINE_H

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_ISURFACE_H
-#define HONOU_RENDER_ISURFACE_H
+#ifndef HONOU_RHI_ISURFACE_H
+#define HONOU_RHI_ISURFACE_H
 
 class VKSurface;
 class DX12Surface;
@@ -30,4 +30,4 @@ public:
 	virtual OGLSurface* CastToOGL() { return nullptr; }
 };
 
-#endif //HONOU_RENDER_ISURFACE_H
+#endif //HONOU_RHI_ISURFACE_H

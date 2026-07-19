@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VERTEX_H
-#define HONOU_RENDER_VERTEX_H
+#ifndef HONOU_RHI_VERTEX_H
+#define HONOU_RHI_VERTEX_H
 
 #include <array>
 
@@ -11,4 +11,4 @@ struct Vertex
 	std::array<float, 2> textCoords = std::array<float, 2>();
 };
 
-#endif //HONOU_RENDER_VERTEX_H
+#endif //HONOU_RHI_VERTEX_H

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_VKSURFACE_H
-#define HONOU_RENDER_VKSURFACE_H
+#ifndef HONOU_RHI_VKSURFACE_H
+#define HONOU_RHI_VKSURFACE_H
 
 #include <RHI/ISurface.h>
 
@@ -24,4 +24,4 @@ private:
 	VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 };
 
-#endif //HONOU_RENDER_VKSURFACE_H
+#endif //HONOU_RHI_VKSURFACE_H

@@ -1,5 +1,5 @@
-#ifndef HONOU_RENDER_IDEVICE_H
-#define HONOU_RENDER_IDEVICE_H
+#ifndef HONOU_RHI_IDEVICE_H
+#define HONOU_RHI_IDEVICE_H
 
 class VKDevice;
 class DX12Device;
@@ -30,4 +30,4 @@ private:
 	IQueue* m_GraphicsQueueRef = nullptr;
 };
 
-#endif //HONOU_RENDER_IDEVICE_H
+#endif //HONOU_RHI_IDEVICE_H
