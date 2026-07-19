@@ -240,6 +240,16 @@ TEST(VKRHITest, RenderLoop)
 	VKSwapChain swapChain;
 	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
 
+	VKImage depthBuffer;
+	const ImageDescription depth{
+		.width = window.GetWidth(),
+		.height = window.GetHeight(),
+		.channelCount = 4,
+		.data = nullptr,
+		.format = TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
+	};
+	depthBuffer.CreateDepthImage(&device, depth);
+
 	VKPipeline pipeline;
 	pipeline.CreatePipeline(&device);
 
@@ -320,7 +330,7 @@ TEST(VKRHITest, RenderLoop)
 
 		const ICommandBuffer::MemoryBarrierInfo info{
 			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-			.newLayout = ICommandBuffer::Layout::RENDER_TARGET,
+			.newLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
 
 			.syncSource{
 				.stages = ICommandBuffer::PipelineStage::COLOR_ATTACHMENT,
@@ -335,7 +345,24 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info);
 
-		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), window.GetWidth(), window.GetHeight());
+		const ICommandBuffer::MemoryBarrierInfo infoDepth{
+			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+			.newLayout = ICommandBuffer::Layout::DEPTH_STENCIL_OPTIMAL,
+
+			.syncSource{
+				.stages = ICommandBuffer::PipelineStage::EARLY_FRAGMENT_TEST,
+				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
+			},
+
+			.syncDest{
+				.stages = ICommandBuffer::PipelineStage::LATE_FRAGMENT_TEST,
+				.access = ICommandBuffer::Access::DEPTH_STENCIL_ATTACHMENT_WRITE
+			}
+		};
+
+		cCmdBuffer->AddMemoryBarrier(&depthBuffer, infoDepth);
+
+		cCmdBuffer->BeginRendering(swapChain.GetCurrentImage(), &depthBuffer, window.GetWidth(), window.GetHeight());
 
 		cCmdBuffer->SetViewport(window.GetWidth(), window.GetHeight());
 
@@ -402,7 +429,7 @@ TEST(VKRHITest, RenderLoop)
 		cCmdBuffer->EndRendering();
 
 		const ICommandBuffer::MemoryBarrierInfo info2{
-			.oldLayout = ICommandBuffer::Layout::RENDER_TARGET,
+			.oldLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
 			.newLayout = ICommandBuffer::Layout::PRESENT,
 
 			.syncSource{

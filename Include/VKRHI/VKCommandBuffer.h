@@ -23,7 +23,7 @@ public:
 
 	void Reset() const override final;
 
-	void BeginRendering(IImage* _image, uint32_t _width, uint32_t _height) const override final;
+	void BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const override final;
 	void EndRendering() const override final;
 
 	void BindPipeline(IPipeline* _pipeline) const override final;

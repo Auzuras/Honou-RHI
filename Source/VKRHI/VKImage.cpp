@@ -9,6 +9,7 @@
 void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description)
 {
 	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
+	p_Format = _description.format;
 
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
@@ -83,6 +84,30 @@ void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description
 	allocator.DestroyCommandAllocator(_device);
 }
 
+void VKImage::CreateDepthImage(IDevice* _device, const ImageDescription& _description)
+{
+	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
+	p_Format = _description.format;
+
+	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
+
+	// Image creation
+	{
+		m_Image = VKImage::CreateImage(lDevice, _description);
+	}
+
+	// Image Memory allocation
+	{
+		m_ImageMemory = VKImage::AllocateImage(lDevice, pDevice, m_Image);
+	}
+
+	// Image View creation
+	{
+		m_ImageView = VKImage::CreateImageView(lDevice, m_Image, _description);
+	}
+}
+
 void VKImage::DestroyImage(IDevice* _device)
 {
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
@@ -126,7 +151,12 @@ VkImage VKImage::CreateImage(VkDevice _device, const ImageDescription& _descript
 		.arrayLayers	= 1,
 		.samples		= VK_SAMPLE_COUNT_1_BIT,
 		.tiling			= VK_IMAGE_TILING_OPTIMAL,
-		.usage			= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		.usage = static_cast<VkImageUsageFlags>(
+			_description.format == TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
+				? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+				: (VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+				   VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+				   VK_IMAGE_USAGE_SAMPLED_BIT)),
 		.initialLayout	= VK_IMAGE_LAYOUT_UNDEFINED
 	};
 
@@ -179,7 +209,9 @@ VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Ima
 		.viewType			= VK_IMAGE_VIEW_TYPE_2D,
 		.format				= MapToVkFormat(_description.format),
 		.subresourceRange = {
-			.aspectMask		= VK_IMAGE_ASPECT_COLOR_BIT,
+			.aspectMask		= _description.format == TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
+		? static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_DEPTH_BIT)
+		: static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_COLOR_BIT),
 			.levelCount		= 1,
 			.layerCount		= 1
 		}

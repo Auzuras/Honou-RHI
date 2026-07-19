@@ -105,11 +105,13 @@ void VKPipeline::CreatePipeline(IDevice* _device)
     };
 
     const VkFormat imageFormat{ VK_FORMAT_B8G8R8A8_UNORM };
+    const VkFormat depthFormat{ VK_FORMAT_D32_SFLOAT_S8_UINT };
 
     const VkPipelineRenderingCreateInfo renderingCI{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
         .colorAttachmentCount = 1,
-        .pColorAttachmentFormats = &imageFormat
+        .pColorAttachmentFormats = &imageFormat,
+        .depthAttachmentFormat = depthFormat
     };
 
     const VkPipelineColorBlendAttachmentState blendAttachment{
@@ -120,6 +122,13 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .sType              =   VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
         .attachmentCount    =   1,
         .pAttachments       =   &blendAttachment
+    };
+
+    const VkPipelineDepthStencilStateCreateInfo depthStencilCI{
+        .sType              =   VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        .depthTestEnable    =   VK_TRUE,
+        .depthWriteEnable   =   VK_TRUE,
+        .depthCompareOp     =   VK_COMPARE_OP_LESS_OR_EQUAL
     };
 
     const VkPipelineRasterizationStateCreateInfo rasterizationStateCI{
@@ -142,7 +151,7 @@ void VKPipeline::CreatePipeline(IDevice* _device)
         .pViewportState         =    &viewportState,
         .pRasterizationState    =    &rasterizationStateCI,
         .pMultisampleState      =    &multisampleStateCI,
-        .pDepthStencilState     =    VK_NULL_HANDLE,
+        .pDepthStencilState     =    &depthStencilCI,
         .pColorBlendState       =    &colorBlendStateCI,
         .pDynamicState          =    &dynamicState,
         .layout                 =    m_PipelineLayout

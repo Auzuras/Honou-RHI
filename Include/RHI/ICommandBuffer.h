@@ -21,14 +21,16 @@ public:
 	{
 		UNDEFINED = 0,
 
-		RENDER_TARGET = 1,
-		SHADER_READ = 2,
-		UNORDERED_ACCESS = 3,
+		COLOR_OPTIMAL = 1,
+		DEPTH_OPTIMAL = 2,
+		DEPTH_STENCIL_OPTIMAL = 3,
+		SHADER_READ = 4,
+		UNORDERED_ACCESS = 5,
 
-		TRANSFER_SRC = 4,
-		TRANSFER_DST = 5,
+		TRANSFER_SRC = 6,
+		TRANSFER_DST = 7,
 
-		PRESENT = 6
+		PRESENT = 8
 	};
 
 	enum class PipelineStage : uint64_t
@@ -37,10 +39,12 @@ public:
 
 		VERTEX_SHADER = 1ull << 0,
 		FRAGMENT_SHADER = 1ull << 1,
+		EARLY_FRAGMENT_TEST = 1ull << 2,
+		LATE_FRAGMENT_TEST = 1ull << 3,
 
-		COLOR_ATTACHMENT = 1ull << 2,
+		COLOR_ATTACHMENT = 1ull << 4,
 
-		TRANSFER = 1ull << 3
+		TRANSFER = 1ull << 5
 	};
 
 	enum class Access : uint64_t
@@ -53,8 +57,11 @@ public:
 		COLOR_ATTACHMENT_READ = 1ull << 2,
 		COLOR_ATTACHMENT_WRITE = 1ull << 3,
 
-		TRANSFER_READ = 1ull << 4,
-		TRANSFER_WRITE = 1ull << 5,
+		DEPTH_STENCIL_ATTACHMENT_READ = 1ull << 4,
+		DEPTH_STENCIL_ATTACHMENT_WRITE = 1ull << 5,
+
+		TRANSFER_READ = 1ull << 6,
+		TRANSFER_WRITE = 1ull << 7,
 	};
 
 	struct MemoryBarrierInfo
@@ -79,7 +86,7 @@ public:
 
 	virtual void Reset() const = 0;
 
-	virtual void BeginRendering(IImage* _image, uint32_t _width, uint32_t _height) const = 0;
+	virtual void BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const = 0;
 	virtual void EndRendering() const = 0;
 
 	virtual void BindPipeline(IPipeline* _pipeline) const = 0;
