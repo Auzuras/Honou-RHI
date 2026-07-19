@@ -384,8 +384,8 @@ TEST(VKRHITest, RenderLoop)
 		} constants;
 
 		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, 1.f), Vector3f(0.f, 1.f, 0.f));
-		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * static_cast<float>(KM_INTERNAL_DEG_2_RAD));
-		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * static_cast<float>(KM_INTERNAL_DEG_2_RAD)) * M.YRotation(rotation * static_cast<float>(KM_INTERNAL_DEG_2_RAD)), M.Scaling(1.f, 1.f, 1.f)).Transpose();
+		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_DEG_2_RAD(float));
+		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * KM_DEG_2_RAD(float)) * M.YRotation(rotation * KM_DEG_2_RAD(float)), M.Scaling(1.f, 1.f, 1.f)).Transpose();
 		rotation += 25.f * dt;
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
