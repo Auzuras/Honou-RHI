@@ -21,7 +21,7 @@ public:
 	DX12Queue* CastToDX12() override final { return nullptr; }
 	OGLQueue* CastToOGL() override final { return nullptr; }
 
-	[[nordiscard]] VkQueue GetRaw() const { return m_Queue; }
+	VkQueue GetRaw() const { return m_Queue; }
 
 private:
 

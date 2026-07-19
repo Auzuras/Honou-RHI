@@ -71,3 +71,9 @@ target_link_libraries(HonouRHITests PRIVATE KooriMath)
 target_link_libraries(HonouRHITests PRIVATE KooriWindow)
 
 target_link_libraries(HonouRHITests PRIVATE HonouRHI)
+
+if (MSVC)
+    target_compile_options(HonouRHITests PRIVATE /W4 /WX)
+else ()
+    target_compile_options(HonouRHITests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif ()

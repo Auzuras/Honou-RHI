@@ -37,7 +37,7 @@ private:
 	VkImageView m_ImageView = VK_NULL_HANDLE;
 };
 
-static VkFormat MapToVkFormat(const TextureFormat _format)
+static inline VkFormat MapToVkFormat(const TextureFormat _format)
 {
 	// TEMP WILL MOVE IN AN OTHER FILE
 	switch (_format)

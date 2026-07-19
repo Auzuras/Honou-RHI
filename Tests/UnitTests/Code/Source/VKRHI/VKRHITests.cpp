@@ -142,7 +142,6 @@ TEST(VKRHITest, Mesh)
 	std::vector<tinyobj::material_t> materials{};
 	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Knight.obj");
 
-	const size_t indicesCount = shapes[0].mesh.indices.size();
 	std::vector<Vertex> vertices{};
 	std::vector<uint16_t> indices{};
 
@@ -155,7 +154,7 @@ TEST(VKRHITest, Mesh)
 		};
 
 		vertices.push_back(v);
-		indices.push_back(indices.size());
+		indices.push_back(static_cast<uint16_t>(indices.size()));
 	}
 
 	VKInstance instance;
@@ -214,6 +213,8 @@ TEST(VKRHITest, RenderLoop)
 	window.SetResizeCallback(
 		[&](uint32_t _width, uint32_t _height)
 		{
+			static_cast<void>(_width);
+			static_cast<void>(_height);
 			windowResized = true;
 		}
 	);
@@ -258,7 +259,6 @@ TEST(VKRHITest, RenderLoop)
 	std::vector<tinyobj::material_t> materials{};
 	tinyobj::LoadObj(&attrib, &shapes, &materials, nullptr, nullptr, "Assets/Meshes/Knight.obj");
 
-	const size_t indicesCount = shapes[0].mesh.indices.size();
 	std::vector<Vertex> vertices{};
 	std::vector<uint16_t> indices{};
 
@@ -271,7 +271,7 @@ TEST(VKRHITest, RenderLoop)
 		};
 
 		vertices.push_back(v);
-		indices.push_back(indices.size());
+		indices.push_back(static_cast<uint16_t>(indices.size()));
 	}
 
 	VKBuffer vertexBuffer;
@@ -328,7 +328,7 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->Open();
 
-		const ICommandBuffer::MemoryBarrierInfo info{
+		const ICommandBuffer::MemoryBarrierInfo barrierInfo{
 			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
 			.newLayout = ICommandBuffer::Layout::COLOR_OPTIMAL,
 
@@ -343,7 +343,7 @@ TEST(VKRHITest, RenderLoop)
 			}
 		};
 
-		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), info);
+		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
 
 		const ICommandBuffer::MemoryBarrierInfo infoDepth{
 			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
@@ -384,8 +384,8 @@ TEST(VKRHITest, RenderLoop)
 		} constants;
 
 		constants.ProjectionView = VP.ViewMatrix(Vector3f(0.f, 0.f, 0.f), Vector3f(0.f, 0.f, 1.f), Vector3f(0.f, 1.f, 0.f));
-		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * KM_INTERNAL_DEG_2_RAD);
-		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * KM_INTERNAL_DEG_2_RAD) * M.YRotation(rotation * KM_INTERNAL_DEG_2_RAD), M.Scaling(1.f, 1.f, 1.f)).Transpose();
+		constants.ProjectionView = constants.ProjectionView * VP.PerspectiveProjection(0.1f, 100.f, static_cast<float>(window.GetWidth())/static_cast<float>(window.GetHeight()) , 90.f * static_cast<float>(KM_INTERNAL_DEG_2_RAD));
+		constants.Model = M.TRS(M.Translation(0.f, 2.5f, -5.f), M.XRotation(-180.f * static_cast<float>(KM_INTERNAL_DEG_2_RAD)) * M.YRotation(rotation * static_cast<float>(KM_INTERNAL_DEG_2_RAD)), M.Scaling(1.f, 1.f, 1.f)).Transpose();
 		rotation += 25.f * dt;
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
@@ -424,7 +424,7 @@ TEST(VKRHITest, RenderLoop)
 
 		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
 
-		cCmdBuffer->DrawIndexed(indices.size());
+		cCmdBuffer->DrawIndexed(static_cast<uint32_t>(indices.size()));
 
 		cCmdBuffer->EndRendering();
 
