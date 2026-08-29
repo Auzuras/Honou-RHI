@@ -89,7 +89,12 @@ TEST(VKRHITest, SwapChainTest)
 	device.CreateDevice(&instance);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+	const ISwapChain::Description scDesc{
+		.width = window.GetWidth(),
+		.height = window.GetHeight(),
+		.surface = &surface
+	};
+	swapChain.CreateSwapChain(&device, scDesc);
 	swapChain.DestroySwapChain(&device);
 
 	device.DestroyDevice();
@@ -265,7 +270,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+	ISwapChain::Description scDesc{
+		.width = window.GetWidth(),
+		.height = window.GetHeight(),
+		.surface = &surface
+	};
+	swapChain.CreateSwapChain(&device, scDesc);
 
 	VKImage depthBuffer;
 	ImageDescription depth{
@@ -513,7 +523,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 			windowResized = false;
 
 			device.WaitIdle();
-			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+			scDesc = {
+				.width = window.GetWidth(),
+				.height = window.GetHeight(),
+				.surface = &surface
+			};
+			swapChain.RecreateSwapChain(&device, scDesc);
 			depthBuffer.DestroyImage(&device);
 
 			depth.width = window.GetWidth();
@@ -587,7 +602,12 @@ TEST(VKRHITest, ComputeRenderLoop)
 	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
 
 	VKSwapChain swapChain;
-	swapChain.CreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+	ISwapChain::Description scDesc{
+		.width = window.GetWidth(),
+		.height = window.GetHeight(),
+		.surface = &surface
+	};
+	swapChain.CreateSwapChain(&device, scDesc);
 
 	VKShaderModule computeSM;
 	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
@@ -757,7 +777,12 @@ TEST(VKRHITest, ComputeRenderLoop)
 				computeImages[i].CreateImage(&device, computeImageDesc);
 			}
 
-			swapChain.RecreateSwapChain(&device, &surface, window.GetWidth(), window.GetHeight());
+			scDesc = {
+				.width = window.GetWidth(),
+				.height = window.GetHeight(),
+				.surface = &surface
+			};
+			swapChain.RecreateSwapChain(&device, scDesc);
 		}
 	}
 

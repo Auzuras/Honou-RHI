@@ -10,28 +10,28 @@
 
 #include <string>
 
-void VKSwapChain::CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height)
+void VKSwapChain::CreateSwapChain(IDevice* _device, const Description& _description)
 {
-    const VkSurfaceKHR surface = _surface->CastToVK()->GetRaw();
+    const VkSurfaceKHR surface = _description.surface->CastToVK()->GetRaw();
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _width, _height);
+    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _description.width, _description.height);
 
     vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &m_SwapChain);
 
-    CreateSwapChainImages(_device, _width, _height);
+    CreateSwapChainImages(_device, _description.width, _description.height);
 
     CreateSwapChainSyncObjects(_device);
 }
 
-void VKSwapChain::RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height)
+void VKSwapChain::RecreateSwapChain(IDevice* _device, const Description& _description)
 {
-    const VkSurfaceKHR surface = _surface->CastToVK()->GetRaw();
+    const VkSurfaceKHR surface = _description.surface->CastToVK()->GetRaw();
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _width, _height);
+    VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _description.width, _description.height);
     swapChainCI.oldSwapchain = m_SwapChain;
 
     VkSwapchainKHR swapChain = VK_NULL_HANDLE;
@@ -43,7 +43,7 @@ void VKSwapChain::RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32
 
     m_SwapChain = swapChain;
 
-    CreateSwapChainImages(_device, _width, _height);
+    CreateSwapChainImages(_device, _description.width, _description.height);
 }
 
 void VKSwapChain::DestroySwapChain(IDevice* _device)

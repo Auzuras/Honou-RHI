@@ -10,8 +10,8 @@ class VKSwapChain : public ISwapChain
 public:
     ~VKSwapChain() override final = default;
 
-    void CreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) override final;
-    void RecreateSwapChain(IDevice* _device, ISurface* _surface, uint32_t _width, uint32_t _height) override final;
+    void CreateSwapChain(IDevice* _device, const Description& _description) override final;
+    void RecreateSwapChain(IDevice* _device, const Description& _description) override final;
     void DestroySwapChain(IDevice* _device) override final;
 
     uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
