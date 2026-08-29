@@ -9,5 +9,4 @@ class RHITest : public testing::Test {};
 
 TEST(RHITest, RenderHardwareTest)
 {
-	IRenderHardware* rhi;
 }

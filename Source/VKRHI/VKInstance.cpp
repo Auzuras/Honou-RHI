@@ -44,7 +44,7 @@ void VKInstance::CreateInstance()
 	const VkResult result = vkCreateInstance(&instanceDesc, nullptr, &m_Instance);
 	HOUNOU_ASSERT(result == VK_SUCCESS, L"Failed to create Vulkan application instance", L"Vulkan error code:");
 
-	HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance successfully created!");
+	HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance successfully created!", L"");
 
 	VkDebugUtilsMessengerCreateInfoEXT debugMessengerCI{
 		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -75,7 +75,7 @@ void VKInstance::DestroyInstance()
 	if (func) func(m_Instance, m_DebugMessenger, nullptr);
 
 	vkDestroyInstance(m_Instance, nullptr);
-	HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance destroyed!");
+	HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance destroyed!", L"");
 }
 
 bool VKInstance::CheckValidationLayerSupport()
@@ -115,15 +115,15 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VKInstance::DebugCallback(VkDebugUtilsMessageSeve
 	switch (_messageSeverity)
 	{
 	default: case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-		HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance destroyed!");
+		HOUNOU_INFO(L"VulkanRHI", L"Vulkan application instance destroyed!", L"");
 		std::cout << "INFO: " << _messageType << " Vulkan Validation Layer : " << _callBackData->pMessage << "\n\n";
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-		HOUNOU_WARN(L"VulkanRHI", L"Vulkan application instance destroyed!");
+		HOUNOU_WARN(L"VulkanRHI", L"Vulkan application instance destroyed!", L"");
 		std::cout << "WARN: " << _messageType << " Vulkan Validation Layer: " << _callBackData->pMessage << "\n\n";
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
-		HOUNOU_ERROR(L"VulkanRHI", L"Vulkan application instance destroyed!");
+		HOUNOU_ERROR(L"VulkanRHI", L"Vulkan application instance destroyed!", L"");
 		std::cout << "ERROR: " << _messageType << " Vulkan Validation Layer: " << _callBackData->pMessage << "\n\n";
 		break;
 	}
