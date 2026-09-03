@@ -215,12 +215,12 @@ TEST(VKRHITest, Texture)
 	VKQueue graphicsQueue;
 	graphicsQueue.CreateQueue(&device);
 
-	const ImageDescription imgDesc{
+	const IImage::Description imgDesc{
 		.width = static_cast<uint32_t>(width),
 		.height = static_cast<uint32_t>(height),
 		.channelCount = static_cast<uint8_t>(channels),
-		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM,
-		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT | (uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED | (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST),
+		.format = IImage::Format::HONOU_FORMAT_R8G8B8A8_UNORM,
+		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT | (uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED | (uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST),
 		.data = data
 	};
 
@@ -278,12 +278,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	swapChain.CreateSwapChain(&device, scDesc);
 
 	VKImage depthBuffer;
-	ImageDescription depth{
+	IImage::Description depth{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
 		.channelCount = 4,
-		.format = TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT,
-		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT),
+		.format = IImage::Format::HOUNOU_FORMAT_D32_FLOAT_S8_UINT,
+		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT),
 		.data = nullptr,
 	};
 	depthBuffer.CreateImage(&device, depth);
@@ -341,12 +341,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 	if (!data) return;
 
-	const ImageDescription imgDesc{
+	const IImage::Description imgDesc{
 		.width = static_cast<uint32_t>(width),
 		.height = static_cast<uint32_t>(height),
 		.channelCount = static_cast<uint8_t>(channels),
-		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM,
-		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT | (uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED | (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST),
+		.format = IImage::Format::HONOU_FORMAT_R8G8B8A8_UNORM,
+		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT | (uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED | (uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST),
 		.data = data
 	};
 
@@ -625,16 +625,16 @@ TEST(VKRHITest, ComputeRenderLoop)
 	VKDescriptorAllocator descAllocator;
 	descAllocator.CreateDescriptorAllocator(&device);
 
-	ImageDescription computeImageDesc{
+	IImage::Description computeImageDesc{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
 		.channelCount = 4,
-		.format = TextureFormat::HONOU_FORMAT_R8G8B8A8_UNORM,
-		.usage = TextureUsage((uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT | 
-			(uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED | 
-			(uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST |
-			(uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_SRC |
-			(uint64_t)TextureUsage::HOUNOU_USAGE_STORAGE),
+		.format = IImage::Format::HONOU_FORMAT_R8G8B8A8_UNORM,
+		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT |
+			(uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED | 
+			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST |
+			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_SRC |
+			(uint64_t)IImage::Usage::HOUNOU_USAGE_STORAGE),
 		.data = nullptr
 	};
 

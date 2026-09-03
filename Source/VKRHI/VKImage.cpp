@@ -11,23 +11,23 @@ static VkImageUsageFlags ToVkImageUsage(uint64_t _usage)
 {
 	VkImageUsageFlags flags = 0;
 
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_COLOR_ATTACHMENT) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT) != 0)
 		flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_DEPTH_STENCIL_ATTACHMENT) != 0)
 		flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_SRC) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_SRC) != 0)
 		flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_TRANSFER_DST) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST) != 0)
 		flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_SAMPLED) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED) != 0)
 		flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
-	if ((_usage & (uint64_t)TextureUsage::HOUNOU_USAGE_STORAGE) != 0)
+	if ((_usage & (uint64_t)IImage::Usage::HOUNOU_USAGE_STORAGE) != 0)
 		flags |= VK_IMAGE_USAGE_STORAGE_BIT;
 
 	return flags;
 }
 
-void VKImage::CreateImage(IDevice* _device, const ImageDescription& _description)
+void VKImage::CreateImage(IDevice* _device, const Description& _description)
 {
 	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
 	p_Format = _description.format;
@@ -86,7 +86,7 @@ void VKImage::SetName(IDevice* _device, const char* _name)
 }
 
 
-void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const ImageDescription& _description)
+void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const Description& _description)
 {
 	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
 	p_Format = _description.format;
@@ -103,7 +103,7 @@ void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const ImageD
 	}
 }
 
-VkImage VKImage::CreateImage(VkDevice _device, const ImageDescription& _description)
+VkImage VKImage::CreateImage(VkDevice _device, const Description& _description)
 {
 	const VkImageCreateInfo imageCI{
 		.sType			= VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -163,7 +163,7 @@ VkDeviceMemory VKImage::AllocateImage(VkDevice _device, VkPhysicalDevice _physic
 	return memory;
 }
 
-VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const ImageDescription& _description)
+VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Description& _description)
 {
 	const VkImageViewCreateInfo imageViewCI{
 		.sType				= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -171,7 +171,7 @@ VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Ima
 		.viewType			= VK_IMAGE_VIEW_TYPE_2D,
 		.format				= MapToVkFormat(_description.format),
 		.subresourceRange = {
-			.aspectMask		= _description.format == TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
+			.aspectMask		= _description.format == Format::HOUNOU_FORMAT_D32_FLOAT_S8_UINT
 		? static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_DEPTH_BIT)
 		: static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_COLOR_BIT),
 			.levelCount		= 1,
@@ -186,7 +186,7 @@ VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Ima
 	return imageView;
 }
 
-void VKImage::UploadData(IDevice* _device, const ImageDescription& _description)
+void VKImage::UploadData(IDevice* _device, const Description& _description)
 {
 	VkDeviceSize totalSize = _description.width * _description.height * 4;
 

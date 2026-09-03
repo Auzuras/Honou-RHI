@@ -2,7 +2,6 @@
 
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSurface.h>
-#include <Helpers/Image.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKFence.h>
@@ -97,10 +96,10 @@ void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint3
     scImages.resize(p_SwapChainImagesCount);
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, scImages.data());
 
-    const ImageDescription desc{
+    const IImage::Description desc{
         .width = _width,
         .height = _height,
-        .format = TextureFormat::HONOU_FORMAT_B8G8R8A8_UNORM
+        .format = IImage::Format::HONOU_FORMAT_B8G8R8A8_UNORM
     };
 
     // TODO: Rework
@@ -173,7 +172,7 @@ VkSwapchainCreateInfoKHR VKSwapChain::CreateSwapChainInfo(VkDevice _device, VkPh
     if (surfaceCaps.currentExtent.width == 0xFFFFFFFF)
         return VkSwapchainCreateInfoKHR();
 
-    const TextureFormat scFormat = TextureFormat::HONOU_FORMAT_B8G8R8A8_UNORM;
+    const IImage::Format scFormat = IImage::Format::HONOU_FORMAT_B8G8R8A8_UNORM;
     const VkFormat imageFormat = MapToVkFormat(scFormat);
 
     VkSwapchainCreateInfoKHR swapChainCI{

@@ -207,7 +207,7 @@ void VKCommandBuffer::AddMemoryBarrier(IImage* _image, MemoryBarrierInfo _memory
 		.image			=	image,
 
 		.subresourceRange{
-			.aspectMask		=  _image->GetFormat() == TextureFormat::HOUNOU_FORMAT_D32_FLOAT_S8_UINT ? (VkImageAspectFlags)(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : (VkImageAspectFlags)VK_IMAGE_ASPECT_COLOR_BIT,
+			.aspectMask		=  _image->GetFormat() == IImage::Format::HOUNOU_FORMAT_D32_FLOAT_S8_UINT ? (VkImageAspectFlags)(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : (VkImageAspectFlags)VK_IMAGE_ASPECT_COLOR_BIT,
 			.levelCount		=	1,
 			.layerCount		=	1
 		}
