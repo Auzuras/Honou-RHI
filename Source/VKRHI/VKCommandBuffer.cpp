@@ -364,6 +364,17 @@ void VKCommandBuffer::Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uin
 	vkCmdDispatch(m_CommandBuffer, _groupCountX, _groupCountY, _groupCountZ);
 }
 
+void VKCommandBuffer::DrawIndexedIndirect(IBuffer* _buffer, uint32_t _offset) const
+{
+
+}
+
+void VKCommandBuffer::DispatchIndirect(IBuffer* _buffer, uint32_t _offset) const
+{
+	VkBuffer buffer = _buffer->CastToVK()->GetRaw();
+	vkCmdDispatchIndirect(m_CommandBuffer, buffer, _offset);
+}
+
 void VKCommandBuffer::AddLabel(const char* _name, const std::array<float, 4>& _color) const
 {
 	const VkDebugUtilsLabelEXT label{

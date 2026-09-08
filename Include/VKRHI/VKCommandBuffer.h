@@ -47,6 +47,9 @@ public:
 	void DrawIndexed(uint32_t _indexCount) const override final;
 	void Dispatch(uint32_t _groupCountX, uint32_t _groupCountY, uint32_t _groupCountZ) const override final;
 
+	void DrawIndexedIndirect(IBuffer* _buffer, uint32_t _offset) const override final;
+	void DispatchIndirect(IBuffer* _buffer, uint32_t _offset) const override final;
+
 	void AddLabel(const char* _name, const std::array<float, 4>& _color) const override final;
 	void EndLabel() const override final;
 
