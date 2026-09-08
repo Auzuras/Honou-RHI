@@ -29,12 +29,12 @@ void VKDevice::CreateDevice(IInstance* _instance)
 		}
 	}
 
-	const float QFPriorities{ 1.0f };
+	std::vector<float> priorities(50, 1.0f);
 	VkDeviceQueueCreateInfo queueCI{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 		.queueFamilyIndex = queueFamily,
-		.queueCount = 1,
-		.pQueuePriorities = &QFPriorities
+		.queueCount = 50,
+		.pQueuePriorities = priorities.data()
 	};
 
 	const std::vector<const char*> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };

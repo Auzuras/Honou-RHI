@@ -47,33 +47,54 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence
 	vkQueueSubmit(m_Queue, 1, &submitInfo, fence);
 }
 
-void VKQueue::CreateQueue(IDevice* _device)
+void VKQueue::CreateQueue(IDevice* _device, Type _queueType)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
 
-	uint32_t queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(pDevice, &queueFamilyCount, nullptr);
-
-	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(pDevice, &queueFamilyCount, queueFamilies.data());
-
-	int value = 0;
-
-	const size_t familySize = queueFamilies.size();
-	for (size_t i = 0; i < familySize; ++i)
-	{
-		const VkQueueFamilyProperties& queueFamily = queueFamilies[i];
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			value = i;
-	}
-
 	_device->SetGraphicsQueue(this);
 
-	vkGetDeviceQueue(lDevice, value, 0, &m_Queue);
+	Families families = VKQueue::GetQueueFamilies(pDevice);
+
+	vkGetDeviceQueue(lDevice, 0, 0, &m_Queue);
 }
 
 void VKQueue::WaitIdle()
 {
 	vkQueueWaitIdle(m_Queue);
+}
+
+VKQueue::Families VKQueue::GetQueueFamilies(VkPhysicalDevice _physicalDevice)
+{
+	Families families{};
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+	const size_t familySize = queueFamilies.size();
+	for (size_t i = 0; i < familySize; ++i)
+	{
+		const VkQueueFamilyProperties& queueFamily = queueFamilies[i];
+
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			families.graphicsFamily = i;
+			families.graphicsQueueCount = queueFamily.queueCount;
+		}
+		else if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		{
+			families.computeFamily = i;
+			families.computeQueueCount = queueFamily.queueCount;
+		}
+		else if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
+		{ 
+			families.transferFamily = i;
+			families.transferQueueCount = queueFamily.queueCount;
+		}
+	}
+
+	return families;
 }

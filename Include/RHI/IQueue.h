@@ -10,12 +10,22 @@ class ICommandBuffer;
 class IFence;
 class ISyncPoint;
 
+#include <cstdint>
+
 class IQueue
 {
 public:
+
+	enum class Type : uint8_t
+	{
+		QUEUE_TYPE_GRAPHICS		=	0,
+		QUEUE_TYPE_COMPUTE		=	1,
+		QUEUE_TYPE_COPY			=	2
+	};
+
 	virtual ~IQueue() = default;
 
-	virtual void CreateQueue(IDevice* _device) = 0;
+	virtual void CreateQueue(IDevice* _device, Type _queueType) = 0;
 
 	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) = 0;
 	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence, ISyncPoint* _waitPoint, ISyncPoint* _signalPoint) = 0;

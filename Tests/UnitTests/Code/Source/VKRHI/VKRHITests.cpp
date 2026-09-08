@@ -5,6 +5,7 @@
 #include <VKRHI/VKSurface.h>
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKPipeline.h>
+#include <VKRHI/VKPipelineLayout.h>
 #include <VKRHI/VKCommandAllocator.h>
 #include <VKRHI/VKCommandBuffer.h>
 #include <VKRHI/VKImage.h>
@@ -213,7 +214,7 @@ TEST(VKRHITest, Texture)
 	device.CreateDevice(&instance);
 
 	VKQueue graphicsQueue;
-	graphicsQueue.CreateQueue(&device);
+	graphicsQueue.CreateQueue(&device, IQueue::Type::QUEUE_TYPE_GRAPHICS);
 
 	const IImage::Description imgDesc{
 		.width = static_cast<uint32_t>(width),
@@ -262,7 +263,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	device.CreateDevice(&instance);
 
 	VKQueue graphicsQueue;
-	graphicsQueue.CreateQueue(&device);
+	graphicsQueue.CreateQueue(&device, IQueue::Type::QUEUE_TYPE_GRAPHICS);
 
 	VKCommandAllocator cmdAlloc;
 	cmdAlloc.CreateCommandAllocator(&device);
@@ -594,7 +595,7 @@ TEST(VKRHITest, ComputeRenderLoop)
 	device.CreateDevice(&instance);
 
 	VKQueue graphicsQueue;
-	graphicsQueue.CreateQueue(&device);
+	graphicsQueue.CreateQueue(&device, IQueue::Type::QUEUE_TYPE_GRAPHICS);
 
 	VKCommandAllocator cmdAlloc;
 	cmdAlloc.CreateCommandAllocator(&device);
