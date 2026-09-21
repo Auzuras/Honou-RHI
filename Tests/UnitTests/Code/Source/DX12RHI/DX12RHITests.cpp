@@ -3,6 +3,7 @@
 #include <Window/Window.h>
 
 #include <DX12RHI/DX12Instance.h>
+#include <DX12RHI/DX12Device.h>
 
 class DX12RHITest : public testing::Test {};
 
@@ -15,7 +16,14 @@ TEST(DX12RHITest, InstanceTest)
 
 TEST(DX12RHITest, DeviceTest)
 {
+	DX12Instance instance;
+	instance.CreateInstance();
 
+	DX12Device device;
+	device.CreateDevice(&instance);
+	device.DestroyDevice();
+
+	instance.DestroyInstance();
 }
 
 TEST(DX12RHITest, SurfaceTest)
