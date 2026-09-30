@@ -55,7 +55,7 @@ TEST(VKRHITest, SurfaceTest)
 	VKInstance instance;
 	instance.CreateInstance();
 	
-	Window window(1920, 1080);
+	Window window(1920, 1080, "Vulkan Window");
 
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
@@ -76,7 +76,7 @@ TEST(VKRHITest, SwapChainTest)
 	VKInstance instance;
 	instance.CreateInstance();
 
-	Window window(1920, 1080);
+	Window window(1920, 1080, "Vulkan Window");
 
 	VKSurface surface;
 	ISurface::SurfaceInformation info{
@@ -241,7 +241,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	instance.CreateInstance();
 
 	bool windowResized = false;
-	Window window(1920, 1080);
+	Window window(1920, 1080, "Vulkan Window");
 	window.SetResizeCallback(
 		[&](uint32_t _width, uint32_t _height)
 		{
@@ -573,7 +573,7 @@ TEST(VKRHITest, ComputeRenderLoop)
 	instance.CreateInstance();
 
 	bool windowResized = false;
-	Window window(1920, 1080);
+	Window window(1920, 1080, "Vulkan Window");
 	window.SetResizeCallback(
 		[&](uint32_t _width, uint32_t _height)
 		{

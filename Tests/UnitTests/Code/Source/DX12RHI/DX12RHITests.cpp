@@ -28,14 +28,14 @@ TEST(DX12RHITest, DeviceTest)
 
 TEST(DX12RHITest, SurfaceTest)
 {
-	Window window(1920, 1080);
+	Window window(1920, 1080, "DX12 Window");
 
 	window.KooriDestroyWindow();
 }
 
 TEST(DX12RHITest, SwapChainTest)
 {
-	Window window(1920, 1080);
+	Window window(1920, 1080, "DX12 Window");
 
 	window.KooriDestroyWindow();
 }
@@ -52,7 +52,7 @@ TEST(DX12RHITest, CommandAllocatorTest)
 
 TEST(DX12RHITest, RenderLoop)
 {
-	Window window(1920, 1080);
+	Window window(1920, 1080, "DX12 Window");
 
 
 	window.KooriDestroyWindow();
