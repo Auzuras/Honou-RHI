@@ -10,9 +10,9 @@ class VKSwapChain : public ISwapChain
 public:
     ~VKSwapChain() override final = default;
 
-    void CreateSwapChain(IDevice* _device, const Description& _description) override final;
+    void CreateSwapChain(IInstance* _instance, IDevice* _device, const Description& _description) override final;
     void RecreateSwapChain(IDevice* _device, const Description& _description) override final;
-    void DestroySwapChain(IDevice* _device) override final;
+    void DestroySwapChain(IInstance* _instance, IDevice* _device) override final;
 
     uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
     void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) override final;
@@ -34,6 +34,7 @@ private:
 private:
 
     VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
+    VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 };
 
 #endif //HONOU_RHI_VKSWAPCHAIN_H

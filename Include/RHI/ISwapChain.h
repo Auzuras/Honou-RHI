@@ -5,6 +5,7 @@ class VKSwapChain;
 class DX12SwapChain;
 class OGLSwapChain;
 
+class IInstance;
 class IDevice;
 class ISurface;
 class IImage;
@@ -13,6 +14,9 @@ class IFence;
 class ISyncPoint;
 
 #include <vector>
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 class ISwapChain
 {
@@ -23,15 +27,18 @@ public:
     public:
         uint32_t width      =   0u;
         uint32_t height     =   0u;
-        ISurface* surface   =   nullptr;
+//#ifdef WINDOWS
+        HINSTANCE instance = NULL;
+        HWND hwnd = NULL;
+//#endif // WINDOWS
     };
 
 public:
     virtual ~ISwapChain() = default;
 
-    virtual void CreateSwapChain(IDevice* _device, const Description& _description) = 0;
+    virtual void CreateSwapChain(IInstance* _instance, IDevice* _device, const Description& _description) = 0;
     virtual void RecreateSwapChain(IDevice* _device, const Description& _description) = 0;
-    virtual void DestroySwapChain(IDevice* _device) = 0;
+    virtual void DestroySwapChain(IInstance* _instance, IDevice* _device) = 0;
 
     virtual uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) = 0;
     virtual void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) = 0;

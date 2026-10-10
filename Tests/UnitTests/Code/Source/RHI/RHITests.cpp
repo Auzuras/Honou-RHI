@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <IRenderHardware.h>
+#include <RHI/IRenderHardware.h>
 
 #include <RHI/IInstance.h>
 #include <RHI/IDevice.h>

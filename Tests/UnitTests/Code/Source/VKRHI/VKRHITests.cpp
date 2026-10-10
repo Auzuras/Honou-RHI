@@ -2,7 +2,6 @@
 
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
-#include <VKRHI/VKSurface.h>
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKPipeline.h>
 #include <VKRHI/VKPipelineLayout.h>
@@ -50,41 +49,12 @@ TEST(VKRHITest, DeviceTest)
 	instance.DestroyInstance();
 }
 
-TEST(VKRHITest, SurfaceTest)
-{
-	VKInstance instance;
-	instance.CreateInstance();
-	
-	Window window(1920, 1080, "Vulkan Window");
-
-	VKSurface surface;
-	ISurface::SurfaceInformation info{
-		.instance = GetModuleHandle(NULL),
-		.hwnd = window.GetHandle()
-	};
-
-	surface.CreateSurface(&instance, info);
-	surface.DestroySurface(&instance);
-
-	instance.DestroyInstance();
-
-	window.KooriDestroyWindow();
-}
-
 TEST(VKRHITest, SwapChainTest)
 {
 	VKInstance instance;
 	instance.CreateInstance();
 
 	Window window(1920, 1080, "Vulkan Window");
-
-	VKSurface surface;
-	ISurface::SurfaceInformation info{
-		.instance = GetModuleHandle(NULL),
-		.hwnd = window.GetHandle()
-	};
-
-	surface.CreateSurface(&instance, info);
 
 	VKDevice device;
 	device.CreateDevice(&instance);
@@ -93,13 +63,13 @@ TEST(VKRHITest, SwapChainTest)
 	const ISwapChain::Description scDesc{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
-		.surface = &surface
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
 	};
-	swapChain.CreateSwapChain(&device, scDesc);
-	swapChain.DestroySwapChain(&device);
+	swapChain.CreateSwapChain(&instance, &device, scDesc);
+	swapChain.DestroySwapChain(&instance, &device);
 
 	device.DestroyDevice();
-	surface.DestroySurface(&instance);
 	instance.DestroyInstance();
 
 	window.KooriDestroyWindow();
@@ -251,14 +221,6 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		}
 	);
 
-	VKSurface surface;
-	ISurface::SurfaceInformation info{
-		.instance = GetModuleHandle(NULL),
-		.hwnd = window.GetHandle()
-	};
-
-	surface.CreateSurface(&instance, info);
-
 	VKDevice device;
 	device.CreateDevice(&instance);
 
@@ -274,9 +236,10 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	ISwapChain::Description scDesc{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
-		.surface = &surface
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
 	};
-	swapChain.CreateSwapChain(&device, scDesc);
+	swapChain.CreateSwapChain(&instance, &device, scDesc);
 
 	VKImage depthBuffer;
 	IImage::Description depth{
@@ -526,8 +489,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 			device.WaitIdle();
 			scDesc = {
 				.width = window.GetWidth(),
-				.height = window.GetHeight(),
-				.surface = &surface
+				.height = window.GetHeight()
 			};
 			swapChain.RecreateSwapChain(&device, scDesc);
 			depthBuffer.DestroyImage(&device);
@@ -555,13 +517,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 	pipeline.DestroyPipeline(&device);
 	
-	swapChain.DestroySwapChain(&device);
+	swapChain.DestroySwapChain(&instance, &device);
 
 	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
 	cmdAlloc.DestroyCommandAllocator(&device);
 
 	device.DestroyDevice();
-	surface.DestroySurface(&instance);
 	instance.DestroyInstance();
 
 	window.KooriDestroyWindow();
@@ -583,14 +544,6 @@ TEST(VKRHITest, ComputeRenderLoop)
 		}
 	);
 
-	VKSurface surface;
-	ISurface::SurfaceInformation info{
-		.instance = GetModuleHandle(NULL),
-		.hwnd = window.GetHandle()
-	};
-
-	surface.CreateSurface(&instance, info);
-
 	VKDevice device;
 	device.CreateDevice(&instance);
 
@@ -606,9 +559,10 @@ TEST(VKRHITest, ComputeRenderLoop)
 	ISwapChain::Description scDesc{
 		.width = window.GetWidth(),
 		.height = window.GetHeight(),
-		.surface = &surface
+		.instance = GetModuleHandle(NULL),
+		.hwnd = window.GetHandle()
 	};
-	swapChain.CreateSwapChain(&device, scDesc);
+	swapChain.CreateSwapChain(&instance, &device, scDesc);
 
 	VKShaderModule computeSM;
 	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
@@ -780,8 +734,7 @@ TEST(VKRHITest, ComputeRenderLoop)
 
 			scDesc = {
 				.width = window.GetWidth(),
-				.height = window.GetHeight(),
-				.surface = &surface
+				.height = window.GetHeight()
 			};
 			swapChain.RecreateSwapChain(&device, scDesc);
 		}
@@ -799,13 +752,12 @@ TEST(VKRHITest, ComputeRenderLoop)
 
 	pipeline.DestroyPipeline(&device);
 
-	swapChain.DestroySwapChain(&device);
+	swapChain.DestroySwapChain(&instance, &device);
 
 	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
 	cmdAlloc.DestroyCommandAllocator(&device);
 
 	device.DestroyDevice();
-	surface.DestroySurface(&instance);
 	instance.DestroyInstance();
 
 	window.KooriDestroyWindow();

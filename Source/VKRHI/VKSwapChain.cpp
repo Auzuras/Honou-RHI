@@ -1,7 +1,7 @@
 #include <VKRHI/VKSwapChain.h>
 
+#include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
-#include <VKRHI/VKSurface.h>
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKFence.h>
@@ -9,13 +9,26 @@
 
 #include <string>
 
-void VKSwapChain::CreateSwapChain(IDevice* _device, const Description& _description)
+#define VK_USE_PLATFORM_WIN32_KHR
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <vulkan/vulkan_win32.h>
+
+void VKSwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, const Description& _description)
 {
-    const VkSurfaceKHR surface = _description.surface->CastToVK()->GetRaw();
+    const VkInstance instance = _instance->CastToVK()->GetRaw();
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, surface, _description.width, _description.height);
+    const VkWin32SurfaceCreateInfoKHR surfaceCI{
+        .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+        .hinstance = _description.instance,
+        .hwnd = _description.hwnd
+    };
+
+    vkCreateWin32SurfaceKHR(instance, &surfaceCI, nullptr, &m_Surface);
+
+    const VkSwapchainCreateInfoKHR swapChainCI = CreateSwapChainInfo(lDevice, pDevice, m_Surface, _description.width, _description.height);
 
     vkCreateSwapchainKHR(lDevice, &swapChainCI, nullptr, &m_SwapChain);
 
@@ -26,7 +39,7 @@ void VKSwapChain::CreateSwapChain(IDevice* _device, const Description& _descript
 
 void VKSwapChain::RecreateSwapChain(IDevice* _device, const Description& _description)
 {
-    const VkSurfaceKHR surface = _description.surface->CastToVK()->GetRaw();
+    const VkSurfaceKHR surface = m_Surface;
     const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
@@ -45,8 +58,9 @@ void VKSwapChain::RecreateSwapChain(IDevice* _device, const Description& _descri
     CreateSwapChainImages(_device, _description.width, _description.height);
 }
 
-void VKSwapChain::DestroySwapChain(IDevice* _device)
+void VKSwapChain::DestroySwapChain(IInstance* _instance, IDevice* _device)
 {
+    const VkInstance instance = _instance->CastToVK()->GetRaw();
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
     DestroySwapChainImages(_device);
@@ -54,6 +68,8 @@ void VKSwapChain::DestroySwapChain(IDevice* _device)
     DestroySwapChainSyncObjects(_device);
 
     vkDestroySwapchainKHR(lDevice, m_SwapChain, nullptr);
+
+    vkDestroySurfaceKHR(instance, m_Surface, nullptr);
 }
 
 uint32_t VKSwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
