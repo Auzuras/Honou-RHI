@@ -10,7 +10,7 @@ class VKSampler : public ISampler
 public:
 	~VKSampler() override final = default;
 
-	virtual void CreateSampler(IDevice* _device, const SamplerInfo& _samplerInfo) override final;
+	virtual void CreateSampler(IDevice* _device, const Description& _samplerInfo) override final;
 	virtual void DestroySampler(IDevice* _device) override final;
 
 	virtual VKSampler* CastToVK() override final { return this; }
@@ -21,29 +21,29 @@ public:
 
 private:
 
-	static VkFilter MapSamplerFilterToVkFormat(const SamplerInfo::Filter _filter)
+	static VkFilter MapSamplerFilterToVkFormat(const Description::Filter _filter)
 	{
 		switch (_filter)
 		{
-		case SamplerInfo::Filter::FILTER_LINEAR: default: return VK_FILTER_LINEAR;
-		case SamplerInfo::Filter::FILTER_NEAREST: return VK_FILTER_NEAREST;
+		case Description::Filter::FILTER_LINEAR: default: return VK_FILTER_LINEAR;
+		case Description::Filter::FILTER_NEAREST: return VK_FILTER_NEAREST;
 		}
 	}
 
-	static VkSamplerAddressMode MapSamplerAddressModeToVkFormat(const SamplerInfo::AddressMode _adressMode)
+	static VkSamplerAddressMode MapSamplerAddressModeToVkFormat(const Description::AddressMode _adressMode)
 	{
 		switch (_adressMode)
 		{
-		case SamplerInfo::AddressMode::REPEAT: default: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		case Description::AddressMode::REPEAT: default: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		}
 	}
 
-	static VkSamplerMipmapMode MapSamplerMipMapModeToVkFormat(const SamplerInfo::MipMapMode _mipMapMode)
+	static VkSamplerMipmapMode MapSamplerMipMapModeToVkFormat(const Description::MipMapMode _mipMapMode)
 	{
 		switch (_mipMapMode)
 		{
-		case SamplerInfo::MipMapMode::MIPMAP_MODE_NEAREST: default: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-		case SamplerInfo::MipMapMode::MIPMAP_MODE_LINEAR: return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		case Description::MipMapMode::MIPMAP_MODE_NEAREST: default: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		case Description::MipMapMode::MIPMAP_MODE_LINEAR: return VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		}
 	}
 

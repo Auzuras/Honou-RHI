@@ -14,7 +14,7 @@ class VKBuffer : public IBuffer
 public:
 	~VKBuffer() override final = default;
 
-	void CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage) override final;
+	void CreateBuffer(IDevice* _device, const Description& _description) override final;
 	void DestroyBuffer(IDevice* _device) override final;
 
 	void SetName(IDevice* _device, const char* _name) override final;
@@ -27,7 +27,7 @@ public:
 
 private:
 
-	static VkBufferUsageFlags MapToVulkan(BufferUsage _usage);
+	static VkBufferUsageFlags MapToVulkan(Usage _usage);
 	static uint32_t FindMemoryType(VkPhysicalDevice _physicalDevice, uint32_t _typeFilter, VkMemoryPropertyFlags _properties);
 
 private:

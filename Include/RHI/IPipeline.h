@@ -18,13 +18,13 @@ public:
 		const char* entryPoint = "main";
 	};
 
-	struct GraphicsPipelineDescription
+	struct GraphicsDescription
 	{
 		ShaderDescription vertexShader;
 		ShaderDescription fragmentShader;
 	};
 
-	struct ComputePipelineDescription
+	struct ComputeDescription
 	{
 		ShaderDescription computeShader;
 	};
@@ -37,8 +37,8 @@ public:
 
 	virtual ~IPipeline() = default;
 
-	virtual void CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription) = 0;
-	virtual void CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription) = 0;
+	virtual void CreatePipeline(IDevice* _device, const GraphicsDescription& _pipelineDescription) = 0;
+	virtual void CreatePipeline(IDevice* _device, const ComputeDescription& _pipelineDescription) = 0;
 	virtual void DestroyPipeline(IDevice* _device) = 0;
 
 	PipelineType GetPipelineType() { return p_PipelineType; }

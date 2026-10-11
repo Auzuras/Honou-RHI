@@ -3,15 +3,15 @@
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 
-void VKBuffer::CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferUsage _usage)
+void VKBuffer::CreateBuffer(IDevice* _device, const Description& _description)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
-	const VkBufferUsageFlags usage = MapToVulkan(_usage);
+	const VkBufferUsageFlags usage = MapToVulkan(_description.usage);
 
 	VkBufferCreateInfo bufferCI{
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.size = _size,
+		.size = _description.size,
 		.usage = usage,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE
 	};
@@ -32,7 +32,7 @@ void VKBuffer::CreateBuffer(IDevice* _device, void* _data, size_t _size, BufferU
 
 	void* data{};
 	vkMapMemory(lDevice, m_BufferMemory, 0, bufferCI.size, 0, &data);
-	memcpy(data, _data, bufferCI.size);
+	memcpy(data, _description.data, bufferCI.size);
 	vkUnmapMemory(lDevice, m_BufferMemory);
 }
 
@@ -57,15 +57,15 @@ void VKBuffer::SetName(IDevice* _device, const char* _name)
 	Hounou::Internal::vkSetDebugUtilsObjectNameEXT(lDevice, &objectNameInfo);
 }
 
-VkBufferUsageFlags VKBuffer::MapToVulkan(BufferUsage _usage)
+VkBufferUsageFlags VKBuffer::MapToVulkan(Usage _usage)
 {
 	switch (_usage)
 	{
-	case IBuffer::BufferUsage::USAGE_VERTEX_BUFFER:		return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	case IBuffer::BufferUsage::USAGE_INDEX_BUFFER:		return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	case IBuffer::BufferUsage::USAGE_TRANSFER_SRC:		return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	case IBuffer::BufferUsage::USAGE_TRANSFER_DST:		return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-	default:											return 0;
+	case IBuffer::Usage::USAGE_VERTEX_BUFFER:		return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	case IBuffer::Usage::USAGE_INDEX_BUFFER:		return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	case IBuffer::Usage::USAGE_TRANSFER_SRC:		return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	case IBuffer::Usage::USAGE_TRANSFER_DST:		return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	default:										return 0;
 	}
 }
 

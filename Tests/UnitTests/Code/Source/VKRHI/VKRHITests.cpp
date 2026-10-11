@@ -90,7 +90,7 @@ TEST(VKRHITest, PipelineTest)
 	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
 
 	VKPipeline pipeline;
-	const IPipeline::GraphicsPipelineDescription gPipeline{
+	const IPipeline::GraphicsDescription gPipeline{
 		.vertexShader = {
 			.shader = &vertSM
 		},
@@ -156,13 +156,25 @@ TEST(VKRHITest, Mesh)
 	VKDevice device;
 	device.CreateDevice(&instance);
 
+	const IBuffer::Description vertexDesc{
+		.usage	=	IBuffer::Usage::USAGE_VERTEX_BUFFER,
+		.size	=	sizeof(Vertex) * vertices.size(),
+		.data	=	vertices.data()
+	};
+
 	VKBuffer vertexBuffer;
-	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+	vertexBuffer.CreateBuffer(&device, vertexDesc);
 	vertexBuffer.SetName(&device, "Knight Vertex Buffer");
 	vertexBuffer.DestroyBuffer(&device);
 
+	const IBuffer::Description indexDesc{
+		.usage	=	IBuffer::Usage::USAGE_INDEX_BUFFER,
+		.size	=	sizeof(uint16_t) * indices.size(),
+		.data	=	indices.data()
+	};
+
 	VKBuffer indexBuffer;
-	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+	indexBuffer.CreateBuffer(&device, indexDesc);
 	indexBuffer.SetName(&device, "Knight Index Buffer");
 	indexBuffer.DestroyBuffer(&device);
 
@@ -259,7 +271,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
 
 	VKPipeline pipeline;
-	const IPipeline::GraphicsPipelineDescription gPipeline{
+	const IPipeline::GraphicsDescription gPipeline{
 		.vertexShader = {
 			.shader = &vertSM
 		},
@@ -292,11 +304,25 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		indices.push_back(static_cast<uint16_t>(indices.size()));
 	}
 
+	const IBuffer::Description vertexDesc{
+	.usage = IBuffer::Usage::USAGE_VERTEX_BUFFER,
+	.size = sizeof(Vertex) * vertices.size(),
+	.data = vertices.data()
+	};
+
 	VKBuffer vertexBuffer;
-	vertexBuffer.CreateBuffer(&device, vertices.data(), sizeof(Vertex) * vertices.size(), IBuffer::BufferUsage::USAGE_VERTEX_BUFFER);
+	vertexBuffer.CreateBuffer(&device, vertexDesc);
+	vertexBuffer.SetName(&device, "Knight Vertex Buffer");
+
+	const IBuffer::Description indexDesc{
+		.usage = IBuffer::Usage::USAGE_INDEX_BUFFER,
+		.size = sizeof(uint16_t) * indices.size(),
+		.data = indices.data()
+	};
 
 	VKBuffer indexBuffer;
-	indexBuffer.CreateBuffer(&device, indices.data(), sizeof(uint16_t) * indices.size(), IBuffer::BufferUsage::USAGE_INDEX_BUFFER);
+	indexBuffer.CreateBuffer(&device, indexDesc);
+	indexBuffer.SetName(&device, "Knight Index Buffer");
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -320,7 +346,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	stbi_image_free(data);
 
 	VKSampler sampler;
-	const ISampler::SamplerInfo sInfo{};
+	const ISampler::Description sInfo{};
 	sampler.CreateSampler(&device, sInfo);
 
 	VKDescriptorAllocator descAllocator;
@@ -568,7 +594,7 @@ TEST(VKRHITest, ComputeRenderLoop)
 	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
 
 	VKPipeline pipeline;
-	const IPipeline::ComputePipelineDescription cPipeline{
+	const IPipeline::ComputeDescription cPipeline{
 		.computeShader = {
 			.shader = &computeSM
 		}

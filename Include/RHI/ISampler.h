@@ -14,7 +14,7 @@ class ISampler
 public:
 
 	// Base sampler info struct (WIP)
-	struct SamplerInfo
+	struct Description
 	{
 		enum class Filter : uint8_t
 		{
@@ -44,7 +44,7 @@ public:
 
 	virtual ~ISampler() = default;
 
-	virtual void CreateSampler(IDevice* _device, const SamplerInfo& _samplerInfo) = 0;
+	virtual void CreateSampler(IDevice* _device, const Description& _samplerInfo) = 0;
 	virtual void DestroySampler(IDevice* _device) = 0;
 
 	virtual VKSampler* CastToVK() { return nullptr; }

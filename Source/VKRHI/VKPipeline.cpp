@@ -7,7 +7,7 @@
 #include <vector>
 #include <Helpers/Vertex.h>
 
-void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsPipelineDescription& _pipelineDescription)
+void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsDescription& _pipelineDescription)
 {
     p_PipelineType = PipelineType::HOUNOU_PIPELINE_TYPE_GRAPHICS;
 
@@ -159,7 +159,7 @@ void VKPipeline::CreatePipeline(IDevice* _device, const GraphicsPipelineDescript
     vkCreateGraphicsPipelines(ldevice, VK_NULL_HANDLE, 1, &gPipelineCI, nullptr, &m_Pipeline);
 }
 
-void VKPipeline::CreatePipeline(IDevice* _device, const ComputePipelineDescription& _pipelineDescription)
+void VKPipeline::CreatePipeline(IDevice* _device, const ComputeDescription& _pipelineDescription)
 {
     p_PipelineType = PipelineType::HOUNOU_PIPELINE_TYPE_COMPUTE;
 

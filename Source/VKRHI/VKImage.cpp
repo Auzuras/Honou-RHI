@@ -190,8 +190,14 @@ void VKImage::UploadData(IDevice* _device, const Description& _description)
 {
 	VkDeviceSize totalSize = _description.width * _description.height * 4;
 
+	const IBuffer::Description stagingDesc{
+		.usage	=	IBuffer::Usage::USAGE_TRANSFER_SRC,
+		.size	=	totalSize,
+		.data	=	_description.data
+	};
+
 	VKBuffer stagingBuffer;
-	stagingBuffer.CreateBuffer(_device, _description.data, totalSize, IBuffer::BufferUsage::USAGE_TRANSFER_SRC);
+	stagingBuffer.CreateBuffer(_device, stagingDesc);
 
 	VKCommandAllocator allocator;
 	allocator.CreateCommandAllocator(_device);

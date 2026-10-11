@@ -2,7 +2,7 @@
 
 #include <VKRHI/VKDevice.h>
 
-void VKSampler::CreateSampler(IDevice* _device, const SamplerInfo& _samplerInfo)
+void VKSampler::CreateSampler(IDevice* _device, const Description& _samplerInfo)
 {
 	const VkDevice ldevice = _device->CastToVK()->GetLogicalDevice();
 
