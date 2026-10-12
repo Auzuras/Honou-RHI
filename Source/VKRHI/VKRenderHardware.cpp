@@ -1,10 +1,11 @@
-#include <VKRHI/VKRenderHardware.h>
+#include <VKRHI/RHI/VKRenderHardware.h>
 
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 
 #include <VKRHI/VKSwapChain.h>
 #include <VKRHI/VKPipeline.h>
+#include <VKRHI/VKShaderModule.h>
 
 #include <VKRHI/VKCommandAllocator.h>
 #include <VKRHI/VKDescriptorAllocator.h>
@@ -80,6 +81,19 @@ void VKRenderHardware::DestroyPipeline(IDevice* const _device, IPipeline* _pipel
 {
 	_pipeline->DestroyPipeline(_device);
 	delete _pipeline;
+}
+
+IShaderModule* VKRenderHardware::CreateShaderModule(IDevice* const _device, const std::vector<char>& _data)
+{
+	IShaderModule* shaderModule = new VKShaderModule();
+	shaderModule->CreateShaderModule(_device, _data);
+	return shaderModule;
+}
+
+void VKRenderHardware::DestroyShaderModule(IDevice* const _device, IShaderModule* _shaderModule)
+{
+	_shaderModule->DestroyShaderModule(_device);
+	delete _shaderModule;
 }
 
 ICommandAllocator* VKRenderHardware::CreateCommandAllocator(IDevice* const _device)

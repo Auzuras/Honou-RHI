@@ -6,6 +6,7 @@
 
 #include <RHI/ISwapChain.h>
 #include <RHI/IPipeline.h>
+#include <RHI/IShaderModule.h>
 
 #include <RHI/ICommandAllocator.h>
 #include <RHI/IDescriptorAllocator.h>
@@ -45,6 +46,9 @@ public:
 	virtual IPipeline* CreatePipeline(IDevice* const _device, const IPipeline::GraphicsDescription& _description) = 0;
 	virtual IPipeline* CreatePipeline(IDevice* const _device, const IPipeline::ComputeDescription& _description) = 0;
 	virtual void DestroyPipeline(IDevice* const _device, IPipeline* _pipeline) = 0;
+
+	virtual IShaderModule* CreateShaderModule(IDevice* const _device, const std::vector<char>& _data) = 0;
+	virtual void DestroyShaderModule(IDevice* const _device, IShaderModule* _shaderModule) = 0;
 
 	virtual ICommandAllocator* CreateCommandAllocator(IDevice* const _device) = 0;
 	virtual void DestroyCommandAllocator(IDevice* const _device, ICommandAllocator* _commandAllocator) = 0;

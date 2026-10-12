@@ -1,7 +1,7 @@
 #ifndef HONOU_RHI_VK_RENDER_HARDWARE_H
 #define HONOU_RHI_VK_RENDER_HARDWARE_H
 
-#include <RHI/IRenderHardware.h>
+#include <RHI/RHI/IRenderHardware.h>
 
 class VKRenderHardware : public IRenderHardware
 {
@@ -23,6 +23,9 @@ public:
 	IPipeline* CreatePipeline(IDevice* const _device, const IPipeline::GraphicsDescription& _description) override final;
 	IPipeline* CreatePipeline(IDevice* const _device, const IPipeline::ComputeDescription& _description) override final;
 	void DestroyPipeline(IDevice* const _device, IPipeline* _pipeline) override final;
+
+	IShaderModule* CreateShaderModule(IDevice* const _device, const std::vector<char>& _data) override final;
+	void DestroyShaderModule(IDevice* const _device, IShaderModule* _shaderModule) override final;
 
 	ICommandAllocator* CreateCommandAllocator(IDevice* const _device) override final;
 	void DestroyCommandAllocator(IDevice* const _device, ICommandAllocator* _commandAllocator) override final;

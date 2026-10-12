@@ -305,9 +305,9 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	}
 
 	const IBuffer::Description vertexDesc{
-	.usage = IBuffer::Usage::USAGE_VERTEX_BUFFER,
-	.size = sizeof(Vertex) * vertices.size(),
-	.data = vertices.data()
+		.usage	=	IBuffer::Usage::USAGE_VERTEX_BUFFER,
+		.size	=	sizeof(Vertex) * vertices.size(),
+		.data	=	vertices.data()
 	};
 
 	VKBuffer vertexBuffer;
@@ -315,9 +315,9 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	vertexBuffer.SetName(&device, "Knight Vertex Buffer");
 
 	const IBuffer::Description indexDesc{
-		.usage = IBuffer::Usage::USAGE_INDEX_BUFFER,
-		.size = sizeof(uint16_t) * indices.size(),
-		.data = indices.data()
+		.usage	=	IBuffer::Usage::USAGE_INDEX_BUFFER,
+		.size	=	sizeof(uint16_t) * indices.size(),
+		.data	=	indices.data()
 	};
 
 	VKBuffer indexBuffer;
