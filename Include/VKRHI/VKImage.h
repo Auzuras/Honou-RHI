@@ -30,8 +30,6 @@ protected:
 	static VkDeviceMemory AllocateImage(VkDevice _device, VkPhysicalDevice _physicalDevice, VkImage _image);
 	static VkImageView CreateImageView(VkDevice _device, VkImage _image, const Description& _description);
 
-	void UploadData(IDevice* _device, const Description& _description);
-
 private:
 
 	VkImage m_Image = VK_NULL_HANDLE;

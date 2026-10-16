@@ -32,7 +32,7 @@ void VKBuffer::CreateBuffer(IDevice* _device, const Description& _description)
 
 	void* data{};
 	vkMapMemory(lDevice, m_BufferMemory, 0, bufferCI.size, 0, &data);
-	memcpy(data, _description.data, bufferCI.size);
+	memcpy(data, nullptr, bufferCI.size);
 	vkUnmapMemory(lDevice, m_BufferMemory);
 }
 

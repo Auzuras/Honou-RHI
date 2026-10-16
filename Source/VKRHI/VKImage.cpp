@@ -49,12 +49,6 @@ void VKImage::CreateImage(IDevice* _device, const Description& _description)
 	{
 		m_ImageView = VKImage::CreateImageView(lDevice, m_Image, _description);
 	}
-
-	// Data Upload
-	if (_description.data)
-	{
-		UploadData(_device, _description);
-	}
 }
 
 void VKImage::DestroyImage(IDevice* _device)
@@ -184,67 +178,4 @@ VkImageView VKImage::CreateImageView(VkDevice _device, VkImage _image, const Des
 	vkCreateImageView(_device, &imageViewCI, nullptr, &imageView);
 
 	return imageView;
-}
-
-void VKImage::UploadData(IDevice* _device, const Description& _description)
-{
-	VkDeviceSize totalSize = _description.width * _description.height * 4;
-
-	const IBuffer::Description stagingDesc{
-		.usage	=	IBuffer::Usage::USAGE_TRANSFER_SRC,
-		.size	=	totalSize,
-		.data	=	_description.data
-	};
-
-	VKBuffer stagingBuffer;
-	stagingBuffer.CreateBuffer(_device, stagingDesc);
-
-	VKCommandAllocator allocator;
-	allocator.CreateCommandAllocator(_device);
-	ICommandBuffer* cmdBuffer = allocator.AllocateCommandBuffer(_device);
-
-	cmdBuffer->Open();
-
-	const ICommandBuffer::MemoryBarrierInfo info{
-		.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-		.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
-
-		.syncDest{
-			.stages = ICommandBuffer::PipelineStage::TRANSFER,
-			.access = ICommandBuffer::Access::TRANSFER_WRITE
-		}
-	};
-
-	cmdBuffer->AddMemoryBarrier(this, info);
-
-	cmdBuffer->Copy(this, &stagingBuffer);
-
-	const ICommandBuffer::MemoryBarrierInfo info2{
-		.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
-		.newLayout = ICommandBuffer::Layout::SHADER_READ,
-
-		.syncSource{
-			.stages = ICommandBuffer::PipelineStage::TRANSFER,
-			.access = ICommandBuffer::Access::TRANSFER_WRITE
-		},
-
-		.syncDest{
-			.stages = ICommandBuffer::PipelineStage::FRAGMENT_SHADER,
-			.access = ICommandBuffer::Access::SHADER_READ
-		}
-	};
-
-	cmdBuffer->AddMemoryBarrier(this, info2);
-
-	cmdBuffer->Close();
-
-	_device->GetGraphicsQueue()->SubmitCommandBuffer(cmdBuffer);
-
-	_device->GetGraphicsQueue()->WaitIdle();
-
-	stagingBuffer.DestroyBuffer(_device);
-
-	allocator.FreeCommandBuffer(_device, cmdBuffer);
-
-	allocator.DestroyCommandAllocator(_device);
 }

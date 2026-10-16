@@ -57,7 +57,6 @@ public:
 		uint8_t channelCount	=	0u;
 		Format format			=	Format::HONOU_FORMAT_R8G8B8A8_UNORM;
 		Usage usage				=	Usage::HOUNOU_USAGE_NONE;
-		void* data				=	nullptr;
 	};
 
 	virtual ~IImage() = default;
