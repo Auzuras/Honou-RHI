@@ -26,6 +26,7 @@ public:
 	{
 		Usage usage		=	Usage::USAGE_NONE;
 		size_t size		=	0;
+		void* data		=	nullptr;
 	};
 
 	virtual ~IBuffer() = default;
