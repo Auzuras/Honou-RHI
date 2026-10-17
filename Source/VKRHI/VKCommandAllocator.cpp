@@ -32,9 +32,10 @@ void VKCommandAllocator::CreateCommandAllocator(IDevice* _device)
 	vkCreateCommandPool(lDevice, &commandPoolCI, nullptr, &m_CommandAllocator);
 }
 
-ICommandBuffer* VKCommandAllocator::AllocateCommandBuffer(IDevice* _device)
+void VKCommandAllocator::DestroyCommandAllocator(IDevice* _device)
 {
-	return AllocateCommandBuffers(_device, 1)[0];
+	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	vkDestroyCommandPool(lDevice, m_CommandAllocator, nullptr);
 }
 
 std::vector<ICommandBuffer*> VKCommandAllocator::AllocateCommandBuffers(IDevice* _device, uint32_t _count)
@@ -63,11 +64,9 @@ std::vector<ICommandBuffer*> VKCommandAllocator::AllocateCommandBuffers(IDevice*
 	return commandBuffers;
 }
 
-void VKCommandAllocator::FreeCommandBuffer(IDevice* _device, ICommandBuffer* _buffer)
+ICommandBuffer* VKCommandAllocator::AllocateCommandBuffer(IDevice* _device)
 {
-	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-	vkFreeCommandBuffers(lDevice, m_CommandAllocator, 1, &_buffer->CastToVK()->m_CommandBuffer);
-	delete _buffer;
+	return AllocateCommandBuffers(_device, 1)[0];
 }
 
 void VKCommandAllocator::FreeCommandBuffers(IDevice* _device, const std::vector<ICommandBuffer*>& _buffers)
@@ -76,8 +75,9 @@ void VKCommandAllocator::FreeCommandBuffers(IDevice* _device, const std::vector<
 		FreeCommandBuffer(_device, _buffers[i]);
 }
 
-void VKCommandAllocator::DestroyCommandAllocator(IDevice* _device)
+void VKCommandAllocator::FreeCommandBuffer(IDevice* _device, ICommandBuffer* _buffer)
 {
-	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-	vkDestroyCommandPool(lDevice, m_CommandAllocator, nullptr);
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	vkFreeCommandBuffers(lDevice, m_CommandAllocator, 1, &_buffer->CastToVK()->m_CommandBuffer);
+	delete _buffer;
 }

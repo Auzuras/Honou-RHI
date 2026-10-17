@@ -15,7 +15,8 @@ public:
 	void CreatePipeline(IDevice* _device, const ComputeDescription& _pipelineDescription) override final;
 	void DestroyPipeline(IDevice* _device) override final;
 
-	const ID3D12PipelineState* GetRaw() { return m_Pipeline.Get(); }
+	ID3D12PipelineState* const GetRaw() { return m_Pipeline.Get(); }
+	ID3D12RootSignature* const GetLayout() { return m_PipelineLayout.Get(); }
 
 	VKPipeline* CastToVK() override final { return nullptr; }
 	DX12Pipeline* CastToDX12() override final { return this; }

@@ -14,6 +14,8 @@ public:
 	void CreateImage(IDevice* _device, const Description& _description) override final;
 	void DestroyImage(IDevice* _device) override final;
 
+	ID3D12Resource* const GetRaw() { return m_Image.Get(); }
+
 	void SetName(IDevice* _device, const char* _name) override final;
 
 	void CreateSwapChainImage(IDevice* _device, ID3D12Resource* _image, const Description& _description);

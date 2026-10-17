@@ -94,7 +94,22 @@ TEST(DX12RHITest, PipelineTest)
 
 TEST(DX12RHITest, CommandAllocatorTest)
 {
+	DX12Instance instance;
+	instance.CreateInstance();
 
+	DX12Device device;
+	device.CreateDevice(&instance);
+
+	DX12CommandAllocator cmdAlloc;
+	cmdAlloc.CreateCommandAllocator(&device);
+
+	ICommandBuffer* cmdBuffer = cmdAlloc.AllocateCommandBuffer(&device);
+	cmdAlloc.FreeCommandBuffer(&device, cmdBuffer);
+
+	cmdAlloc.DestroyCommandAllocator(&device);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
 }
 
 TEST(DX12RHITest, RenderLoop)
