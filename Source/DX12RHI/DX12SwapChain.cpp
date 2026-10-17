@@ -49,13 +49,37 @@ void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, cons
 
 	}
 
-	// Retrieve backbuffers
+	CreateSwapChainImages(_device, _description.width, _description.height);
+}
 
+void DX12SwapChain::RecreateSwapChain(IDevice* _device, const Description& _description)
+{}
+
+void DX12SwapChain::DestroySwapChain(IInstance* _instance, IDevice* _device)
+{}
+
+uint32_t DX12SwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
+{
+	return 0;
+}
+
+void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint)
+{
+	const HRESULT result = m_SwapChain->Present(1, 0);
+	
+	if (FAILED(result))
+	{
+
+	}
+}
+
+void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height)
+{
 	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
 	{
 		Microsoft::WRL::ComPtr<ID3D12Resource> image;
-		result = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&image));
-		
+		const HRESULT result = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&image));
+
 		if (FAILED(result))
 		{
 
@@ -65,5 +89,7 @@ void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, cons
 
 		}
 	}
-
 }
+
+void DX12SwapChain::DestroySwapChainImages(IDevice* _device)
+{}

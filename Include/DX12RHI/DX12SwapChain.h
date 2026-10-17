@@ -24,6 +24,16 @@ public:
 
 private:
 
+    void CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height);
+    void DestroySwapChainImages(IDevice* _device);
+
+    void CreateSwapChainSyncObjects(IDevice* _device);
+    void DestroySwapChainSyncObjects(IDevice* _device);
+
+    //DXGI_SWAP_CHAIN_DESC1 CreateSwapChainInfo(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height);
+
+private:
+
     Microsoft::WRL::ComPtr<IDXGISwapChain3> m_SwapChain = nullptr;
 };
 
