@@ -4,7 +4,7 @@
 
 void DX12Queue::CreateQueue(IDevice* _device, Type _queueType)
 {
-	ID3D12Device* device = _device->CastToDX12()->GetRaw().Get();
+	ID3D12Device* const device = _device->CastToDX12()->GetRaw();
 
 	const D3D12_COMMAND_QUEUE_DESC cmdQueueDesc{
 		.Type = MapToDX12Type(_queueType),

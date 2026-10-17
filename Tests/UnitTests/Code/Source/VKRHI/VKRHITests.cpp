@@ -84,10 +84,10 @@ TEST(VKRHITest, PipelineTest)
 	device.CreateDevice(&instance);
 
 	VKShaderModule vertSM;
-	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
+	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Vulkan/Unlit.vert.spv"));
 
 	VKShaderModule fragSM;
-	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
+	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Vulkan/Unlit.frag.spv"));
 
 	VKPipeline pipeline;
 	const IPipeline::GraphicsDescription gPipeline{
@@ -324,10 +324,10 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	depthBuffer.CreateImage(&device, depth);
 
 	VKShaderModule vertSM;
-	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.vert.spv"));
+	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Vulkan/Unlit.vert.spv"));
 
 	VKShaderModule fragSM;
-	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Unlit.frag.spv"));
+	fragSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/Vulkan/Unlit.frag.spv"));
 
 	VKPipeline pipeline;
 	const IPipeline::GraphicsDescription gPipeline{

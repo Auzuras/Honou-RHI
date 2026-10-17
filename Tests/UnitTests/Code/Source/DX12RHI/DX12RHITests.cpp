@@ -6,6 +6,8 @@
 #include <DX12RHI/DX12Device.h>
 #include <DX12RHI/DX12SwapChain.h>
 #include <DX12RHI/DX12Queue.h>
+#include <DX12RHI/DX12Pipeline.h>
+#include <DX12RHI/DX12ShaderModule.h>
 
 class DX12RHITest : public testing::Test {};
 
@@ -59,7 +61,35 @@ TEST(DX12RHITest, SwapChainTest)
 
 TEST(DX12RHITest, PipelineTest)
 {
+	DX12Instance instance;
+	instance.CreateInstance();
 
+	DX12Device device;
+	device.CreateDevice(&instance);
+
+	DX12ShaderModule vertSM;
+	vertSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/DX12/Unlit_VERT.cso"));
+
+	DX12ShaderModule pixSM;
+	pixSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/Unlit/DX12/Unlit_PIX.cso"));
+
+	DX12Pipeline pipeline;
+	const IPipeline::GraphicsDescription gPipeline{
+		.vertexShader = {
+			.shader = &vertSM
+		},
+		.fragmentShader = {
+			.shader = &pixSM
+		}
+	};
+	pipeline.CreatePipeline(&device, gPipeline);
+	pipeline.DestroyPipeline(&device);
+
+	pixSM.DestroyShaderModule(&device);
+	vertSM.DestroyShaderModule(&device);
+
+	device.DestroyDevice();
+	instance.DestroyInstance();
 }
 
 TEST(DX12RHITest, CommandAllocatorTest)

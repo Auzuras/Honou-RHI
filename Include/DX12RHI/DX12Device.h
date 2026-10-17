@@ -20,7 +20,7 @@ public:
 	DX12Device* CastToDX12() override final { return this; }
 	OGLDevice* CastToOGL() override final { return nullptr; }
 
-	Microsoft::WRL::ComPtr<ID3D12Device> GetRaw() const { return m_Device; }
+	ID3D12Device* const GetRaw() const { return m_Device.Get(); }
 
 private:
 
