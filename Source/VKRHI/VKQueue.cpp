@@ -7,6 +7,18 @@
 
 #include <vector>
 
+void VKQueue::CreateQueue(IDevice* _device, Type _queueType)
+{
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
+
+	_device->SetGraphicsQueue(this);
+
+	Families families = VKQueue::GetQueueFamilies(pDevice);
+
+	vkGetDeviceQueue(lDevice, 0, 0, &m_Queue);
+}
+
 void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
@@ -45,18 +57,6 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence
 	};
 
 	vkQueueSubmit(m_Queue, 1, &submitInfo, fence);
-}
-
-void VKQueue::CreateQueue(IDevice* _device, Type _queueType)
-{
-	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
-
-	_device->SetGraphicsQueue(this);
-
-	Families families = VKQueue::GetQueueFamilies(pDevice);
-
-	vkGetDeviceQueue(lDevice, 0, 0, &m_Queue);
 }
 
 void VKQueue::WaitIdle()

@@ -2,6 +2,11 @@
 
 #include <DX12RHI/DX12Instance.h>
 #include <DX12RHI/DX12Device.h>
+#include <DX12RHI/DX12Image.h>
+#include <DX12RHI/DX12Queue.h>
+
+#include <string>
+#include <iostream>
 
 void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, const Description& _description)
 {
@@ -26,12 +31,13 @@ void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, cons
 		.Flags			=	0
 	};
 
+	// TODO: CHANGE IT FOR A PRESENTATION QUEUE?
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> sc1;
-	HRESULT result = instance->CreateSwapChainForHwnd(device.Get(), _description.hwnd, &scDesc, nullptr, nullptr, &sc1);
+	HRESULT result = instance->CreateSwapChainForHwnd(_device->GetGraphicsQueue()->CastToDX12()->GetRaw(), _description.hwnd, &scDesc, nullptr, nullptr, &sc1);
 
 	if (FAILED(result))
 	{
-
+		std::cout << result;
 	}
 	else
 	{
@@ -75,10 +81,16 @@ void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint*
 
 void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height)
 {
+	const IImage::Description desc{
+		.width = _width,
+		.height = _height,
+		.format = IImage::Format::HONOU_FORMAT_B8G8R8A8_UNORM
+	};
+
 	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
 	{
-		Microsoft::WRL::ComPtr<ID3D12Resource> image;
-		const HRESULT result = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&image));
+		Microsoft::WRL::ComPtr<ID3D12Resource> cImage;
+		const HRESULT result = m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&cImage));
 
 		if (FAILED(result))
 		{
@@ -86,7 +98,12 @@ void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uin
 		}
 		else
 		{
+			DX12Image* image = new DX12Image();
+			image->CreateSwapChainImage(_device, cImage.Get(), desc);
 
+			std::string name = "Hounou RHI - Swap Chain Image " + std::to_string(i);
+			image->SetName(_device, name.c_str());
+			p_SwapChainImages.push_back(image);
 		}
 	}
 }

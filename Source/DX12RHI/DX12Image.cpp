@@ -37,3 +37,26 @@ void DX12Image::CreateImage(IDevice* _device, const Description& _description)
 
 	}
 }
+
+void DX12Image::DestroyImage(IDevice* _device)
+{
+	m_Image = nullptr;
+}
+
+void DX12Image::SetName(IDevice* _device, const char* _name)
+{
+	//_device->CastToDX12()->GetRaw()->SetName(_name);
+}
+
+void DX12Image::CreateSwapChainImage(IDevice* _device, ID3D12Resource* _image, const Description& _description)
+{
+	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
+	p_Format = _description.format;
+
+	m_Image = _image;
+}
+
+void DX12Image::DestroySwapChainImage(IDevice* _device)
+{
+	m_Image = nullptr;
+}

@@ -58,7 +58,7 @@ void VKImage::DestroyImage(IDevice* _device)
 	if (m_ImageView)
 		vkDestroyImageView(lDevice, m_ImageView, nullptr);
 
-	if (!p_FromSwapChain && m_Image)
+	if (m_Image)
 		vkDestroyImage(lDevice, m_Image, nullptr);
 
 	if (m_ImageMemory)
@@ -80,14 +80,12 @@ void VKImage::SetName(IDevice* _device, const char* _name)
 }
 
 
-void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const Description& _description)
+void VKImage::CreateSwapChainImage(IDevice* _device, VkImage _image, const Description& _description)
 {
 	p_Width = _description.width; p_Height = _description.height; p_ChannelCount = _description.channelCount;
 	p_Format = _description.format;
 
 	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-
-	p_FromSwapChain = true;
 
 	m_Image = _image;
 
@@ -95,6 +93,17 @@ void VKImage::CreateImageInternal(IDevice* _device, VkImage _image, const Descri
 	{
 		m_ImageView = VKImage::CreateImageView(lDevice, m_Image, _description);
 	}
+}
+
+void VKImage::DestroySwapChainImage(IDevice* _device)
+{
+	VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+	if (m_ImageView)
+		vkDestroyImageView(lDevice, m_ImageView, nullptr);
+
+	if (m_ImageMemory)
+		vkFreeMemory(lDevice, m_ImageMemory, nullptr);
 }
 
 VkImage VKImage::CreateImage(VkDevice _device, const Description& _description)

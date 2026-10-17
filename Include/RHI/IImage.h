@@ -77,8 +77,6 @@ protected:
 	uint32_t p_Height = 0u;
 	uint8_t p_ChannelCount = 0u;
 	Format p_Format = Format::HONOU_FORMAT_UNDEFINED;
-
-	bool p_FromSwapChain = false;
 };
 
 #endif //HONOU_RHI_IIMAGE_H

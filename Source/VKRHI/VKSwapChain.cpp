@@ -106,10 +106,9 @@ void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint3
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    std::vector<VkImage> scImages = std::vector<VkImage>();
 
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, nullptr);
-    scImages.resize(p_SwapChainImagesCount);
+    std::vector<VkImage> scImages = std::vector<VkImage>(p_SwapChainImagesCount);
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, scImages.data());
 
     const IImage::Description desc{
@@ -126,8 +125,8 @@ void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint3
         p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
 
         VKImage* image = new VKImage();
-        image->CreateImageInternal(_device, scImages[i], desc);
-        std::string name = "Hounou RHI - SwapChain Image " + std::to_string(i);
+        image->CreateSwapChainImage(_device, scImages[i], desc);
+        std::string name = "Hounou RHI - Swap Chain Image " + std::to_string(i);
         image->SetName(_device, name.c_str());
         p_SwapChainImages.push_back(image);
     }
@@ -137,7 +136,7 @@ void VKSwapChain::DestroySwapChainImages(IDevice* _device)
 {
     for (size_t i = 0; i < p_SwapChainImagesCount; ++i)
     {
-        p_SwapChainImages[i]->DestroyImage(_device);
+        p_SwapChainImages[i]->CastToVK()->DestroySwapChainImage(_device);
         delete p_SwapChainImages[i];
 
         p_SwapChainRenderSyncPoint[i]->DestroySyncPoint(_device);

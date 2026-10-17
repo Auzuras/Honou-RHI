@@ -16,7 +16,8 @@ public:
 
 	void SetName(IDevice* _device, const char* _name) override final;
 
-	//void CreateImageInternal(IDevice* _device, VkImage _image, const Description& _description);
+	void CreateSwapChainImage(IDevice* _device, ID3D12Resource* _image, const Description& _description);
+	void DestroySwapChainImage(IDevice* _device);
 
 	virtual VKImage* CastToVK() override final { return nullptr; }
 	virtual DX12Image* CastToDX12() override final { return this; }

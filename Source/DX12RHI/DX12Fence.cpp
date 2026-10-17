@@ -2,7 +2,7 @@
 
 #include <DX12RHI/DX12Device.h>
 
-void DX12Fence::CreateFence(IDevice* _device, bool _signaled = true)
+void DX12Fence::CreateFence(IDevice* _device, bool _signaled)
 {
 	Microsoft::WRL::ComPtr<ID3D12Device> device = _device->CastToDX12()->GetRaw();
 
