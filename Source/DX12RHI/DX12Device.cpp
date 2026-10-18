@@ -48,5 +48,13 @@ void DX12Device::WaitIdle()
 
 void DX12Device::DebugCallback(D3D12_MESSAGE_CATEGORY _category, D3D12_MESSAGE_SEVERITY _severity, D3D12_MESSAGE_ID _id, LPCSTR _description, void* _context)
 {
-	std::cout << _severity << " " << _description << "\n";
+	switch (_severity)
+	{
+	case D3D12_MESSAGE_SEVERITY_CORRUPTION:
+	case D3D12_MESSAGE_SEVERITY_ERROR:
+	case D3D12_MESSAGE_SEVERITY_WARNING:
+	case D3D12_MESSAGE_SEVERITY_MESSAGE:
+		std::cout << _severity << " " << _description << "\n\n";
+		break;
+	}
 }
