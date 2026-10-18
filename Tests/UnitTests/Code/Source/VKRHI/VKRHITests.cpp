@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <Tests/Common.h>
+
 #include <VKRHI/VKInstance.h>
 #include <VKRHI/VKDevice.h>
 #include <VKRHI/VKSwapChain.h>
@@ -15,18 +17,6 @@
 #include <VKRHI/VKSampler.h>
 #include <VKRHI/VKDescriptorAllocator.h>
 #include <VKRHI/VKDescriptor.h>
-
-#include <tiny_obj_loader.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-#include <Helpers/Vertex.h>
-
-#include <Window/Window.h>
-
-#include <Matrix/Matrix4.h>
-#include <Vector/Vector3.h>
-#include <chrono>
 
 class VKRHITest : public testing::Test {};
 
@@ -159,6 +149,7 @@ TEST(VKRHITest, Mesh)
 	const IBuffer::Description vertexDesc{
 		.usage = IBuffer::Usage::USAGE_VERTEX_BUFFER,
 		.size = sizeof(Vertex) * vertices.size(),
+		.stride = sizeof(Vertex),
 		.data = vertices.data()
 	};
 
@@ -170,6 +161,7 @@ TEST(VKRHITest, Mesh)
 	const IBuffer::Description indexDesc{
 		.usage = IBuffer::Usage::USAGE_INDEX_BUFFER,
 		.size = sizeof(uint16_t) * indices.size(),
+		.stride = sizeof(uint16_t),
 		.data = indices.data()
 	};
 

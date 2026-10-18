@@ -2,7 +2,7 @@
 
 #include <DX12RHI/DX12Instance.h>
 #include <DX12RHI/DX12Device.h>
-//#include <DX12RHI/DX12Buffer.h>
+#include <DX12RHI/DX12Buffer.h>
 #include <DX12RHI/DX12Image.h>
 #include <DX12RHI/DX12Pipeline.h>
 //#include <DX12RHI/DX12Descriptor.h>
@@ -97,50 +97,7 @@ void DX12CommandBuffer::Reset() const
 
 void DX12CommandBuffer::BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const
 {
-	const VkImageView imageview = _image->CastToVK()->GetRawImageView();
-	const VkImageView depthview = _depth ? _depth->CastToVK()->GetRawImageView() : VK_NULL_HANDLE;
 
-	const VkRenderingAttachmentInfo colorAttachmentInfo{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		.imageView = imageview,
-		.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.clearValue{
-			.color{
-				0.0f, 0.0f, 0.2f, 1.0f
-			}
-		}
-	};
-
-	const VkRenderingAttachmentInfo depthAttachmentInfo{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		.imageView = depthview,
-		.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.clearValue{
-			.depthStencil{
-				1.0f, 0
-			}
-		}
-	};
-
-	const VkRenderingInfo renderingInfo{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.renderArea{
-			.extent{
-				.width = _width,
-				.height = _height
-			}
-		},
-		.layerCount = 1,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &colorAttachmentInfo,
-		.pDepthAttachment = _depth ? &depthAttachmentInfo : VK_NULL_HANDLE,
-	};
-
-	vkCmdBeginRendering(m_CommandBuffer, &renderingInfo);
 }
 
 void DX12CommandBuffer::EndRendering() const
@@ -175,8 +132,8 @@ void DX12CommandBuffer::SetScissor(uint32_t _width, uint32_t _height) const
 	const D3D12_RECT scissor{
 		.left	=	0,
 		.top	=	0,
-		.right	= _width,
-		.bottom = _height
+		.right	=	static_cast<LONG>(_width),
+		.bottom =	static_cast<LONG>(_height)
 	};
 
 	m_CommandBuffer->RSSetScissorRects(1, &scissor);
@@ -231,47 +188,32 @@ void DX12CommandBuffer::Copy(IImage* _destination, IImage* _source) const
 
 void DX12CommandBuffer::Copy(IImage* _destination, IBuffer* _source) const
 {
-	ID3D12Resource* const dst = _destination->CastToDX12()->GetRaw();
-	//ID3D12Resource* const src = _source->CastToDX12()->GetRaw();
 
-	const D3D12_TEXTURE_COPY_LOCATION dstLocation{
-		.pResource = dst,
-		.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
-		.SubresourceIndex = 0
-	};
-
-	//const D3D12_TEXTURE_COPY_LOCATION srcLocation{
-	//	.pResource = src,
-	//	.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
-	//	.PlacedFootprint = src->GetPlacedFootprint(dst->GetRaw()->GetDesc())
-	//};
-
-	//m_CommandBuffer->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
 }
 
 void DX12CommandBuffer::Copy(IBuffer* _destination, IImage* _source) const
 {
-	// Same
+
 }
 
 void DX12CommandBuffer::Copy(IBuffer* _destination, IBuffer* _source) const
 {
-	//ID3D12Resource* const dst = _destination->CastToDX12();
-	//ID3D12Resource* const src = _source->CastToDX12();
+	ID3D12Resource* const dst = _destination->CastToDX12()->GetRaw();
+	ID3D12Resource* const src = _source->CastToDX12()->GetRaw();
 
-	//const UINT64 size = std::min(_destination->GetSize(), _source->GetSize());
+	const UINT64 size = std::min(0, 0);
 
-	//m_CommandBuffer->CopyBufferRegion(dst, 0, src, 0, size);
+	m_CommandBuffer->CopyBufferRegion(dst, 0, src, 0, size);
 }
 
 void DX12CommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const
 {
-
+	//m_CommandBuffer->IASetVertexBuffers(0, 1, );
 }
 
 void DX12CommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 {
-
+	//m_CommandBuffer->IASetIndexBuffer();
 }
 
 void DX12CommandBuffer::BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const
@@ -311,13 +253,6 @@ void DX12CommandBuffer::DispatchIndirect(IBuffer* _buffer, uint32_t _offset) con
 
 void DX12CommandBuffer::AddLabel(const char* _name, const std::array<float, 4>& _color) const
 {
-	const UINT8 color[4]{
-		static_cast<UINT8>(_color[0] * 255.f),
-		static_cast<UINT8>(_color[1] * 255.f),
-		static_cast<UINT8>(_color[2] * 255.f),
-		static_cast<UINT8>(_color[3] * 255.f)
-	};
-
 	m_CommandBuffer->BeginEvent(0, _name, static_cast<UINT>(std::strlen(_name) + 1));
 }
 

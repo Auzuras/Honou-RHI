@@ -26,6 +26,7 @@ public:
 	{
 		Usage usage		=	Usage::USAGE_NONE;
 		size_t size		=	0;
+		size_t stride	=	0;
 		void* data		=	nullptr;
 	};
 

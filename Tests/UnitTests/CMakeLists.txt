@@ -43,7 +43,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest tinyobjloader stb Koori-Math Koori-Window)
 
-
 set(HONOU_RHI_UT_BIN_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${HONOU_RHI_UT_BIN_OUTPUT_DIR}/Libs")
@@ -60,7 +59,7 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
             $<TARGET_FILE_DIR:HonouRHITests>/Assets
 )
 
-target_include_directories(HonouRHITests PRIVATE ${stb_SOURCE_DIR})
+target_include_directories(HonouRHITests PRIVATE ${stb_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Code/Include)
 
 target_link_libraries(HonouRHITests PRIVATE gtest)
 
