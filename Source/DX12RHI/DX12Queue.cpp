@@ -1,6 +1,7 @@
 #include <DX12RHI/DX12Queue.h>
 
 #include <DX12RHI/DX12Device.h>
+#include <DX12RHI/DX12CommandBuffer.h>
 
 void DX12Queue::CreateQueue(IDevice* _device, Type _queueType)
 {
@@ -22,7 +23,7 @@ void DX12Queue::CreateQueue(IDevice* _device, Type _queueType)
 void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
 {
 	ID3D12CommandList* cmdLists[] = {
-		nullptr
+		_commandBuffer->CastToDX12()->GetRaw()
 	};
 
 	m_Queue->ExecuteCommandLists(1, cmdLists);

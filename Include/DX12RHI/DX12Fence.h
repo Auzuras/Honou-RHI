@@ -24,6 +24,10 @@ public:
 private:
 	
 	Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence = nullptr;
+	HANDLE m_Event = nullptr;
+
+	UINT64 m_NextValue = 1;
+	UINT64 m_WaitValue = 0;
 };
 
 #endif //HONOU_RHI_DX12FENCE_H

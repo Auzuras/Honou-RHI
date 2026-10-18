@@ -4,6 +4,8 @@
 #include <DX12RHI/DX12Device.h>
 #include <DX12RHI/DX12Image.h>
 #include <DX12RHI/DX12Queue.h>
+#include <DX12RHI/DX12Fence.h>
+#include <DX12RHI/DX12SyncPoint.h>
 
 #include <string>
 #include <iostream>
@@ -37,7 +39,7 @@ void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, cons
 
 	if (FAILED(result))
 	{
-		std::cout << result;
+
 	}
 	else
 	{
@@ -56,6 +58,8 @@ void DX12SwapChain::CreateSwapChain(IInstance* _instance, IDevice* _device, cons
 	}
 
 	CreateSwapChainImages(_device, _description.width, _description.height);
+
+	CreateSwapChainSyncObjects(_device);
 }
 
 void DX12SwapChain::RecreateSwapChain(IDevice* _device, const Description& _description)
@@ -98,9 +102,12 @@ void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uin
 		}
 		else
 		{
+			DX12SyncPoint* renderSyncPoint = new DX12SyncPoint();
+			renderSyncPoint->CreateSyncPoint(_device);
+			p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
+
 			DX12Image* image = new DX12Image();
 			image->CreateSwapChainImage(_device, cImage.Get(), desc);
-
 			std::string name = "Hounou RHI - Swap Chain Image " + std::to_string(i);
 			image->SetName(_device, name.c_str());
 			p_SwapChainImages.push_back(image);
@@ -110,3 +117,34 @@ void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uin
 
 void DX12SwapChain::DestroySwapChainImages(IDevice* _device)
 {}
+
+void DX12SwapChain::CreateSwapChainSyncObjects(IDevice* _device)
+{
+	// TODO: Rework
+	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		DX12Fence* fence = new DX12Fence();
+		fence->CreateFence(_device);
+		p_SwapChainImagesFences.push_back(fence);
+
+		DX12SyncPoint* imageSyncPoint = new DX12SyncPoint();
+		imageSyncPoint->CreateSyncPoint(_device);
+		p_SwapChainImageSyncPoint.push_back(imageSyncPoint);
+	}
+}
+
+void DX12SwapChain::DestroySwapChainSyncObjects(IDevice* _device)
+{
+	// TODO: Rework
+	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		p_SwapChainImagesFences[i]->DestroyFence(_device);
+		delete p_SwapChainImagesFences[i];
+
+		p_SwapChainImageSyncPoint[i]->DestroySyncPoint(_device);
+		delete p_SwapChainImageSyncPoint[i];
+	}
+
+	p_SwapChainImageSyncPoint.clear();
+	p_SwapChainImagesFences.clear();
+}

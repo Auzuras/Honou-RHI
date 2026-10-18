@@ -61,9 +61,10 @@ public:
 	OGLCommandBuffer* CastToOGL() { return nullptr; }
 
 private:
-	friend class VKCommandAllocator;
+	friend class DX12CommandAllocator;
 
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList1> m_CommandBuffer;
+	DX12CommandAllocator* m_Allocator = nullptr;
 };
 
 #endif //HONOU_RHI_DX12COMMANDBUFFER_H

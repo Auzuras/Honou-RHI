@@ -106,7 +106,6 @@ void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint3
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, nullptr);
     std::vector<VkImage> scImages = std::vector<VkImage>(p_SwapChainImagesCount);
     vkGetSwapchainImagesKHR(lDevice, m_SwapChain, &p_SwapChainImagesCount, scImages.data());

@@ -1,6 +1,7 @@
 #include <DX12RHI/DX12CommandAllocator.h>
 
 #include <DX12RHI/DX12Device.h>
+#include <DX12RHI/DX12CommandBuffer.h>
 
 void DX12CommandAllocator::CreateCommandAllocator(IDevice* _device)
 {
@@ -23,37 +24,41 @@ std::vector<ICommandBuffer*> DX12CommandAllocator::AllocateCommandBuffers(IDevic
 {
 	ID3D12Device* const device = _device->CastToDX12()->GetRaw();
 
-	//VkCommandBufferAllocateInfo cbAllocCI{
-	//	.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-	//	.commandPool = m_CommandAllocator,
-	//	.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-	//	.commandBufferCount = _count
-	//};
+	// Temp allocation for now
+	std::vector<ICommandBuffer*> commandBuffers = std::vector<ICommandBuffer*>(_count);
+	for (size_t i = 0; i < _count; ++i)
+	{
+		DX12CommandBuffer* cmdBuffer = new DX12CommandBuffer();
+		const HRESULT result = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&cmdBuffer->m_CommandBuffer));
+		
+		if (FAILED(result))
+		{
 
-	//std::vector<VkCommandBuffer> vkCmdBuffers{ _count };
-	//vkAllocateCommandBuffers(lDevice, &cbAllocCI, vkCmdBuffers.data());
+		}
+		
+		cmdBuffer->m_Allocator = this;
 
-	//// Temp allocation for now
-	//std::vector<ICommandBuffer*> commandBuffers = std::vector<ICommandBuffer*>(_count);
-	//for (size_t i = 0; i < _count; ++i)
-	//{
-	//	VKCommandBuffer* cmdBuffer = new VKCommandBuffer();
-	//	cmdBuffer->m_CommandBuffer = vkCmdBuffers[i];
-	//	commandBuffers[i] = cmdBuffer;
-	//}
+		commandBuffers[i] = cmdBuffer;
 
-	//return commandBuffers;
+		cmdBuffer->Close();
+	}
 
-	return std::vector<ICommandBuffer*>{};
+	return commandBuffers;
 }
 
 ICommandBuffer* DX12CommandAllocator::AllocateCommandBuffer(IDevice* _device)
 {
-	return nullptr;
+	return AllocateCommandBuffers(_device, 1)[0];
 }
 
 void DX12CommandAllocator::FreeCommandBuffers(IDevice* _device, const std::vector<ICommandBuffer*>& _buffers)
-{}
+{
+	for (size_t i = 0; i < _buffers.size(); ++i)
+		FreeCommandBuffer(_device, _buffers[i]);
+}
 
 void DX12CommandAllocator::FreeCommandBuffer(IDevice* _device, ICommandBuffer* _buffer)
-{}
+{
+	_buffer->CastToDX12()->m_CommandBuffer = nullptr;
+	delete _buffer;
+}

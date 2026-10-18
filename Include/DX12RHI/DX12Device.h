@@ -24,7 +24,12 @@ public:
 
 private:
 
+	static void DebugCallback(D3D12_MESSAGE_CATEGORY _category, D3D12_MESSAGE_SEVERITY _severity, D3D12_MESSAGE_ID _id, LPCSTR _description, void* _context);
+
+private:
+
 	Microsoft::WRL::ComPtr<ID3D12Device> m_Device = nullptr;
+	DWORD m_VLayerCallbackCookie = 0;
 };
 
 #endif //HONOU_RHI_DX12DEVICE_H

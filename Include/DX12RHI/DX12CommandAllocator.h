@@ -18,6 +18,8 @@ public:
 	void CreateCommandAllocator(IDevice* _device) override final;
 	void DestroyCommandAllocator(IDevice* _device) override final;
 
+	ID3D12CommandAllocator* const GetRaw() { return m_CommandAllocator.Get(); }
+
 	std::vector<ICommandBuffer*> AllocateCommandBuffers(IDevice* _device, uint32_t _count) override final;
 	ICommandBuffer* AllocateCommandBuffer(IDevice* _device) override final;
 

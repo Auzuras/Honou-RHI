@@ -2,6 +2,7 @@
 
 #include <DX12RHI/DX12Instance.h>
 #include <DX12RHI/DX12Device.h>
+#include <DX12RHI/DX12CommandAllocator.h>
 #include <DX12RHI/DX12Buffer.h>
 #include <DX12RHI/DX12Image.h>
 #include <DX12RHI/DX12Pipeline.h>
@@ -82,7 +83,7 @@ D3D12_RESOURCE_STATES ToDX12Layout(ICommandBuffer::Layout _layout)
 
 void DX12CommandBuffer::Open() const
 {
-	m_CommandBuffer->Reset(nullptr, nullptr);
+	m_CommandBuffer->Reset(m_Allocator->GetRaw(), nullptr);
 }
 
 void DX12CommandBuffer::Close() const
@@ -92,7 +93,7 @@ void DX12CommandBuffer::Close() const
 
 void DX12CommandBuffer::Reset() const
 {
-	m_CommandBuffer->Reset(nullptr, nullptr);
+	m_CommandBuffer->Reset(m_Allocator->GetRaw(), nullptr);
 }
 
 void DX12CommandBuffer::BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const

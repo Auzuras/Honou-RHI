@@ -2,6 +2,7 @@
 #include <DX12RHI/DX12Instance.h>
 
 #include <dxgi1_6.h>
+#include <iostream>
 
 void DX12Device::CreateDevice(IInstance* _instance)
 {
@@ -22,6 +23,17 @@ void DX12Device::CreateDevice(IInstance* _instance)
 		// TODO: ERROR
 		return;
 	}
+
+	Microsoft::WRL::ComPtr<ID3D12InfoQueue1> infoQueue = nullptr;
+	result = m_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+
+	if (SUCCEEDED(result))
+	{
+		infoQueue->RegisterMessageCallback(DX12Device::DebugCallback, D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS, nullptr, &m_VLayerCallbackCookie);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	}
 }
 
 void DX12Device::DestroyDevice()
@@ -32,4 +44,9 @@ void DX12Device::DestroyDevice()
 void DX12Device::WaitIdle()
 {
 
+}
+
+void DX12Device::DebugCallback(D3D12_MESSAGE_CATEGORY _category, D3D12_MESSAGE_SEVERITY _severity, D3D12_MESSAGE_ID _id, LPCSTR _description, void* _context)
+{
+	std::cout << _severity << " " << _description << "\n";
 }
