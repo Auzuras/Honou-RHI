@@ -98,7 +98,10 @@ void DX12CommandBuffer::Reset() const
 
 void DX12CommandBuffer::BeginRendering(IImage* _image, IImage* _depth, uint32_t _width, uint32_t _height) const
 {
-
+	//float clearColor[] = { 0.0f, 0.0f, 0.2f, 1.0f };
+	//m_CommandBuffer->OMSetRenderTargets(1, &scImageHandle, FALSE, &depthHandle);
+	//m_CommandBuffer->ClearRenderTargetView(scImageHandle, clearColor, 0, nullptr);
+	//m_CommandBuffer->ClearDepthStencilView(depthHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void DX12CommandBuffer::EndRendering() const
@@ -219,12 +222,12 @@ void DX12CommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 
 void DX12CommandBuffer::BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const
 {
-
+	m_CommandBuffer->SetGraphicsRoot32BitConstants(0, _size, &_data, 0);
 }
 
 void DX12CommandBuffer::BindDescriptor(IPipeline* _pipeline, IDescriptor* _descriptor, uint32_t _set) const
 {
-
+	
 }
 
 void DX12CommandBuffer::Draw(uint32_t _vertexCount) const

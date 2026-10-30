@@ -4,6 +4,18 @@ cbuffer ModelViewProjectionCB : register(b0)
     matrix ProjectionView;
 };
 
+struct UBO
+{
+    matrix Model;
+    matrix Projection;
+    matrix View;
+};
+
+cbuffer UniformBufferObject : register(b1)
+{
+    UBO ubo;
+};
+
 struct VertexShaderInput
 {
     float3 Position     :   POSITION;

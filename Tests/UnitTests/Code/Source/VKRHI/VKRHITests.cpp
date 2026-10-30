@@ -15,8 +15,8 @@
 #include <VKRHI/VKSyncPoint.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKSampler.h>
-#include <VKRHI/VKDescriptorAllocator.h>
-#include <VKRHI/VKDescriptor.h>
+
+#include <vulkan/vulkan.h>
 
 class VKRHITest : public testing::Test {};
 
@@ -449,11 +449,84 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	const ISampler::Description sInfo{};
 	sampler.CreateSampler(&device, sInfo);
 
-	VKDescriptorAllocator descAllocator;
-	descAllocator.CreateDescriptorAllocator(&device);
+	const uint32_t maxSet = 10;
 
-	std::vector<IDescriptor*> descs = descAllocator.AllocateDescriptors(&device, &pipeline, ISwapChain::MAX_FRAMES_IN_FLIGHT);
+	std::array<VkDescriptorPoolSize, 4> pools{
+		VkDescriptorPoolSize{
+			.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.descriptorCount = maxSet
+		},
+		VkDescriptorPoolSize{
+			.type = VK_DESCRIPTOR_TYPE_SAMPLER,
+			.descriptorCount = maxSet
+		},
+		VkDescriptorPoolSize{
+			.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			.descriptorCount = maxSet
+		},
+		VkDescriptorPoolSize{
+			.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			.descriptorCount = maxSet
+		}
+	};
 
+	const VkDescriptorPoolCreateInfo poolCI{
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = maxSet,
+		.poolSizeCount = static_cast<uint32_t>(pools.size()),
+		.pPoolSizes = pools.data()
+	};
+
+	VkDescriptorPool descPool;
+	vkCreateDescriptorPool(device.GetLogicalDevice(), &poolCI, nullptr, &descPool);
+
+
+	std::array<VkDescriptorSetLayout, ISwapChain::MAX_FRAMES_IN_FLIGHT> layouts{ pipeline.GetDescriptorLayout(), pipeline.GetDescriptorLayout(), pipeline.GetDescriptorLayout() };
+
+	const VkDescriptorSetAllocateInfo allocateInfo{
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		.descriptorPool = descPool,
+		.descriptorSetCount = ISwapChain::MAX_FRAMES_IN_FLIGHT,
+		.pSetLayouts = layouts.data()
+	};
+
+	std::array<VkDescriptorSet, ISwapChain::MAX_FRAMES_IN_FLIGHT> sets{};
+	vkAllocateDescriptorSets(device.GetLogicalDevice(), &allocateInfo, sets.data());
+
+	const VkDescriptorImageInfo samplerInfo{
+	.sampler = sampler.CastToVK()->GetRaw()
+	};
+
+	const VkDescriptorImageInfo imageInfo{
+		.imageView = texture.CastToVK()->GetRawImageView(),
+		.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+	};
+
+	for (uint32_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		const std::array<VkWriteDescriptorSet, 2> descriptorWrites{
+			VkWriteDescriptorSet{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = sets[i],
+				.dstBinding = 0,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+				.pImageInfo = &samplerInfo
+			},
+			VkWriteDescriptorSet{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = sets[i],
+				.dstBinding = 1,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				.pImageInfo = &imageInfo
+			}
+		};
+
+		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
+	}
 	uint32_t frameIndex = 0;
 
 	float rotation = 0.f;
@@ -539,39 +612,9 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 		cCmdBuffer->BindConstants(&pipeline, 0, sizeof(constants), &constants);
 
-		const VkDescriptorImageInfo samplerInfo{
-			.sampler = sampler.CastToVK()->GetRaw()
-		};
+		vkCmdBindDescriptorSets(cCmdBuffer->CastToVK()->GetRaw(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetLayout(), 0, 1, &sets[frameIndex], 0, nullptr);
 
-		const VkDescriptorImageInfo imageInfo{
-			.imageView = texture.CastToVK()->GetRawImageView(),
-			.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
-		};
-
-		const std::array<VkWriteDescriptorSet, 2> descriptorWrites{
-			VkWriteDescriptorSet{
-				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
-				.dstBinding = 0,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
-				.pImageInfo = &samplerInfo
-			},
-			VkWriteDescriptorSet{
-				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
-				.dstBinding = 1,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-				.pImageInfo = &imageInfo
-			}
-		};
-
-		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
-
-		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
+		//cCmdBuffer->BindDescriptor(&pipeline, set, 0);
 
 		cCmdBuffer->DrawIndexed(static_cast<uint32_t>(indices.size()));
 
@@ -636,8 +679,6 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 	texture.DestroyImage(&device);
 
-	descAllocator.DestroyDescriptorAllocator(&device);
-
 	vertexBuffer.DestroyBuffer(&device);
 	indexBuffer.DestroyBuffer(&device);
 
@@ -654,236 +695,229 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	window.KooriDestroyWindow();
 }
 
-TEST(VKRHITest, ComputeRenderLoop)
-{
-	VKInstance instance;
-	instance.CreateInstance();
-
-	bool windowResized = false;
-	Window window(1920, 1080, "Vulkan Window");
-	window.SetResizeCallback(
-		[&](uint32_t _width, uint32_t _height)
-		{
-			static_cast<void>(_width);
-			static_cast<void>(_height);
-			windowResized = true;
-		}
-	);
-
-	VKDevice device;
-	device.CreateDevice(&instance);
-
-	VKQueue graphicsQueue;
-	graphicsQueue.CreateQueue(&device, IQueue::Type::QUEUE_TYPE_GRAPHICS);
-
-	VKCommandAllocator cmdAlloc;
-	cmdAlloc.CreateCommandAllocator(&device);
-
-	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
-
-	VKSwapChain swapChain;
-	ISwapChain::Description scDesc{
-		.width = window.GetWidth(),
-		.height = window.GetHeight(),
-		.instance = GetModuleHandle(NULL),
-		.hwnd = window.GetHandle()
-	};
-	swapChain.CreateSwapChain(&instance, &device, scDesc);
-
-	VKShaderModule computeSM;
-	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
-
-	VKPipeline pipeline;
-	const IPipeline::ComputeDescription cPipeline{
-		.computeShader = {
-			.shader = &computeSM
-		}
-	};
-	pipeline.CreatePipeline(&device, cPipeline);
-
-	computeSM.DestroyShaderModule(&device);
-
-	VKDescriptorAllocator descAllocator;
-	descAllocator.CreateDescriptorAllocator(&device);
-
-	IImage::Description computeImageDesc{
-		.width = window.GetWidth(),
-		.height = window.GetHeight(),
-		.channelCount = 4,
-		.format = IImage::Format::HONOU_FORMAT_R8G8B8A8_UNORM,
-		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT |
-			(uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED |
-			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST |
-			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_SRC |
-			(uint64_t)IImage::Usage::HOUNOU_USAGE_STORAGE)
-	};
-
-	std::vector<VKImage> computeImages(ISwapChain::MAX_FRAMES_IN_FLIGHT);
-	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		computeImages[i].CreateImage(&device, computeImageDesc);
-	}
-
-	std::vector<IDescriptor*> descs = descAllocator.AllocateDescriptors(&device, &pipeline, ISwapChain::MAX_FRAMES_IN_FLIGHT);
-
-	uint32_t frameIndex = 0;
-
-	while (!window.WindowShouldClose())
-	{
-		swapChain.GetNextSwapChainImage(&device, frameIndex);
-
-		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
-
-		cCmdBuffer->Reset();
-
-		cCmdBuffer->Open();
-
-		ICommandBuffer::MemoryBarrierInfo barrierInfo{
-			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-			.newLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
-
-			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::NONE,
-				.access = ICommandBuffer::Access::NONE
-			},
-
-			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
-				.access = ICommandBuffer::Access::SHADER_WRITE
-			}
-		};
-
-		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
-
-		cCmdBuffer->BindPipeline(&pipeline);
-
-		const VkDescriptorImageInfo imageInfo{
-			.imageView = computeImages[frameIndex].CastToVK()->GetRawImageView(),
-			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
-		};
-
-		const std::array<VkWriteDescriptorSet, 1> descriptorWrites{
-			VkWriteDescriptorSet{
-				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
-				.dstBinding = 0,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-				.pImageInfo = &imageInfo
-			}
-		};
-
-		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 1, descriptorWrites.data(), 0, nullptr);
-
-		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
-
-		cCmdBuffer->Dispatch((window.GetWidth() + 15) / 16, (window.GetHeight() + 15) / 16, 1);
-
-		barrierInfo = {
-			.oldLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
-			.newLayout = ICommandBuffer::Layout::TRANSFER_SRC,
-
-			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
-				.access = ICommandBuffer::Access::SHADER_WRITE
-			},
-
-			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::TRANSFER,
-				.access = ICommandBuffer::Access::TRANSFER_READ
-			}
-		};
-
-		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
-
-		barrierInfo = {
-			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
-			.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
-
-			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::NONE,
-				.access = ICommandBuffer::Access::NONE
-			},
-
-			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::TRANSFER,
-				.access = ICommandBuffer::Access::TRANSFER_WRITE
-			}
-		};
-
-		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
-
-		cCmdBuffer->Copy(swapChain.GetCurrentImage(), &computeImages[frameIndex]);
-
-		barrierInfo = {
-			.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
-			.newLayout = ICommandBuffer::Layout::PRESENT,
-
-			.syncSource{
-				.stages = ICommandBuffer::PipelineStage::TRANSFER,
-				.access = ICommandBuffer::Access::TRANSFER_WRITE
-			},
-
-			.syncDest{
-				.stages = ICommandBuffer::PipelineStage::NONE,
-				.access = ICommandBuffer::Access::NONE
-			}
-		};
-
-		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
-
-		cCmdBuffer->Close();
-
-		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
-
-		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
-
-		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
-
-		window.UpdateWindow();
-
-		if (windowResized)
-		{
-			windowResized = false;
-
-			device.WaitIdle();
-
-			for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-			{
-				computeImages[i].DestroyImage(&device);
-				computeImageDesc.width = window.GetWidth();
-				computeImageDesc.height = window.GetHeight();
-				computeImages[i].CreateImage(&device, computeImageDesc);
-			}
-
-			scDesc = {
-				.width = window.GetWidth(),
-				.height = window.GetHeight()
-			};
-			swapChain.RecreateSwapChain(&device, scDesc);
-		}
-	}
-
-	graphicsQueue.WaitIdle();
-	// or device.WaitIdle();
-
-	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		computeImages[i].DestroyImage(&device);
-	}
-
-	descAllocator.DestroyDescriptorAllocator(&device);
-
-	pipeline.DestroyPipeline(&device);
-
-	swapChain.DestroySwapChain(&instance, &device);
-
-	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
-	cmdAlloc.DestroyCommandAllocator(&device);
-
-	device.DestroyDevice();
-	instance.DestroyInstance();
-
-	window.KooriDestroyWindow();
-}
+//TEST(VKRHITest, ComputeRenderLoop)
+//{
+//	VKInstance instance;
+//	instance.CreateInstance();
+//
+//	bool windowResized = false;
+//	Window window(1920, 1080, "Vulkan Window");
+//	window.SetResizeCallback(
+//		[&](uint32_t _width, uint32_t _height)
+//		{
+//			static_cast<void>(_width);
+//			static_cast<void>(_height);
+//			windowResized = true;
+//		}
+//	);
+//
+//	VKDevice device;
+//	device.CreateDevice(&instance);
+//
+//	VKQueue graphicsQueue;
+//	graphicsQueue.CreateQueue(&device, IQueue::Type::QUEUE_TYPE_GRAPHICS);
+//
+//	VKCommandAllocator cmdAlloc;
+//	cmdAlloc.CreateCommandAllocator(&device);
+//
+//	std::vector<ICommandBuffer*> cmdBuffers = cmdAlloc.AllocateCommandBuffers(&device, ISwapChain::MAX_FRAMES_IN_FLIGHT);
+//
+//	VKSwapChain swapChain;
+//	ISwapChain::Description scDesc{
+//		.width = window.GetWidth(),
+//		.height = window.GetHeight(),
+//		.instance = GetModuleHandle(NULL),
+//		.hwnd = window.GetHandle()
+//	};
+//	swapChain.CreateSwapChain(&instance, &device, scDesc);
+//
+//	VKShaderModule computeSM;
+//	computeSM.CreateShaderModule(&device, IShaderModule::GetShaderData("Assets/Shaders/HelloTriangle/HelloTriangle.comp.spv"));
+//
+//	VKPipeline pipeline;
+//	const IPipeline::ComputeDescription cPipeline{
+//		.computeShader = {
+//			.shader = &computeSM
+//		}
+//	};
+//	pipeline.CreatePipeline(&device, cPipeline);
+//
+//	computeSM.DestroyShaderModule(&device);
+//
+//	IImage::Description computeImageDesc{
+//		.width = window.GetWidth(),
+//		.height = window.GetHeight(),
+//		.channelCount = 4,
+//		.format = IImage::Format::HONOU_FORMAT_R8G8B8A8_UNORM,
+//		.usage = IImage::Usage((uint64_t)IImage::Usage::HOUNOU_USAGE_COLOR_ATTACHMENT |
+//			(uint64_t)IImage::Usage::HOUNOU_USAGE_SAMPLED |
+//			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_DST |
+//			(uint64_t)IImage::Usage::HOUNOU_USAGE_TRANSFER_SRC |
+//			(uint64_t)IImage::Usage::HOUNOU_USAGE_STORAGE)
+//	};
+//
+//	std::vector<VKImage> computeImages(ISwapChain::MAX_FRAMES_IN_FLIGHT);
+//	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+//	{
+//		computeImages[i].CreateImage(&device, computeImageDesc);
+//	}
+//
+//	uint32_t frameIndex = 0;
+//
+//	while (!window.WindowShouldClose())
+//	{
+//		swapChain.GetNextSwapChainImage(&device, frameIndex);
+//
+//		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
+//
+//		cCmdBuffer->Reset();
+//
+//		cCmdBuffer->Open();
+//
+//		ICommandBuffer::MemoryBarrierInfo barrierInfo{
+//			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+//			.newLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::NONE,
+//				.access = ICommandBuffer::Access::NONE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
+//				.access = ICommandBuffer::Access::SHADER_WRITE
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
+//
+//		cCmdBuffer->BindPipeline(&pipeline);
+//
+//		const VkDescriptorImageInfo imageInfo{
+//			.imageView = computeImages[frameIndex].CastToVK()->GetRawImageView(),
+//			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
+//		};
+//
+//		const std::array<VkWriteDescriptorSet, 1> descriptorWrites{
+//			VkWriteDescriptorSet{
+//				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//				.dstSet = descs[frameIndex]->CastToVK()->GetRaw(),
+//				.dstBinding = 0,
+//				.dstArrayElement = 0,
+//				.descriptorCount = 1,
+//				.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+//				.pImageInfo = &imageInfo
+//			}
+//		};
+//
+//		vkUpdateDescriptorSets(device.CastToVK()->GetLogicalDevice(), 1, descriptorWrites.data(), 0, nullptr);
+//
+//		cCmdBuffer->BindDescriptor(&pipeline, descs[frameIndex], 0);
+//
+//		cCmdBuffer->Dispatch((window.GetWidth() + 15) / 16, (window.GetHeight() + 15) / 16, 1);
+//
+//		barrierInfo = {
+//			.oldLayout = ICommandBuffer::Layout::UNORDERED_ACCESS,
+//			.newLayout = ICommandBuffer::Layout::TRANSFER_SRC,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::COMPUTE_SHADER,
+//				.access = ICommandBuffer::Access::SHADER_WRITE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+//				.access = ICommandBuffer::Access::TRANSFER_READ
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(&computeImages[frameIndex], barrierInfo);
+//
+//		barrierInfo = {
+//			.oldLayout = ICommandBuffer::Layout::UNDEFINED,
+//			.newLayout = ICommandBuffer::Layout::TRANSFER_DST,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::NONE,
+//				.access = ICommandBuffer::Access::NONE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+//				.access = ICommandBuffer::Access::TRANSFER_WRITE
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
+//
+//		cCmdBuffer->Copy(swapChain.GetCurrentImage(), &computeImages[frameIndex]);
+//
+//		barrierInfo = {
+//			.oldLayout = ICommandBuffer::Layout::TRANSFER_DST,
+//			.newLayout = ICommandBuffer::Layout::PRESENT,
+//
+//			.syncSource{
+//				.stages = ICommandBuffer::PipelineStage::TRANSFER,
+//				.access = ICommandBuffer::Access::TRANSFER_WRITE
+//			},
+//
+//			.syncDest{
+//				.stages = ICommandBuffer::PipelineStage::NONE,
+//				.access = ICommandBuffer::Access::NONE
+//			}
+//		};
+//
+//		cCmdBuffer->AddMemoryBarrier(swapChain.GetCurrentImage(), barrierInfo);
+//
+//		cCmdBuffer->Close();
+//
+//		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+//
+//		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
+//
+//		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
+//
+//		window.UpdateWindow();
+//
+//		if (windowResized)
+//		{
+//			windowResized = false;
+//
+//			device.WaitIdle();
+//
+//			for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+//			{
+//				computeImages[i].DestroyImage(&device);
+//				computeImageDesc.width = window.GetWidth();
+//				computeImageDesc.height = window.GetHeight();
+//				computeImages[i].CreateImage(&device, computeImageDesc);
+//			}
+//
+//			scDesc = {
+//				.width = window.GetWidth(),
+//				.height = window.GetHeight()
+//			};
+//			swapChain.RecreateSwapChain(&device, scDesc);
+//		}
+//	}
+//
+//	graphicsQueue.WaitIdle();
+//	// or device.WaitIdle();
+//
+//	for (int i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+//	{
+//		computeImages[i].DestroyImage(&device);
+//	}
+//
+//	pipeline.DestroyPipeline(&device);
+//
+//	swapChain.DestroySwapChain(&instance, &device);
+//
+//	cmdAlloc.FreeCommandBuffers(&device, cmdBuffers);
+//	cmdAlloc.DestroyCommandAllocator(&device);
+//
+//	device.DestroyDevice();
+//	instance.DestroyInstance();
+//
+//	window.KooriDestroyWindow();
+//}

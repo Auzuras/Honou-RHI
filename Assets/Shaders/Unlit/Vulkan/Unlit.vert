@@ -6,6 +6,13 @@ layout(location = 2) in vec2 inTextCoords;
 
 layout(location = 0) out vec2 textCoords;
 
+layout(binding = 0) uniform UinformBufferObject
+{
+	mat4x4 Model;
+	mat4x4 Projection;
+	mat4x4 View;
+} UBO;
+
 layout(push_constant, std430) uniform constantBuffer
 {
 	mat4x4 Model;

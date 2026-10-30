@@ -26,7 +26,8 @@ void DX12Image::CreateImage(IDevice* _device, const Description& _description)
 		.Flags				=	D3D12_RESOURCE_FLAG_NONE
 	};
 
-	HRESULT result = device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_Image));
+	// TODO: Clear value
+	HRESULT result = device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&m_Image));
 
 	if (FAILED(result))
 	{
