@@ -5,6 +5,8 @@
 
 void VKBuffer::CreateBuffer(IDevice* _device, const Description& _description)
 {
+	p_Description = _description;
+
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 	const VkPhysicalDevice pDevice = _device->CastToVK()->GetPhysicalDevice();
 	const VkBufferUsageFlags usage = MapToVulkan(_description.usage);

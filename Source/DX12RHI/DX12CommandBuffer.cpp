@@ -212,12 +212,28 @@ void DX12CommandBuffer::Copy(IBuffer* _destination, IBuffer* _source) const
 
 void DX12CommandBuffer::BindVertexBuffer(IBuffer* const _vertexBuffer) const
 {
-	//m_CommandBuffer->IASetVertexBuffers(0, 1, );
+	ID3D12Resource* const vertexBuffer = _vertexBuffer->CastToDX12()->GetRaw();
+
+	const D3D12_VERTEX_BUFFER_VIEW vertexBufferView{
+		.BufferLocation		=	vertexBuffer->GetGPUVirtualAddress(),
+		.SizeInBytes		=	static_cast<UINT>(_vertexBuffer->GetSize()),
+		.StrideInBytes		=	static_cast<UINT>(_vertexBuffer->GetStride())
+	};
+
+	m_CommandBuffer->IASetVertexBuffers(0, 1, &vertexBufferView);
 }
 
 void DX12CommandBuffer::BindIndexBuffer(IBuffer* const _indexBuffer) const
 {
-	//m_CommandBuffer->IASetIndexBuffer();
+	ID3D12Resource* const indexBuffer = _indexBuffer->CastToDX12()->GetRaw();
+
+	const D3D12_INDEX_BUFFER_VIEW indexBufferView{
+		.BufferLocation		=	indexBuffer->GetGPUVirtualAddress(),
+		.SizeInBytes		=	static_cast<UINT>(_indexBuffer->GetSize()),
+		.Format				=	DXGI_FORMAT_R16_UINT
+	};
+
+	m_CommandBuffer->IASetIndexBuffer(&indexBufferView);
 }
 
 void DX12CommandBuffer::BindConstants(IPipeline* _pipeline, uint32_t _offset, uint32_t _size, void* _data) const

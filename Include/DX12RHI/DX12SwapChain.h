@@ -5,6 +5,9 @@
 
 #include <wrl.h>
 #include <dxgi1_4.h>
+#include <d3d12.h>
+
+#include <array>
 
 class DX12SwapChain : public ISwapChain
 {
@@ -15,8 +18,8 @@ public:
     void RecreateSwapChain(IDevice* _device, const Description& _description) override final;
     void DestroySwapChain(IInstance* _instance, IDevice* _device) override final;
 
-    uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
-    void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) override final;
+    uint32_t Acquire(IDevice* _device, uint32_t _frameIndex) override final;
+    void Present(IDevice* _device, IQueue* _presentQueue) override final;
 
     VKSwapChain* CastToVK() override final { return nullptr; }
     DX12SwapChain* CastToDX12() override final { return this; }
@@ -35,6 +38,11 @@ private:
 private:
 
     Microsoft::WRL::ComPtr<IDXGISwapChain3> m_SwapChain = nullptr;
+
+    Microsoft::WRL::ComPtr<ID3D12Fence> m_SwapChainFence = nullptr;
+    HANDLE m_SwapChainEvent = nullptr;
+
+    std::array<uint32_t, MAX_FRAMES_IN_FLIGHT> m_SwapChainFenceValues{};
 };
 
 #endif //HONOU_RHI_DX12SWAPCHAIN_H

@@ -5,7 +5,6 @@
 #include <DX12RHI/DX12Image.h>
 #include <DX12RHI/DX12Queue.h>
 #include <DX12RHI/DX12Fence.h>
-#include <DX12RHI/DX12SyncPoint.h>
 
 #include <string>
 #include <iostream>
@@ -68,19 +67,31 @@ void DX12SwapChain::RecreateSwapChain(IDevice* _device, const Description& _desc
 void DX12SwapChain::DestroySwapChain(IInstance* _instance, IDevice* _device)
 {}
 
-uint32_t DX12SwapChain::GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex)
+uint32_t DX12SwapChain::Acquire(IDevice* _device, uint32_t _frameIndex)
 {
+	const UINT pFence = m_SwapChainFenceValues[_frameIndex];
+	p_CurrentImageIndex = m_SwapChain->GetCurrentBackBufferIndex();
+	const UINT cFence = m_SwapChainFenceValues[p_CurrentImageIndex];
+
+	if (m_SwapChainFence->GetCompletedValue() < cFence)
+	{
+		m_SwapChainFence->SetEventOnCompletion(cFence, m_SwapChainEvent);
+		WaitForSingleObjectEx(m_SwapChainEvent, INFINITE, FALSE);
+	}
+
+	m_SwapChainFenceValues[p_CurrentImageIndex] = pFence + 1;
+
 	return 0;
 }
 
-void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint)
+void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue)
 {
-	const HRESULT result = m_SwapChain->Present(1, 0);
-	
-	if (FAILED(result))
-	{
+	ID3D12CommandQueue* const queue = _presentQueue->CastToDX12()->GetRaw();
 
-	}
+	m_SwapChain->Present(1, 0);
+
+	const UINT cFence = m_SwapChainFenceValues[p_CurrentImageIndex];
+	queue->Signal(m_SwapChainFence.Get(), cFence);
 }
 
 void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height)
@@ -102,9 +113,6 @@ void DX12SwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uin
 		}
 		else
 		{
-			DX12SyncPoint* renderSyncPoint = new DX12SyncPoint();
-			renderSyncPoint->CreateSyncPoint(_device);
-			p_SwapChainRenderSyncPoint.push_back(renderSyncPoint);
 
 			DX12Image* image = new DX12Image();
 			image->CreateSwapChainImage(_device, cImage.Get(), desc);
@@ -120,31 +128,14 @@ void DX12SwapChain::DestroySwapChainImages(IDevice* _device)
 
 void DX12SwapChain::CreateSwapChainSyncObjects(IDevice* _device)
 {
-	// TODO: Rework
-	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		DX12Fence* fence = new DX12Fence();
-		fence->CreateFence(_device);
-		p_SwapChainImagesFences.push_back(fence);
+	Microsoft::WRL::ComPtr<ID3D12Device> device = _device->CastToDX12()->GetRaw();
 
-		DX12SyncPoint* imageSyncPoint = new DX12SyncPoint();
-		imageSyncPoint->CreateSyncPoint(_device);
-		p_SwapChainImageSyncPoint.push_back(imageSyncPoint);
-	}
+	const HRESULT result = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_SwapChainFence));
+	m_SwapChainEvent = CreateEvent(nullptr, false, false, nullptr);
 }
 
 void DX12SwapChain::DestroySwapChainSyncObjects(IDevice* _device)
 {
-	// TODO: Rework
-	for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		p_SwapChainImagesFences[i]->DestroyFence(_device);
-		delete p_SwapChainImagesFences[i];
-
-		p_SwapChainImageSyncPoint[i]->DestroySyncPoint(_device);
-		delete p_SwapChainImageSyncPoint[i];
-	}
-
-	p_SwapChainImageSyncPoint.clear();
-	p_SwapChainImagesFences.clear();
+	m_SwapChainFence = nullptr;
+	m_SwapChainEvent = nullptr;
 }

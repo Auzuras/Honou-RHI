@@ -40,6 +40,13 @@ public:
 	virtual VKBuffer* const CastToVK() { return nullptr; }
 	virtual DX12Buffer* CastToDX12() { return nullptr; }
 	virtual OGLBuffer* CastToOGL() { return nullptr; }
+
+	size_t GetSize() const { return p_Description.size; }
+	size_t GetStride() const { return p_Description.stride; }
+
+protected:
+
+	Description p_Description{};
 };
 
 #endif //HONOU_RHI_IBUFFER_H

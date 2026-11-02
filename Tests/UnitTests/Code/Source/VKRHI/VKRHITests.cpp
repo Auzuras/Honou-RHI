@@ -12,7 +12,6 @@
 #include <VKRHI/VKImage.h>
 #include <VKRHI/VKBuffer.h>
 #include <VKRHI/VKShaderModule.h>
-#include <VKRHI/VKSyncPoint.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKSampler.h>
 
@@ -467,7 +466,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		VkDescriptorPoolSize{
 			.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 			.descriptorCount = maxSet
-		}
+		} 
 	};
 
 	const VkDescriptorPoolCreateInfo poolCI{
@@ -538,7 +537,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 		float dt = std::chrono::duration<float>(currentTime - lastTime).count();
 		lastTime = currentTime;
 
-		swapChain.GetNextSwapChainImage(&device, frameIndex);
+		swapChain.Acquire(&device, frameIndex);
 
 		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
 
@@ -643,11 +642,11 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 		cCmdBuffer->Close();
 
-		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+		//graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
 
 		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
 
-		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
+		swapChain.Present(&device, &graphicsQueue);
 
 		window.UpdateWindow();
 

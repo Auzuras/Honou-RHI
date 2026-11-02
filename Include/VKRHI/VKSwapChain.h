@@ -5,6 +5,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <array>
+
 class VKSwapChain : public ISwapChain
 {
 public:
@@ -14,8 +16,8 @@ public:
     void RecreateSwapChain(IDevice* _device, const Description& _description) override final;
     void DestroySwapChain(IInstance* _instance, IDevice* _device) override final;
 
-    uint32_t GetNextSwapChainImage(IDevice* _device, uint32_t _frameIndex) override final;
-    void Present(IDevice* _device, IQueue* _presentQueue, ISyncPoint* _syncPoint) override final;
+    uint32_t Acquire(IDevice* _device, uint32_t _frameIndex) override final;
+    void Present(IDevice* _device, IQueue* _presentQueue) override final;
 
     VKSwapChain* CastToVK() override final { return this; }
     DX12SwapChain* CastToDX12() override final { return nullptr; }
@@ -35,6 +37,11 @@ private:
 
     VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
     VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
+
+    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> m_ImageSemaphores = {};
+    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> m_RenderSemaphores = {};
+
+    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> m_ImageFences = {};
 };
 
 #endif //HONOU_RHI_VKSWAPCHAIN_H

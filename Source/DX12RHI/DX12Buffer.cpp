@@ -4,6 +4,8 @@
 
 void DX12Buffer::CreateBuffer(IDevice* _device, const Description& _description)
 {
+	p_Description = _description;
+
 	ID3D12Device* const device = _device->CastToDX12()->GetRaw();
 
 	const D3D12_HEAP_PROPERTIES heapProperties{
