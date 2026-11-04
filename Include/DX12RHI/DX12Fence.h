@@ -14,8 +14,8 @@ public:
 	void CreateFence(IDevice* _device) override final;
 	void DestroyFence(IDevice* _device) override final;
 
-	void Wait(IDevice* _device) override final;
-	void Reset(IDevice* _device) override final;
+	void SignalGPU(IDevice* _device, uint64_t _value) override final;
+	void WaitCPU(IDevice* _device, uint64_t _value) override final;
 
 	VKFence* CastToVK() override final { return nullptr; }
 	DX12Fence* CastToDX12() override final { return this; }
@@ -25,9 +25,6 @@ private:
 	
 	Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence = nullptr;
 	HANDLE m_Event = nullptr;
-
-	UINT64 m_NextValue = 1;
-	UINT64 m_WaitValue = 0;
 };
 
 #endif //HONOU_RHI_DX12FENCE_H

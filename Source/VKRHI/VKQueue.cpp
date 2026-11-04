@@ -31,29 +31,41 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
 	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
-void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence)
+void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
 
-	const VkFence fence = _fence->CastToVK()->GetRaw();
-
 	VkPipelineStageFlags waitStages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-	//const VkSubmitInfo submitInfo{
-	//	.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+	const VkSemaphore waitPoint = _waitPoint.fence->CastToVK()->GetRaw();
+	const VkSemaphore signalPoint = _signalPoint.fence->CastToVK()->GetRaw();
 
-	//	.waitSemaphoreCount = 1,
-	//	.pWaitSemaphores = &waitPoint,
-	//	.pWaitDstStageMask = &waitStages,
+	const VkTimelineSemaphoreSubmitInfo timelineSemaphoreInfo{
+		.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
 
-	//	.commandBufferCount = 1,
-	//	.pCommandBuffers = &cmdBuffer,
+		.waitSemaphoreValueCount = 1,
+		.pWaitSemaphoreValues = &_waitPoint.fenceValue,
 
-	//	.signalSemaphoreCount = 1,
-	//	.pSignalSemaphores = &signalPoint
-	//};
+		.signalSemaphoreValueCount = 1,
+		.pSignalSemaphoreValues = &_signalPoint.fenceValue
+	};
 
-	//vkQueueSubmit(m_Queue, 1, &submitInfo, fence);
+	const VkSubmitInfo submitInfo{
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.pNext = &timelineSemaphoreInfo,
+
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = &waitPoint,
+		.pWaitDstStageMask = &waitStages,
+
+		.commandBufferCount = 1,
+		.pCommandBuffers = &cmdBuffer,
+
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = &signalPoint
+	};
+
+	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void VKQueue::WaitIdle()

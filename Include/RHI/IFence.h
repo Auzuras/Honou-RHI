@@ -29,4 +29,10 @@ protected:
 	uint64_t p_NextValue = 0ull;
 };
 
+struct SyncPoint
+{
+	IFence* fence = nullptr;
+	uint64_t fenceValue = 0ull;
+};
+
 #endif //HONOU_RHI_IFENCE_H

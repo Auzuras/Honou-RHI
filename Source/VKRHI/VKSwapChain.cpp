@@ -75,23 +75,20 @@ uint32_t VKSwapChain::Acquire(IDevice* _device, uint32_t _frameIndex)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    vkWaitForFences(lDevice, 1, &m_ImageFences[_frameIndex], true, UINT64_MAX);
-    vkResetFences(lDevice, 1, &m_ImageFences[_frameIndex]);
-
     vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, m_ImageSemaphores[_frameIndex], VK_NULL_HANDLE, &p_CurrentImageIndex);
+
     return p_CurrentImageIndex;
 }
 
 void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
-    const VkSemaphore semaphore = VK_NULL_HANDLE;
     const VkQueue queue = _presentQueue->CastToVK()->GetRaw();
 
     VkPresentInfoKHR presentInfo{
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &semaphore,
+        .pWaitSemaphores = &m_ImageSemaphores[p_CurrentImageIndex],
         .swapchainCount = 1,
         .pSwapchains = &m_SwapChain,
         .pImageIndices = &p_CurrentImageIndex

@@ -10,21 +10,21 @@ class VKFence : public IFence
 public:
 	~VKFence() override final = default;
 
-	void CreateFence(IDevice* _device, bool _signaled = true) override final;
+	void CreateFence(IDevice* _device) override final;
 	void DestroyFence(IDevice* _device) override final;
 
-	void Wait(IDevice* _device) override final;
-	void Reset(IDevice* _device) override final;
+	void SignalGPU(IDevice* _device, uint64_t _value) override final;
+	void WaitCPU(IDevice* _device, uint64_t _value) override final;
 
 	VKFence* CastToVK() override final { return this; }
 	DX12Fence* CastToDX12() override final { return nullptr; }
 	OGLFence* CastToOGL() override final { return nullptr; }
 
-	[[nodiscard]] VkFence const GetRaw() const { return m_Fence; }
+	[[nodiscard]] VkSemaphore const GetRaw() const { return m_Semaphore; }
 
 private:
 
-	VkFence m_Fence = VK_NULL_HANDLE;
+	VkSemaphore m_Semaphore = VK_NULL_HANDLE;
 };
 
 #endif //HONOU_RHI_VKFENCE_H

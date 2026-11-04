@@ -39,9 +39,6 @@ private:
     VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 
     std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> m_ImageSemaphores = {};
-    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> m_RenderSemaphores = {};
-
-    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> m_ImageFences = {};
 };
 
 #endif //HONOU_RHI_VKSWAPCHAIN_H

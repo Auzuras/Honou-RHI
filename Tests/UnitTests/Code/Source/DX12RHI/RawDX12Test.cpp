@@ -800,7 +800,9 @@ TEST(DX12Test, LoopTest)
 					swapchainFrame = swapChain->GetCurrentBackBufferIndex();
 					const UINT cFence = scValues[swapchainFrame];
 
-					if (scFence->GetCompletedValue() < cFence)
+					const UINT64 completedValue = scFence->GetCompletedValue();
+
+					if (completedValue < cFence)
 					{
 						scFence->SetEventOnCompletion(cFence, scEvent);
 						WaitForSingleObjectEx(scEvent, INFINITE, FALSE);

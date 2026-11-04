@@ -10,6 +10,8 @@ class ICommandBuffer;
 class IFence;
 class ISyncPoint;
 
+struct SyncPoint;
+
 #include <cstdint>
 
 class IQueue
@@ -28,7 +30,7 @@ public:
 	virtual void CreateQueue(IDevice* _device, Type _queueType) = 0;
 
 	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) = 0;
-	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence) = 0;
+	virtual void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint) = 0;
 
 	virtual void WaitIdle() = 0;
 

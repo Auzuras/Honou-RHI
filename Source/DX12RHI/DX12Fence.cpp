@@ -2,7 +2,7 @@
 
 #include <DX12RHI/DX12Device.h>
 
-void DX12Fence::CreateFence(IDevice* _device, bool _signaled)
+void DX12Fence::CreateFence(IDevice* _device)
 {
 	Microsoft::WRL::ComPtr<ID3D12Device> device = _device->CastToDX12()->GetRaw();
 
@@ -17,13 +17,19 @@ void DX12Fence::CreateFence(IDevice* _device, bool _signaled)
 void DX12Fence::DestroyFence(IDevice* _device)
 {
 	m_Fence = nullptr;
+	m_Event = nullptr;
 }
 
-void DX12Fence::Wait(IDevice* _device)
+void DX12Fence::SignalGPU(IDevice* _device, uint64_t _value)
 {
-	
+	m_Fence->Signal(_value);
 }
 
-void DX12Fence::Reset(IDevice* _device)
+void DX12Fence::WaitCPU(IDevice* _device, uint64_t _value)
 {
+	if (m_Fence->GetCompletedValue() >= _value) 
+		return;
+
+	m_Fence->SetEventOnCompletion(_value, m_Event);
+	WaitForSingleObject(m_Event, INFINITE);
 }

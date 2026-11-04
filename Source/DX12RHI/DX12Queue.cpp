@@ -29,7 +29,7 @@ void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
 	m_Queue->ExecuteCommandLists(1, cmdLists);
 }
 
-void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, IFence* _fence)
+void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint)
 {}
 
 void DX12Queue::WaitIdle()
