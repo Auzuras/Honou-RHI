@@ -7,18 +7,18 @@ class OGLFence;
 
 class IDevice;
 
+#include <cstdint>
+
 class IFence
 {
 public:
 	virtual ~IFence() = default;
 
-	virtual void CreateFence(IDevice* _device, bool _signaled = true) = 0;
+	virtual void CreateFence(IDevice* _device) = 0;
 	virtual void DestroyFence(IDevice* _device) = 0;
 
-	virtual void Wait(IDevice* _device) = 0;
-	virtual void Reset(IDevice* _device) = 0;
-
-	bool IsSignaled() const { return p_IsSignaled; }
+	virtual void SignalGPU(IDevice* _device, uint64_t _value) = 0;
+	virtual void WaitCPU(IDevice* _device, uint64_t _value) = 0;
 
 	virtual VKFence* CastToVK() { return nullptr; }
 	virtual DX12Fence* CastToDX12() { return nullptr; }
@@ -26,7 +26,7 @@ public:
 
 protected:
 
-	bool p_IsSignaled = false;
+	uint64_t p_NextValue = 0ull;
 };
 
 #endif //HONOU_RHI_IFENCE_H

@@ -11,7 +11,7 @@ class DX12Fence : public IFence
 public:
 	~DX12Fence() override final = default;
 
-	void CreateFence(IDevice* _device, bool _signaled = true) override final;
+	void CreateFence(IDevice* _device) override final;
 	void DestroyFence(IDevice* _device) override final;
 
 	void Wait(IDevice* _device) override final;
