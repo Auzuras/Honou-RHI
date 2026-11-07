@@ -33,3 +33,8 @@ void DX12Fence::WaitCPU(IDevice* _device, uint64_t _value)
 	m_Fence->SetEventOnCompletion(_value, m_Event);
 	WaitForSingleObject(m_Event, INFINITE);
 }
+
+uint64_t DX12Fence::GetCompletedValue(IDevice* _device)
+{
+	return m_Fence->GetCompletedValue();
+}

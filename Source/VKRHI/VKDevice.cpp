@@ -45,7 +45,8 @@ void VKDevice::CreateDevice(IInstance* _instance)
 		.shaderSampledImageArrayNonUniformIndexing = true,
 		.descriptorBindingVariableDescriptorCount = true,
 		.runtimeDescriptorArray = true,
-		.bufferDeviceAddress = true,
+		.timelineSemaphore = true,
+		.bufferDeviceAddress = true
 	};
 
 	const VkPhysicalDeviceVulkan13Features enabledVk13Features{
@@ -70,7 +71,7 @@ void VKDevice::CreateDevice(IInstance* _instance)
 		.pEnabledFeatures = &enabledVk10Features
 	};
 
-	vkCreateDevice(m_PhysicalDevice, &deviceCI, nullptr, &m_LogicalDevice);
+	VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCI, nullptr, &m_LogicalDevice);
 }
 
 void VKDevice::DestroyDevice()

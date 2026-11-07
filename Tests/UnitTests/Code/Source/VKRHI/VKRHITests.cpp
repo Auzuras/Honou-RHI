@@ -14,6 +14,7 @@
 #include <VKRHI/VKShaderModule.h>
 #include <VKRHI/VKQueue.h>
 #include <VKRHI/VKSampler.h>
+#include <VKRHI/VKFence.h>
 
 #include <vulkan/vulkan.h>
 
@@ -249,7 +250,8 @@ TEST(VKRHITest, Texture)
 
 	cmdBuffer->Close();
 
-	device.GetGraphicsQueue()->SubmitCommandBuffer(cmdBuffer);
+	const SyncPoint sync{};
+	device.GetGraphicsQueue()->SubmitCommandBuffer(cmdBuffer, sync, sync);
 
 	device.GetGraphicsQueue()->WaitIdle();
 
@@ -436,7 +438,8 @@ TEST(VKRHITest, GraphicsRenderLoop)
 	cmdBuffers[ISwapChain::MAX_FRAMES_IN_FLIGHT]->AddMemoryBarrier(&texture, infoIm2);
 	cmdBuffers[ISwapChain::MAX_FRAMES_IN_FLIGHT]->Close();
 
-	graphicsQueue.SubmitCommandBuffer(cmdBuffers[ISwapChain::MAX_FRAMES_IN_FLIGHT]);
+	const SyncPoint sync{};
+	graphicsQueue.SubmitCommandBuffer(cmdBuffers[ISwapChain::MAX_FRAMES_IN_FLIGHT], sync, sync);
 
 	graphicsQueue.WaitIdle();
 
@@ -642,11 +645,11 @@ TEST(VKRHITest, GraphicsRenderLoop)
 
 		cCmdBuffer->Close();
 
-		//graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, sync, sync);
+
+		swapChain.Present(&device, &graphicsQueue, frameIndex);
 
 		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
-
-		swapChain.Present(&device, &graphicsQueue);
 
 		window.UpdateWindow();
 
@@ -765,7 +768,7 @@ TEST(VKRHITest, GraphicsRenderLoop)
 //
 //	while (!window.WindowShouldClose())
 //	{
-//		swapChain.GetNextSwapChainImage(&device, frameIndex);
+//		swapChain.Acquire(&device, frameIndex);
 //
 //		ICommandBuffer* cCmdBuffer = cmdBuffers[frameIndex];
 //
@@ -870,11 +873,12 @@ TEST(VKRHITest, GraphicsRenderLoop)
 //
 //		cCmdBuffer->Close();
 //
-//		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, swapChain.GetFence(frameIndex), swapChain.GetImageSyncPoint(frameIndex), swapChain.GetRenderSyncPoint());
+//		const SyncPoint sync{};
+//		graphicsQueue.SubmitCommandBuffer(cCmdBuffer, sync, sync);
 //
 //		frameIndex = (frameIndex + 1) % ISwapChain::MAX_FRAMES_IN_FLIGHT;
 //
-//		swapChain.Present(&device, &graphicsQueue, swapChain.GetRenderSyncPoint());
+//		swapChain.Present(&device, &graphicsQueue, frameIndex);
 //
 //		window.UpdateWindow();
 //

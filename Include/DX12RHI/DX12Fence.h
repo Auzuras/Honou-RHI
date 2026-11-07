@@ -16,6 +16,7 @@ public:
 
 	void SignalGPU(IDevice* _device, uint64_t _value) override final;
 	void WaitCPU(IDevice* _device, uint64_t _value) override final;
+	uint64_t GetCompletedValue(IDevice* _device) override final;
 
 	VKFence* CastToVK() override final { return nullptr; }
 	DX12Fence* CastToDX12() override final { return this; }

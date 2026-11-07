@@ -20,17 +20,14 @@ void DX12Queue::CreateQueue(IDevice* _device, Type _queueType)
 	_device->SetGraphicsQueue(this);
 }
 
-void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
+void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint)
 {
 	ID3D12CommandList* cmdLists[] = {
-		_commandBuffer->CastToDX12()->GetRaw()
+	_commandBuffer->CastToDX12()->GetRaw()
 	};
 
 	m_Queue->ExecuteCommandLists(1, cmdLists);
 }
-
-void DX12Queue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint)
-{}
 
 void DX12Queue::WaitIdle()
 {

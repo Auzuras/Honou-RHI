@@ -18,35 +18,22 @@ void VKQueue::CreateQueue(IDevice* _device, Type _queueType)
 	vkGetDeviceQueue(lDevice, 0, 0, &m_Queue);
 }
 
-void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer)
-{
-	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
-
-	const VkSubmitInfo submitInfo{
-		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.commandBufferCount = 1,
-		.pCommandBuffers = &cmdBuffer,
-	};
-
-	vkQueueSubmit(m_Queue, 1, &submitInfo, VK_NULL_HANDLE);
-}
-
 void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint)
 {
 	const VkCommandBuffer cmdBuffer = _commandBuffer->CastToVK()->GetRaw();
 
 	VkPipelineStageFlags waitStages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-	const VkSemaphore waitPoint = _waitPoint.fence->CastToVK()->GetRaw();
-	const VkSemaphore signalPoint = _signalPoint.fence->CastToVK()->GetRaw();
+	const VkSemaphore waitPoint = _waitPoint.fence ? _waitPoint.fence->CastToVK()->GetRaw() : VK_NULL_HANDLE;
+	const VkSemaphore signalPoint = _signalPoint.fence ? _signalPoint.fence->CastToVK()->GetRaw() : VK_NULL_HANDLE;
 
 	const VkTimelineSemaphoreSubmitInfo timelineSemaphoreInfo{
 		.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
 
-		.waitSemaphoreValueCount = 1,
+		.waitSemaphoreValueCount = _waitPoint.fence ? 1ul : 0ul,
 		.pWaitSemaphoreValues = &_waitPoint.fenceValue,
 
-		.signalSemaphoreValueCount = 1,
+		.signalSemaphoreValueCount = _signalPoint.fence ? 1ul : 0ul,
 		.pSignalSemaphoreValues = &_signalPoint.fenceValue
 	};
 
@@ -54,14 +41,14 @@ void VKQueue::SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoin
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 		.pNext = &timelineSemaphoreInfo,
 
-		.waitSemaphoreCount = 1,
+		.waitSemaphoreCount = _waitPoint.fence ? 1ul : 0ul,
 		.pWaitSemaphores = &waitPoint,
 		.pWaitDstStageMask = &waitStages,
 
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmdBuffer,
 
-		.signalSemaphoreCount = 1,
+		.signalSemaphoreCount = _signalPoint.fence ? 1ul : 0ul,
 		.pSignalSemaphores = &signalPoint
 	};
 

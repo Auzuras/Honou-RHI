@@ -19,14 +19,11 @@ public:
 
 	virtual void SignalGPU(IDevice* _device, uint64_t _value) = 0;
 	virtual void WaitCPU(IDevice* _device, uint64_t _value) = 0;
+	virtual uint64_t GetCompletedValue(IDevice* _device) = 0;
 
 	virtual VKFence* CastToVK() { return nullptr; }
 	virtual DX12Fence* CastToDX12() { return nullptr; }
 	virtual OGLFence* CastToOGL() { return nullptr; }
-
-protected:
-
-	uint64_t p_NextValue = 0ull;
 };
 
 struct SyncPoint

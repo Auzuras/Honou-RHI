@@ -75,26 +75,84 @@ uint32_t VKSwapChain::Acquire(IDevice* _device, uint32_t _frameIndex)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-    vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, m_ImageSemaphores[_frameIndex], VK_NULL_HANDLE, &p_CurrentImageIndex);
+    const uint64_t completedValue = p_SwapChainFence->GetCompletedValue(_device);
+    
+    if (completedValue < p_FenceValues[_frameIndex])
+    {
+        p_SwapChainFence->WaitCPU(_device, p_FenceValues[_frameIndex]);
+    }
+
+    VkResult result = vkAcquireNextImageKHR(lDevice, m_SwapChain, UINT64_MAX, m_ImageSemaphores[_frameIndex], VK_NULL_HANDLE, &p_CurrentImageIndex);
+
+    if (result != VK_SUCCESS)
+    {
+        result = result;
+    }
 
     return p_CurrentImageIndex;
 }
 
-void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue)
+void VKSwapChain::Present(IDevice* _device, IQueue* _presentQueue, uint32_t _frameIndex)
 {
     const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
     const VkQueue queue = _presentQueue->CastToVK()->GetRaw();
 
+    VkPipelineStageFlags waitStages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+    
+    const uint64_t signalValue = ++p_NextFenceValue;
+    p_FenceValues[_frameIndex] = signalValue;
+
+    const VkPipelineStageFlags2 waitStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+    const VkSemaphoreSubmitInfo waitInfo{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+        .semaphore = m_ImageSemaphores[_frameIndex],
+        .value = 0,
+        .stageMask = waitStage
+    };
+
+    const VkSemaphoreSubmitInfo signalInfos[]{
+        {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .semaphore = m_RenderFinishedSemaphores[p_CurrentImageIndex],
+            .value = 0,
+            .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+        },
+        {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .semaphore = p_SwapChainFence->CastToVK()->GetRaw(),
+            .value = signalValue,
+            .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+        }
+    };
+
+    // This submit is used here to hide 
+    // the internal synchronization of the swapchain unique to vulkan
+    const VkSubmitInfo2 submitInfo{
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .waitSemaphoreInfoCount = 1,
+        .pWaitSemaphoreInfos = &waitInfo,
+        .signalSemaphoreInfoCount = 2,
+        .pSignalSemaphoreInfos = signalInfos
+    };
+
+    vkQueueSubmit2(queue, 1, &submitInfo, VK_NULL_HANDLE);
+
     VkPresentInfoKHR presentInfo{
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &m_ImageSemaphores[p_CurrentImageIndex],
+        .pWaitSemaphores = &m_RenderFinishedSemaphores[p_CurrentImageIndex],
         .swapchainCount = 1,
         .pSwapchains = &m_SwapChain,
         .pImageIndices = &p_CurrentImageIndex
     };
 
-    vkQueuePresentKHR(queue, &presentInfo);
+    VkResult result = vkQueuePresentKHR(queue, &presentInfo);
+
+    if (result != VK_SUCCESS)
+    {
+        result = result;
+    }
 }
 
 void VKSwapChain::CreateSwapChainImages(IDevice* _device, uint32_t _width, uint32_t _height)
@@ -135,10 +193,46 @@ void VKSwapChain::DestroySwapChainImages(IDevice* _device)
 
 void VKSwapChain::CreateSwapChainSyncObjects(IDevice* _device)
 {
+    VkDevice const lDevice = _device->CastToVK()->GetLogicalDevice();
+
+    const VkSemaphoreCreateInfo semaphoreCI{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
+    };
+
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        vkCreateSemaphore(lDevice, &semaphoreCI, VK_NULL_HANDLE, &m_ImageSemaphores[i]);
+    }
+
+    m_RenderFinishedSemaphores.resize(p_SwapChainImagesCount);
+
+    for (size_t i = 0; i < p_SwapChainImagesCount; ++i)
+    {
+        vkCreateSemaphore(lDevice, &semaphoreCI, VK_NULL_HANDLE, &m_RenderFinishedSemaphores[i]);
+    }
+
+    p_SwapChainFence = new VKFence();
+    p_SwapChainFence->CreateFence(_device);
 }
 
 void VKSwapChain::DestroySwapChainSyncObjects(IDevice* _device)
 {
+    VkDevice const lDevice = _device->CastToVK()->GetLogicalDevice();
+
+    for (size_t i = 0; i < ISwapChain::MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        vkDestroySemaphore(lDevice, m_ImageSemaphores[i], VK_NULL_HANDLE);
+    }
+
+    for (size_t i = 0; i < p_SwapChainImagesCount; ++i)
+    {
+        vkDestroySemaphore(lDevice, m_RenderFinishedSemaphores[i], VK_NULL_HANDLE);
+    }
+
+    m_RenderFinishedSemaphores.clear();
+
+    p_SwapChainFence->DestroyFence(_device);
+    delete p_SwapChainFence;
 }
 
 VkSwapchainCreateInfoKHR VKSwapChain::CreateSwapChainInfo(VkDevice _device, VkPhysicalDevice _physicalDevice, VkSurfaceKHR _surface, uint32_t _width, uint32_t _height)

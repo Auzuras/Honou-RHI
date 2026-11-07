@@ -43,8 +43,7 @@ void VKFence::WaitCPU(IDevice* _device, uint64_t _value)
 {
 	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
 
-	uint64_t completedValue = 0;
-	vkGetSemaphoreCounterValue(lDevice, m_Semaphore, &completedValue);
+	uint64_t completedValue = GetCompletedValue(_device);
 
 	if (completedValue >= _value)
 		return;
@@ -57,4 +56,14 @@ void VKFence::WaitCPU(IDevice* _device, uint64_t _value)
 	};
 
 	const VkResult result = vkWaitSemaphores(lDevice, &semaphoreWaitInfo, UINT64_MAX);
+}
+
+uint64_t VKFence::GetCompletedValue(IDevice* _device)
+{
+	const VkDevice lDevice = _device->CastToVK()->GetLogicalDevice();
+
+	uint64_t completedValue = 0;
+	vkGetSemaphoreCounterValue(lDevice, m_Semaphore, &completedValue);
+
+	return completedValue;
 }

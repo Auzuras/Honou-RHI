@@ -12,7 +12,6 @@ public:
 
 	void CreateQueue(IDevice* _device, Type _queueType) override final;
 
-	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer) override final;
 	void SubmitCommandBuffer(ICommandBuffer* _commandBuffer, const SyncPoint& _waitPoint, const SyncPoint& _signalPoint) override final;
 
 	void WaitIdle() override final;

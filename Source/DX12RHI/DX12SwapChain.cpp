@@ -84,7 +84,7 @@ uint32_t DX12SwapChain::Acquire(IDevice* _device, uint32_t _frameIndex)
 	return 0;
 }
 
-void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue)
+void DX12SwapChain::Present(IDevice* _device, IQueue* _presentQueue, uint32_t _frameIndex)
 {
 	ID3D12CommandQueue* const queue = _presentQueue->CastToDX12()->GetRaw();
 

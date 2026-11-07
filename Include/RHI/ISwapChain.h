@@ -14,6 +14,7 @@ class IFence;
 class ISyncPoint;
 
 #include <vector>
+#include <array>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -41,7 +42,7 @@ public:
     virtual void DestroySwapChain(IInstance* _instance, IDevice* _device) = 0;
 
     virtual uint32_t Acquire(IDevice* _device, uint32_t _frameIndex) = 0;
-    virtual void Present(IDevice* _device, IQueue* _presentQueue) = 0;
+    virtual void Present(IDevice* _device, IQueue* _presentQueue, uint32_t _frameIndex) = 0;
 
     IImage* GetCurrentImage() const { return p_SwapChainImages[p_CurrentImageIndex]; }
 
@@ -58,7 +59,11 @@ protected:
     uint32_t p_CurrentImageIndex = 0;
     uint32_t p_SwapChainImagesCount = 0;
 
-    std::vector<IImage*> p_SwapChainImages = std::vector<IImage*>();
+    std::vector<IImage*> p_SwapChainImages = {};
+    
+    IFence* p_SwapChainFence = nullptr;
+    std::array<uint64_t, ISwapChain::MAX_FRAMES_IN_FLIGHT> p_FenceValues = {};
+    uint64_t p_NextFenceValue = 0ull;
 };
 
 #endif //HONOU_RHI_ISWAPCHAIN_H

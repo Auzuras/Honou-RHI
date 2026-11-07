@@ -19,7 +19,7 @@ public:
     void DestroySwapChain(IInstance* _instance, IDevice* _device) override final;
 
     uint32_t Acquire(IDevice* _device, uint32_t _frameIndex) override final;
-    void Present(IDevice* _device, IQueue* _presentQueue) override final;
+    void Present(IDevice* _device, IQueue* _presentQueue, uint32_t _frameIndex) override final;
 
     VKSwapChain* CastToVK() override final { return nullptr; }
     DX12SwapChain* CastToDX12() override final { return this; }
